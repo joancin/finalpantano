@@ -176,9 +176,9 @@
       // --- NAVEGACIÓN ---
       window.irA = (lugar) => {
           if (lugar === 'zona_admin') {
-              window.location.href = "admin.html"; // <--- ESTO ES LO QUE ARREGLA EL PROBLEMA
+              window.location.href = "admin.html"; 
           } else if (lugar === 'zona_festero') {
-              alert("Próximamente: Zona de Gestión de Actividades");
+              window.location.href = "gestion.html";
           } else {
               alert("Sección en construcción: " + lugar);
           }
