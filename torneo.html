@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Torneo</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #673ab7; --win: #4caf50; }
+        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        /* Pestañas */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .tab { padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; opacity: 0.6; }
+        .tab.active { background: var(--accent); color: white; opacity: 1; }
+
+        /* Sección Participantes */
+        .list-item { background: var(--card); padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        
+        .add-box { background: var(--card); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; }
+        .add-box input { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+
+        /* BRACKET (Árbol del Torneo) */
+        .bracket-container { display: flex; overflow-x: auto; padding: 20px 0; gap: 40px; }
+        .round { display: flex; flex-direction: column; justify-content: space-around; min-width: 200px; }
+        .round-title { text-align: center; font-weight: bold; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; font-size: 0.9rem; }
+        
+        .match { background: var(--card); border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0; display: flex; flex-direction: column; gap: 5px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        .team { padding: 8px; cursor: pointer; border-radius: 4px; transition: background 0.2s; display: flex; justify-content: space-between; }
+        .team:hover { background: rgba(0,0,0,0.05); }
+        .team.winner { background: var(--win); color: white; font-weight: bold; }
+        .team.empty { color: gray; font-style: italic; cursor: default; }
+
+        /* Conectores visuales (Líneas) */
+        .match::after { content: ''; position: absolute; right: -20px; top: 50%; width: 20px; height: 2px; background: #ccc; z-index: -1; }
+        .round:last-child .match::after { display: none; } /* Última ronda no tiene línea */
+
+        .msg { margin-top: 10px; font-weight: bold; display: none; }
+        .success { color: green; } .error { color: red; }
+        .hidden { display: none !important; }
+        button.action { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    </style>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      // --- CONFIGURACIÓN ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+        authDomain: "fiestas-pantano.firebaseapp.com",
+        projectId: "fiestas-pantano",
+        storageBucket: "fiestas-pantano.firebasestorage.app",
+        messagingSenderId: "801380435613",
+        appId: "1:801380435613:web:a842572cf7cee93ac57674",
+        measurementId: "G-EG2MZGBT1B"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+      
+      let activityId = "";
+      let activityData = null;
+
+      // 1. INICIALIZAR Y SEGURIDAD
+      onAuthStateChanged(auth, async (user) => {
+          if (!user) window.location.href = "index.html";
+          
+          // Verificar Permisos
+          const uDoc = await getDoc(doc(db, "usuarios", user.uid));
+          if(!uDoc.exists() || (uDoc.data().rol !== 'admin' && uDoc.data().rol !== 'festero')) {
+              alert("Acceso Denegado");
+              window.location.href = "panel.html";
+              return;
+          }
+
+          aplicarTema();
+
+          // Obtener ID de la URL (ej: torneo.html?id=XYZ)
+          const params = new URLSearchParams(window.location.search);
+          activityId = params.get("id");
+          
+          if(!activityId) { alert("Error: No se especificó actividad"); window.location.href = "gestion.html"; }
+
+          cargarDatos();
+      });
+
+      async function cargarDatos() {
+          const docSnap = await getDoc(doc(db, "actividades", activityId));
+          if(!docSnap.exists()) return;
+          activityData = docSnap.data();
+          
+          document.getElementById("page-title").innerText = "Gestión: " + activityData.titulo;
+          
+          renderParticipantes();
+          if(activityData.bracket) renderBracket();
+          else document.getElementById("bracket-view").innerHTML = '<div style="text-align:center; padding:20px;"><p>No hay torneo generado aún.</p><button class="action" onclick="generarBracket()">🎲 Generar Sorteo Aleatorio</button></div>';
+      }
+
+      // --- PESTAÑAS ---
+      window.switchTab = (tabName) => {
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.getElementById('tab-'+tabName).classList.add('active');
+          
+          document.getElementById('section-participantes').classList.add('hidden');
+          document.getElementById('section-bracket').classList.add('hidden');
+          document.getElementById('section-'+tabName).classList.remove('hidden');
+      }
+
+      // --- GESTIÓN DE PARTICIPANTES ---
+      function renderParticipantes() {
+          const lista = document.getElementById("lista-participantes");
+          lista.innerHTML = "";
+          const inscritos = activityData.inscritos || []; // [{nombre_equipo: 'A', ...}, ...]
+
+          inscritos.forEach((p, index) => {
+              // Si es equipo mostramos nombre_equipo, si es individual mostramos capitan
+              const nombreMostrado = p.nombre_equipo || p.capitan || "Sin nombre";
+              const miembrosStr = (p.miembros && p.miembros.length > 0) ? 
+                  ` <small>(${p.miembros.map(m=>m.nombre).join(", ")})</small>` : "";
+
+              lista.innerHTML += `
+                <div class="list-item">
+                    <div>
+                        <strong>${nombreMostrado}</strong>
+                        ${miembrosStr}
+                    </div>
+                    <button class="btn-del" onclick="borrarParticipante(${index})">Eliminar</button>
+                </div>`;
+          });
+          
+          document.getElementById("count-part").innerText = inscritos.length;
+      }
+
+      window.agregarManual = async () => {
+          const input = document.getElementById("nuevo-nombre");
+          const nombre = input.value.trim();
+          if(!nombre) return;
+
+          // Añadimos un participante "dummy" (sin usuario real vinculado, solo texto)
+          const nuevo = {
+              capitan: "Admin", // Creado por admin
+              nombre_equipo: nombre, // Usamos esto como nombre principal
+              miembros: [],
+              fecha_registro: new Date(),
+              es_manual: true
+          };
+
+          await updateDoc(doc(db, "actividades", activityId), {
+              inscritos: arrayUnion(nuevo)
+          });
+          
+          input.value = "";
+          cargarDatos(); // Recargar
+      }
+
+      window.borrarParticipante = async (index) => {
+          if(!confirm("¿Borrar este equipo? Si el torneo ya empezó, esto puede romper el cuadro.")) return;
+          
+          // Necesitamos el objeto exacto para borrarlo. Lo leemos de memoria local
+          const aBorrar = activityData.inscritos[index];
+          
+          await updateDoc(doc(db, "actividades", activityId), {
+              inscritos: arrayRemove(aBorrar)
+          });
+          cargarDatos();
+      }
+
+      // --- LÓGICA DEL TORNEO (BRACKET) ---
+      
+      window.generarBracket = async () => {
+          const inscritos = activityData.inscritos || [];
+          if(inscritos.length < 2) { alert("Necesitas al menos 2 equipos."); return; }
+          
+          if(!confirm("Esto borrará cualquier progreso anterior del torneo. ¿Generar nuevo sorteo?")) return;
+
+          // 1. Mezclar equipos (Shuffle)
+          let equipos = [...inscritos].sort(() => Math.random() - 0.5);
+          
+          // 2. Ajustar a potencia de 2 (4, 8, 16...) añadiendo "BYE" (huecos vacíos)
+          // Esto simplifica el bracket. Si hay 5 equipos, ajustamos a 8. 3 pasan directo.
+          let power = 2;
+          while(power < equipos.length) power *= 2;
+          
+          while(equipos.length < power) {
+              equipos.push(null); // null significa "BYE" (Pase directo al rival)
+          }
+
+          // 3. Crear Ronda 1 (Partidos)
+          let ronda1 = [];
+          for(let i=0; i < equipos.length; i+=2) {
+              const teamA = equipos[i];
+              const teamB = equipos[i+1];
+              
+              // Si uno es null, el otro gana automáticamente
+              let winner = null;
+              if(teamA && !teamB) winner = 0; // Gana el de la posición 0 (teamA)
+              if(!teamA && teamB) winner = 1; // Gana el de la posición 1 (teamB)
+
+              ronda1.push({
+                  p1: teamA ? (teamA.nombre_equipo || teamA.capitan) : "PASE DIRECTO",
+                  p2: teamB ? (teamB.nombre_equipo || teamB.capitan) : "PASE DIRECTO",
+                  winner: winner // 0 para p1, 1 para p2, null si no se ha jugado
+              });
+          }
+
+          // Estructura del bracket guardada en DB
+          // rounds: [ [match1, match2...], [match1...] ]
+          const bracket = { rounds: [ronda1] };
+          
+          // Guardar
+          await updateDoc(doc(db, "actividades", activityId), { bracket: bracket });
+          cargarDatos();
+      }
+
+      function renderBracket() {
+          const container = document.getElementById("bracket-view");
+          container.innerHTML = "";
+          
+          const rounds = activityData.bracket.rounds;
+          
+          rounds.forEach((matches, rIndex) => {
+              const roundDiv = document.createElement("div");
+              roundDiv.className = "round";
+              
+              // Título de la ronda
+              let title = `Ronda ${rIndex + 1}`;
+              if(matches.length === 1) title = "🏆 FINAL";
+              else if(matches.length === 2) title = "SEMIFINAL";
+              
+              roundDiv.innerHTML = `<div class="round-title">${title}</div>`;
+
+              matches.forEach((match, mIndex) => {
+                  const matchDiv = document.createElement("div");
+                  matchDiv.className = "match";
+                  
+                  // Equipo 1
+                  const class1 = (match.winner === 0) ? "team winner" : "team";
+                  const click1 = (match.winner === null && match.p1 !== "PASE DIRECTO" && match.p2 !== "PASE DIRECTO") ? `onclick="declararGanador(${rIndex}, ${mIndex}, 0)"` : "";
+                  
+                  // Equipo 2
+                  const class2 = (match.winner === 1) ? "team winner" : "team";
+                  const click2 = (match.winner === null && match.p1 !== "PASE DIRECTO" && match.p2 !== "PASE DIRECTO") ? `onclick="declararGanador(${rIndex}, ${mIndex}, 1)"` : "";
+
+                  matchDiv.innerHTML = `
+                      <div class="${class1}" ${click1}>${match.p1}</div>
+                      <div class="${class2}" ${click2}>${match.p2}</div>
+                  `;
+                  roundDiv.appendChild(matchDiv);
+              });
+
+              container.appendChild(roundDiv);
+          });
+      }
+
+      window.declararGanador = async (rIndex, mIndex, winnerIdx) => {
+          if(!confirm("¿Confirmar ganador?")) return;
+
+          let bracket = activityData.bracket;
+          let rounds = bracket.rounds;
+          
+          // 1. Marcar ganador en el partido actual
+          rounds[rIndex][mIndex].winner = winnerIdx;
+          const nombreGanador = (winnerIdx === 0) ? rounds[rIndex][mIndex].p1 : rounds[rIndex][mIndex].p2;
+
+          // 2. Mover ganador a la SIGUIENTE ronda
+          const nextRoundIdx = rIndex + 1;
+          
+          // Si no existe la siguiente ronda, la creamos (si quedan ganadores por jugar)
+          if(!rounds[nextRoundIdx]) {
+              // Solo creamos nueva ronda si este no era el partido final
+              if(rounds[rIndex].length > 1) rounds[nextRoundIdx] = []; 
+              else {
+                  // FIN DEL TORNEO
+                  alert(`¡${nombreGanador} HA GANADO EL TORNEO! 🏆`);
+                  await updateDoc(doc(db, "actividades", activityId), { bracket: bracket });
+                  cargarDatos();
+                  return;
+              }
+          }
+
+          // Lógica para colocar al ganador en el siguiente partido
+          // El ganador del partido 0 y el del partido 1 van al NuevoPartido 0
+          // El ganador del partido 2 y el del partido 3 van al NuevoPartido 1
+          const nextMatchIdx = Math.floor(mIndex / 2);
+          
+          // Aseguramos que existe el hueco en la siguiente ronda
+          if(!rounds[nextRoundIdx][nextMatchIdx]) {
+              rounds[nextRoundIdx][nextMatchIdx] = { p1: "Esperando...", p2: "Esperando...", winner: null };
+          }
+
+          // Colocamos al ganador en p1 o p2 dependiendo de si venía de un índice par o impar
+          if (mIndex % 2 === 0) {
+              rounds[nextRoundIdx][nextMatchIdx].p1 = nombreGanador;
+          } else {
+              rounds[nextRoundIdx][nextMatchIdx].p2 = nombreGanador;
+          }
+
+          // Guardar cambios
+          await updateDoc(doc(db, "actividades", activityId), { bracket: bracket });
+          cargarDatos();
+      }
+
+      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="page-title">Cargando...</h1>
+            <button class="btn-back" onclick="window.location.href='gestion.html'">Volver</button>
+        </div>
+
+        <div class="tabs">
+            <div id="tab-participantes" class="tab active" onclick="switchTab('participantes')">Participantes (<span id="count-part">0</span>)</div>
+            <div id="tab-bracket" class="tab" onclick="switchTab('bracket')">🏆 Competición (Bracket)</div>
+        </div>
+
+        <div id="section-participantes">
+            <div class="add-box">
+                <input type="text" id="nuevo-nombre" placeholder="Añadir equipo manualmente (Ej: Los del Bar)">
+                <button class="action" onclick="agregarManual()">Añadir</button>
+            </div>
+            <div id="lista-participantes"></div>
+        </div>
+
+        <div id="section-bracket" class="hidden">
+            <p style="font-size: 0.9rem; color: gray;">Haz clic en un equipo para declararlo ganador y avanzarlo.</p>
+            <div id="bracket-view" class="bracket-container">
+                </div>
+        </div>
+    </div>
+</body>
+</html>
