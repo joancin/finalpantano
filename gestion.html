@@ -11,30 +11,44 @@
         body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
         
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        .container { max-width: 900px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .grid-gestion { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 700px) { .grid-gestion { grid-template-columns: 1fr; } }
+        
+        /* Grid Principal */
+        .grid-gestion { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+        @media (max-width: 800px) { .grid-gestion { grid-template-columns: 1fr; } }
 
         .card { background: var(--card); padding: 25px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
-        button.action { width: 100%; background: var(--accent); color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid #ddd; padding-bottom: 10px; font-size: 1.2rem; }
+        
+        /* Formularios */
+        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; background: var(--card); color: var(--text); }
+        button.action { width: 100%; background: var(--accent); color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         button.action:hover { opacity: 0.9; }
 
-        .code-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
-        .code-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .tag { padding: 3px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+        /* Listas */
+        .scroll-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
+        .list-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .tag { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
         .tag.free { background: #e8f5e9; color: green; }
         .tag.used { background: #ffebee; color: red; }
+        
+        .activity-item { background: rgba(0,0,0,0.02); margin-bottom: 8px; padding: 10px; border-radius: 5px; border-left: 4px solid var(--accent); }
+        .activity-header { display: flex; justify-content: space-between; font-weight: bold; }
+        .activity-details { font-size: 13px; color: gray; margin-top: 5px; }
+        .btn-del { background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; }
+
         .msg { margin-top: 10px; font-weight: bold; display: none; }
         .success { color: green; } .error { color: red; }
+        
+        /* Ocultar elementos */
+        .hidden { display: none; }
     </style>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot, where, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot, where, getDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       // --- CONFIGURACIÓN ---
@@ -53,6 +67,7 @@
       const auth = getAuth(app);
       let currentUser = null;
 
+      // 1. SEGURIDAD
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
           const docSnap = await getDoc(doc(db, "usuarios", user.uid));
@@ -62,46 +77,28 @@
           currentUser = user;
           aplicarTema();
           escucharCodigos();
+          escucharActividades(); // Nueva función
       });
 
-      // --- GENERAR CÓDIGO (CON CHEQUEO DE DUPLICADOS) ---
+      // --- GESTIÓN DE CÓDIGOS (Tu código anterior) ---
       window.generarCodigo = async () => {
           const codeInput = document.getElementById("new-code");
           const codigo = codeInput.value.trim().toUpperCase();
           const status = document.getElementById("status-code");
 
-          if(codigo.length < 3) {
-              mostrarMsg(status, "Mínimo 3 letras", "error"); return;
-          }
-
-          status.innerText = "Verificando..."; status.style.display = "block";
-
+          if(codigo.length < 3) { mostrarMsg(status, "Mínimo 3 letras", "error"); return; }
+          
           try {
-              // 1. Comprobar si ya existe
               const q = query(collection(db, "invitaciones"), where("codigo", "==", codigo));
               const querySnapshot = await getDocs(q);
+              if (!querySnapshot.empty) { mostrarMsg(status, "¡Ya existe!", "error"); return; }
 
-              if (!querySnapshot.empty) {
-                  mostrarMsg(status, "❌ ¡Ese código ya existe! Inventa otro.", "error");
-                  return;
-              }
-
-              // 2. Si no existe, lo creamos
               await addDoc(collection(db, "invitaciones"), {
-                  codigo: codigo,
-                  rol: "usuario",
-                  usado: false,
-                  creado_por: currentUser.uid,
-                  fecha_creacion: new Date()
+                  codigo: codigo, rol: "usuario", usado: false, creado_por: currentUser.uid, fecha_creacion: new Date()
               });
-
               mostrarMsg(status, `✅ Código ${codigo} creado.`, "success");
               codeInput.value = ""; 
-
-          } catch (e) {
-              console.error(e);
-              mostrarMsg(status, "Error: " + e.message, "error");
-          }
+          } catch (e) { console.error(e); mostrarMsg(status, "Error: " + e.message, "error"); }
       }
 
       function escucharCodigos() {
@@ -109,27 +106,103 @@
           onSnapshot(q, (snapshot) => {
               const lista = document.getElementById("lista-codigos");
               lista.innerHTML = "";
-              if(snapshot.empty) { lista.innerHTML = "<p>No hay códigos.</p>"; return; }
-
+              if(snapshot.empty) { lista.innerHTML = "<li>Sin códigos.</li>"; return; }
               snapshot.forEach((doc) => {
                   const d = doc.data();
                   const estadoClass = d.usado ? "used" : "free";
-                  const estadoTexto = d.usado ? `Usado por: ${d.usado_por || '?'}` : "DISPONIBLE";
-                  const item = `
-                    <li class="code-item">
-                        <div><strong>${d.codigo}</strong></div>
-                        <span class="tag ${estadoClass}">${estadoTexto}</span>
-                    </li>`;
-                  lista.innerHTML += item;
+                  const estadoTexto = d.usado ? `${d.usado_por}` : "LIBRE";
+                  lista.innerHTML += `<li class="list-item"><div><strong>${d.codigo}</strong></div><span class="tag ${estadoClass}">${estadoTexto}</span></li>`;
               });
           });
       }
 
-      function mostrarMsg(el, txt, tipo) {
-          el.innerText = txt; el.className = "msg " + tipo; el.style.display = "block";
-          setTimeout(() => el.style.display = 'none', 4000);
+      // --- NUEVO: GESTIÓN DE ACTIVIDADES ---
+      
+      // Mostrar/Ocultar input de tamaño de grupo
+      window.checkModalidad = () => {
+          const tipo = document.getElementById("act-modalidad").value;
+          const divGrupo = document.getElementById("div-grupo-size");
+          if (tipo === 'grupo') {
+              divGrupo.classList.remove("hidden");
+          } else {
+              divGrupo.classList.add("hidden");
+          }
       }
 
+      window.crearActividad = async () => {
+          const titulo = document.getElementById("act-titulo").value;
+          const fecha = document.getElementById("act-fecha").value;
+          const genero = document.getElementById("act-genero").value;
+          const modalidad = document.getElementById("act-modalidad").value;
+          const tamano = document.getElementById("act-tamano").value; // Solo si es grupo
+          const status = document.getElementById("status-act");
+
+          if(!titulo || !fecha) { mostrarMsg(status, "Pon título y fecha", "error"); return; }
+          
+          // Calcular tamaño real del equipo
+          let equipoSize = 1;
+          if(modalidad === 'parejas') equipoSize = 2;
+          if(modalidad === 'grupo') equipoSize = parseInt(tamano) || 3;
+
+          try {
+              await addDoc(collection(db, "actividades"), {
+                  titulo: titulo,
+                  fecha: new Date(fecha), // Guardamos como fecha real
+                  genero: genero, // Torneo, Comida...
+                  modalidad: modalidad, // Individual, Parejas...
+                  tamano_equipo: equipoSize,
+                  creado_por: currentUser.uid,
+                  participantes: [] // Lista vacía para apuntarse luego
+              });
+
+              mostrarMsg(status, "✅ Actividad publicada", "success");
+              // Limpiar form
+              document.getElementById("act-titulo").value = "";
+              document.getElementById("act-fecha").value = "";
+          } catch (e) {
+              console.error(e);
+              mostrarMsg(status, "Error: " + e.message, "error");
+          }
+      }
+
+      function escucharActividades() {
+          // Ordenamos por fecha
+          const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
+          
+          onSnapshot(q, (snapshot) => {
+              const lista = document.getElementById("lista-actividades");
+              lista.innerHTML = "";
+              
+              if(snapshot.empty) { lista.innerHTML = "<p>No hay actividades creadas.</p>"; return; }
+
+              snapshot.forEach((docSnap) => {
+                  const act = docSnap.data();
+                  // Convertir timestamp a fecha legible
+                  const fechaLegible = act.fecha.toDate ? act.fecha.toDate().toLocaleString() : new Date(act.fecha).toLocaleString();
+                  
+                  const html = `
+                    <div class="activity-item">
+                        <div class="activity-header">
+                            <span>${act.titulo}</span>
+                            <button class="btn-del" onclick="borrarActividad('${docSnap.id}', '${act.titulo}')">X</button>
+                        </div>
+                        <div class="activity-details">
+                            📅 ${fechaLegible} | 🏷️ ${act.genero} | 👥 ${act.modalidad} (${act.tamano_equipo} pax)
+                        </div>
+                    </div>
+                  `;
+                  lista.innerHTML += html;
+              });
+          });
+      }
+
+      window.borrarActividad = async (id, titulo) => {
+          if(confirm(`¿Borrar la actividad "${titulo}"? Se perderán las inscripciones.`)) {
+              await deleteDoc(doc(db, "actividades", id));
+          }
+      }
+
+      function mostrarMsg(el, txt, tipo) { el.innerText = txt; el.className = "msg " + tipo; el.style.display = "block"; setTimeout(()=>el.style.display='none', 4000); }
       function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
     </script>
 </head>
@@ -139,20 +212,61 @@
             <h1>🎉 Gestión Festera</h1>
             <button class="btn-back" onclick="window.location.href='panel.html'"><span class="material-symbols-outlined">arrow_back</span> Volver</button>
         </div>
+
         <div class="grid-gestion">
+            
             <div class="card">
-                <h2>🎫 Generar Invitaciones</h2>
-                <input type="text" id="new-code" placeholder="Escribe un código (ej: VECINO24)">
+                <h2>🎫 Invitaciones</h2>
+                <input type="text" id="new-code" placeholder="Código (ej: VECINO24)">
                 <button class="action" onclick="generarCodigo()">Crear Código</button>
                 <p id="status-code" class="msg"></p>
-                <h3 style="margin-top:20px; font-size: 16px;">Historial</h3>
-                <ul id="lista-codigos" class="code-list"><li>Cargando...</li></ul>
+                
+                <h3 style="margin-top:20px; font-size: 14px;">Historial</h3>
+                <ul id="lista-codigos" class="scroll-list"><li>Cargando...</li></ul>
             </div>
-            <div class="card" style="opacity: 0.7;">
+
+            <div class="card">
                 <h2>📅 Crear Actividad</h2>
-                <p>Próximamente...</p>
-                <button class="action" style="background: gray; cursor: not-allowed;">En construcción</button>
+                
+                <label style="font-size:12px; font-weight:bold;">Datos Principales</label>
+                <input type="text" id="act-titulo" placeholder="Título (ej: Torneo de Mus)">
+                <input type="datetime-local" id="act-fecha">
+                
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:12px;">Género</label>
+                        <select id="act-genero">
+                            <option value="torneo">🏆 Torneo</option>
+                            <option value="comida">🥘 Comida</option>
+                            <option value="fiesta">🪩 Fiesta</option>
+                            <option value="otro">📢 Otro</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:12px;">Modalidad</label>
+                        <select id="act-modalidad" onchange="checkModalidad()">
+                            <option value="individual">👤 Individual</option>
+                            <option value="parejas">👥 Parejas</option>
+                            <option value="grupo">👨‍👩‍👧‍👦 Grupo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="div-grupo-size" class="hidden">
+                    <label style="font-size:12px;">Personas por grupo</label>
+                    <input type="number" id="act-tamano" value="4" min="2" max="20">
+                </div>
+
+                <button class="action" onclick="crearActividad()">Publicar Actividad</button>
+                <p id="status-act" class="msg"></p>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+                
+                <h3 style="font-size: 14px;">Actividades Creadas</h3>
+                <div id="lista-actividades">
+                    </div>
             </div>
+
         </div>
     </div>
 </body>
