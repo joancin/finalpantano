@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración - Fiestas</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #e91e63; }
+        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        /* Header simple con botón volver */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        
+        /* Tarjetas */
+        .card { background: var(--card); padding: 25px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        
+        /* Formularios */
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        button.action { width: 100%; background: var(--accent); color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button.action:hover { opacity: 0.9; }
+
+        /* Tabla de usuarios */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #ddd; }
+        th { color: var(--accent); }
+        .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; }
+        
+        .msg { margin-top: 10px; font-weight: bold; display: none; }
+        .success { color: green; } .error { color: red; }
+    </style>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+        authDomain: "fiestas-pantano.firebaseapp.com",
+        projectId: "fiestas-pantano",
+        storageBucket: "fiestas-pantano.firebasestorage.app",
+        messagingSenderId: "801380435613",
+        appId: "1:801380435613:web:a842572cf7cee93ac57674",
+        measurementId: "G-EG2MZGBT1B"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      // 1. SEGURIDAD: Solo Admin puede ver esto
+      onAuthStateChanged(auth, async (user) => {
+          if (!user) window.location.href = "index.html";
+          
+          const docSnap = await getDoc(doc(db, "usuarios", user.uid));
+          if (!docSnap.exists() || docSnap.data().rol !== 'admin') {
+              alert("Acceso denegado. Solo administradores.");
+              window.location.href = "panel.html";
+          } else {
+              cargarUsuarios(); // Si es admin, cargamos la lista
+              aplicarTema();
+          }
+      });
+
+      // 2. CREAR FESTERO (Sin cerrar sesión del admin)
+      window.crearFestero = async () => {
+          const userNew = document.getElementById("f-user").value.trim().toLowerCase();
+          const passNew = document.getElementById("f-pass").value;
+          const status = document.getElementById("status-create");
+
+          if(!userNew || passNew.length < 6) {
+              mostrarMsg(status, "Rellena usuario y contraseña (min 6 chars)", "error");
+              return;
+          }
+
+          status.innerText = "Creando..."; status.style.display = "block";
+
+          try {
+              // TRUCO: Creamos una 'App Secundaria' para crear el usuario sin desloguear al Admin
+              const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+              const secondaryAuth = getAuth(secondaryApp);
+              
+              const fakeEmail = userNew + "@fiestaspueblo.com";
+              const userCred = await createUserWithEmailAndPassword(secondaryAuth, fakeEmail, passNew);
+              
+              // Guardar en base de datos con rol 'festero'
+              await setDoc(doc(db, "usuarios", userCred.user.uid), {
+                  username: userNew,
+                  rol: "festero",
+                  creado_por_admin: true,
+                  fecha: new Date()
+              });
+
+              // Limpiar y cerrar app secundaria
+              await secondaryAuth.signOut(); // logout de la secundaria
+              
+              mostrarMsg(status, `¡Festero '${userNew}' creado con éxito!`, "success");
+              document.getElementById("f-user").value = "";
+              document.getElementById("f-pass").value = "";
+              cargarUsuarios(); // Actualizar tabla
+
+          } catch (e) {
+              console.error(e);
+              let errorTxt = e.message;
+              if(errorTxt.includes("email-already-in-use")) errorTxt = "Ese usuario ya existe.";
+              mostrarMsg(status, "Error: " + errorTxt, "error");
+          }
+      }
+
+      // 3. LISTAR USUARIOS
+      async function cargarUsuarios() {
+          const tbody = document.getElementById("tabla-body");
+          tbody.innerHTML = "<tr><td colspan='3'>Cargando...</td></tr>";
+          
+          const querySnapshot = await getDocs(collection(db, "usuarios"));
+          tbody.innerHTML = ""; // Limpiar
+
+          querySnapshot.forEach((docSnap) => {
+              const u = docSnap.data();
+              const row = `
+                <tr>
+                    <td><b>${u.username}</b></td>
+                    <td>${u.rol.toUpperCase()}</td>
+                    <td>
+                        ${u.rol !== 'admin' ? `<button class="btn-del" onclick="borrarUsuario('${docSnap.id}', '${u.username}')">Eliminar</button>` : '-'}
+                    </td>
+                </tr>
+              `;
+              tbody.innerHTML += row;
+          });
+      }
+
+      // 4. BORRAR USUARIO (Solo de la DB visual, no de Auth por seguridad del cliente)
+      window.borrarUsuario = async (id, nombre) => {
+          if(!confirm(`¿Seguro que quieres borrar a ${nombre}? El usuario no podrá entrar al panel, pero su cuenta de acceso seguirá existiendo (Firebase limitation).`)) return;
+          
+          await deleteDoc(doc(db, "usuarios", id));
+          alert("Usuario eliminado de la base de datos.");
+          cargarUsuarios();
+      }
+
+      function mostrarMsg(el, txt, tipo) {
+          el.innerText = txt;
+          el.className = "msg " + tipo;
+          el.style.display = "block";
+      }
+
+      function aplicarTema() {
+        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+      }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛠️ Zona Admin</h1>
+            <button class="btn-back" onclick="window.location.href='panel.html'">
+                <span class="material-symbols-outlined">arrow_back</span> Volver
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>Crear Nuevo Festero</h2>
+            <p>Da de alta a un organizador directamente.</p>
+            <input type="text" id="f-user" placeholder="Nombre de usuario (ej: comision2026)">
+            <input type="text" id="f-pass" placeholder="Contraseña (mínimo 6 caracteres)">
+            <button class="action" onclick="crearFestero()">Crear Festero</button>
+            <p id="status-create" class="msg"></p>
+        </div>
+
+        <div class="card">
+            <h2>Lista de Usuarios</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
