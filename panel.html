@@ -175,11 +175,16 @@
           document.getElementById('theme-icon').innerText = 'light_mode';
       }
 
-      // --- NAVEGACIÓN ---
-      window.irA = (lugar) => {
-          alert("Navegando a: " + lugar);
-          // Aquí pondremos window.location.href = "..." cuando creemos esas páginas
-      }
+    window.irA = (lugar) => {
+        if (lugar === 'zona_admin') {
+            window.location.href = "admin.html";
+        } else if (lugar === 'zona_festero') {
+            // window.location.href = "gestion.html"; // Esto lo haremos luego
+            alert("Próximamente: Zona de Gestión de Actividades");
+        } else {
+            alert("Sección en construcción: " + lugar);
+        }
+    }
     </script>
 </head>
 <body>
