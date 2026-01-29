@@ -16,34 +16,32 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
-        /* Tarjetas de Actividad */
-        .act-card { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 25px; transition: transform 0.2s; }
-        .act-card:hover { transform: translateY(-2px); }
-
+        .act-card { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 25px; }
         .act-img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
         .act-body { padding: 20px; }
-        
         .act-title { margin: 0; font-size: 1.4rem; color: var(--accent); }
         .act-meta { display: flex; gap: 15px; font-size: 0.9rem; color: gray; margin: 10px 0; align-items: center; }
         .badge { background: #eee; color: #333; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
         
         .act-footer { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Botones de acción */
-        .btn-join { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-join { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
         .btn-join:hover { background: #e64a19; }
-        
         .btn-leave { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; }
-        .btn-leave:hover { background: #ff4444; color: white; }
-
-        .joined-msg { color: green; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        
+        /* Modal de Inscripción */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 200; }
+        .modal { background: var(--card); padding: 25px; border-radius: 10px; width: 90%; max-width: 400px; color: var(--text); }
+        .modal input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .teammate-row { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
+        .status-icon { font-size: 18px; }
 
         .msg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; z-index: 1000; }
     </style>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       // --- CONFIGURACIÓN ---
@@ -61,16 +59,18 @@
       const db = getFirestore(app);
       const auth = getAuth(app);
       let currentUser = null;
-      let username = "";
+      let myUsername = "";
+      
+      // Variables para el modal
+      let currentActId = "";
+      let currentModalidad = "";
+      let currentTeamSize = 1;
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
           currentUser = user;
-          
-          // Obtener nombre del usuario para el registro
           const uDoc = await getDoc(doc(db, "usuarios", user.uid));
-          if(uDoc.exists()) username = uDoc.data().username;
-          
+          if(uDoc.exists()) myUsername = uDoc.data().username;
           aplicarTema();
           cargarActividades();
       });
@@ -82,33 +82,26 @@
               const container = document.getElementById("activities-container");
               container.innerHTML = "";
 
-              if (snapshot.empty) {
-                  container.innerHTML = "<p style='text-align:center'>No hay actividades programadas aún.</p>";
-                  return;
-              }
+              if (snapshot.empty) { container.innerHTML = "<p style='text-align:center'>No hay actividades.</p>"; return; }
 
               snapshot.forEach((docSnap) => {
                   const act = docSnap.data();
                   const actId = docSnap.id;
-                  const fecha = act.fecha.toDate ? act.fecha.toDate() : new Date(act.fecha);
-                  const fechaStr = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                  const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString();
                   
-                  // COMPROBAR SI YA ESTOY APUNTADO
-                  // Buscamos si mi UID está en la lista de participantes (que ahora guardará objetos o IDs)
-                  // Para simplificar, asumiremos que 'participantes' es un array de objetos {uid: '...', nombre: '...'}
-                  // O un array simple de UIDs. Vamos a usar array de objetos para guardar nombre de equipo.
+                  // Verificar si estoy dentro (buscamos mi UID en cualquier parte del equipo)
+                  const inscritos = act.inscritos || []; // Nueva estructura
+                  let estoyDentro = false;
                   
-                  const participantes = act.participantes || [];
-                  const estoyDentro = participantes.some(p => p.uid === currentUser.uid);
+                  // Recorremos todos los equipos inscritos
+                  inscritos.forEach(equipo => {
+                      if (equipo.capitan_uid === currentUser.uid) estoyDentro = true;
+                      if (equipo.miembros && equipo.miembros.some(m => m.uid === currentUser.uid)) estoyDentro = true;
+                  });
 
-                  // Lógica de imagen por defecto si falla
-                  let imgUrl = act.imagen || "";
-                  if(!imgUrl) {
-                      if(act.genero === 'torneo') imgUrl = 'https://cdn-icons-png.flaticon.com/512/1606/1606141.png';
-                      else imgUrl = 'https://cdn-icons-png.flaticon.com/512/3159/3159066.png';
-                  }
+                  // Imagen
+                  let imgUrl = act.imagen || (act.genero === 'torneo' ? 'https://cdn-icons-png.flaticon.com/512/1606/1606141.png' : 'https://cdn-icons-png.flaticon.com/512/3159/3159066.png');
 
-                  // Renderizar tarjeta
                   const div = document.createElement("div");
                   div.className = "act-card";
                   div.innerHTML = `
@@ -121,16 +114,10 @@
                           </div>
                           
                           <div class="act-footer">
-                              <div id="status-${actId}">
-                                  ${estoyDentro 
-                                      ? `<span class="joined-msg"><span class="material-symbols-outlined">check_circle</span> Apuntado</span>` 
-                                      : `<span style="color:gray">${participantes.length} inscritos</span>`
-                                  }
-                              </div>
-                              
+                              <div>${estoyDentro ? '<span style="color:green; font-weight:bold;">✅ Inscrito</span>' : `<span style="color:gray">${inscritos.length} equipos/personas</span>`}</div>
                               ${estoyDentro
-                                  ? `<button class="btn-leave" onclick="desapuntarse('${actId}', '${act.titulo}')">Borrarme</button>`
-                                  : `<button class="btn-join" onclick="apuntarse('${actId}', '${act.modalidad}', '${act.titulo}')">¡Apuntarme!</button>`
+                                  ? `<button class="btn-leave" onclick="alert('Para borrarte contacta a un Festero (Próximamente editar)')">Ya estás dentro</button>`
+                                  : `<button class="btn-join" onclick="abrirModal('${actId}', '${act.modalidad}', ${act.tamano_equipo || 1})">¡Apuntarme!</button>`
                               }
                           </div>
                       </div>
@@ -140,83 +127,133 @@
           });
       }
 
-      // --- LÓGICA DE APUNTARSE ---
-      window.apuntarse = async (actId, modalidad, titulo) => {
-          let datosInscripcion = {
-              uid: currentUser.uid,
-              nombre: username,
-              fecha: new Date()
-          };
-
-          // Si es por equipos, pedimos nombre
-          if (modalidad !== 'individual') {
-              const nombreEquipo = prompt(`Para apuntarte a "${titulo}" necesitas un nombre de equipo (o pareja):`);
-              if (!nombreEquipo) return; // Cancelado
-              datosInscripcion.equipo = nombreEquipo;
+      // --- SISTEMA DE INSCRIPCIÓN INTELIGENTE ---
+      window.abrirModal = (id, modalidad, size) => {
+          currentActId = id;
+          currentModalidad = modalidad;
+          currentTeamSize = size;
+          
+          const modal = document.getElementById("modal-inscripcion");
+          const container = document.getElementById("modal-inputs");
+          const tituloModal = document.getElementById("modal-titulo");
+          
+          container.innerHTML = ""; // Limpiar
+          
+          if (modalidad === 'individual') {
+              tituloModal.innerText = "Confirmar Inscripción";
+              container.innerHTML = "<p>¿Te apuntas a esta actividad?</p>";
+          } else {
+              tituloModal.innerText = `Inscripción ${modalidad}`;
+              // Input nombre de equipo
+              container.innerHTML += `<label>Nombre del Equipo:</label><input type="text" id="team-name" placeholder="Ej: Los Invencibles">`;
+              
+              // Inputs para compañeros (Size - 1 porque yo soy el primero)
+              const numCompaneros = (modalidad === 'parejas') ? 1 : (size - 1);
+              container.innerHTML += `<p style="font-size:12px; margin-top:10px;">Añade los usuarios de tus compañeros (si tienen cuenta se vincularán):</p>`;
+              
+              for(let i=0; i < numCompaneros; i++) {
+                  container.innerHTML += `
+                    <div class="teammate-row">
+                        <input type="text" class="mate-input" placeholder="Usuario o Nombre del compañero ${i+1}">
+                    </div>`;
+              }
           }
-
-          try {
-              const actRef = doc(db, "actividades", actId);
-              await updateDoc(actRef, {
-                  participantes: arrayUnion(datosInscripcion)
-              });
-              mostrarToat("¡Te has apuntado correctamente!");
-          } catch (e) {
-              console.error(e);
-              alert("Error al apuntarse. Inténtalo de nuevo.");
-          }
+          
+          modal.style.display = "flex";
       }
 
-      // --- LÓGICA DE DESAPUNTARSE ---
-      window.desapuntarse = async (actId, titulo) => {
-          if(!confirm(`¿Quieres borrarte de "${titulo}"?`)) return;
+      window.cerrarModal = () => { document.getElementById("modal-inscripcion").style.display = "none"; }
+
+      window.confirmarInscripcion = async () => {
+          const btn = document.getElementById("btn-confirmar");
+          btn.innerText = "Procesando..."; btn.disabled = true;
 
           try {
-              // Para borrar de un array de objetos en Firestore, necesitamos el objeto EXACTO.
-              // Como eso es difícil, haremos: LEER -> FILTRAR -> GUARDAR.
-              
-              const actRef = doc(db, "actividades", actId);
-              const docSnap = await getDoc(actRef);
-              if (docSnap.exists()) {
-                  const data = docSnap.data();
-                  const listaVieja = data.participantes || [];
+              let datosEquipo = {
+                  capitan: myUsername,
+                  capitan_uid: currentUser.uid,
+                  fecha_registro: new Date(),
+                  miembros: [] // Aquí guardaremos {nombre: "...", uid: "..." (opcional)}
+              };
+
+              if (currentModalidad !== 'individual') {
+                  const nombreEquipo = document.getElementById("team-name").value;
+                  if (!nombreEquipo) throw new Error("Debes poner un nombre de equipo");
+                  datosEquipo.nombre_equipo = nombreEquipo;
+
+                  // RECOLECTAR Y BUSCAR COMPAÑEROS
+                  const inputs = document.querySelectorAll(".mate-input");
                   
-                  // Filtramos para quitarme a mí
-                  const listaNueva = listaVieja.filter(p => p.uid !== currentUser.uid);
-                  
-                  await updateDoc(actRef, { participantes: listaNueva });
-                  mostrarToat("Te has borrado de la actividad.");
+                  // Promesas para buscar todos los usuarios en paralelo
+                  const promesasBusqueda = Array.from(inputs).map(async (input) => {
+                      const nombre = input.value.trim().toLowerCase(); // Buscar en minúsculas
+                      if (!nombre) return null; // Campo vacío
+
+                      // Buscar en DB
+                      const q = query(collection(db, "usuarios"), where("username", "==", nombre));
+                      const querySnapshot = await getDocs(q);
+
+                      if (!querySnapshot.empty) {
+                          // ¡Usuario encontrado!
+                          const userDoc = querySnapshot.docs[0];
+                          return { nombre: userDoc.data().username, uid: userDoc.id, vinculado: true };
+                      } else {
+                          // No existe, guardamos solo el nombre
+                          return { nombre: input.value.trim(), vinculado: false };
+                      }
+                  });
+
+                  // Esperar a que se busquen todos
+                  const resultados = await Promise.all(promesasBusqueda);
+                  datosEquipo.miembros = resultados.filter(r => r !== null);
               }
+
+              // GUARDAR EN BASE DE DATOS
+              const actRef = doc(db, "actividades", currentActId);
+              
+              // Usamos arrayUnion para añadir el objeto completo a la lista "inscritos"
+              await updateDoc(actRef, {
+                  inscritos: arrayUnion(datosEquipo)
+              });
+
+              mostrarToat("✅ ¡Inscripción completada con éxito!");
+              cerrarModal();
+
           } catch (e) {
               console.error(e);
-              alert("Error al desapuntarse.");
+              alert("Error: " + e.message);
+          } finally {
+              btn.innerText = "Confirmar Inscripción"; btn.disabled = false;
           }
       }
 
       function mostrarToat(txt) {
-          const t = document.getElementById("toast");
-          t.innerText = txt;
-          t.style.display = "block";
+          const t = document.getElementById("toast"); t.innerText = txt; t.style.display = "block";
           setTimeout(() => t.style.display = "none", 3000);
       }
-
       function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
     </script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📅 Calendario de Fiestas</h1>
-            <button class="btn-back" onclick="window.location.href='panel.html'">
-                <span class="material-symbols-outlined">arrow_back</span> Volver
-            </button>
+            <h1>📅 Calendario</h1>
+            <button class="btn-back" onclick="window.location.href='panel.html'"><span class="material-symbols-outlined">arrow_back</span> Volver</button>
         </div>
 
-        <div id="activities-container">
-            <p>Cargando eventos...</p>
-        </div>
-
+        <div id="activities-container">Cargando...</div>
         <div id="toast" class="msg"></div>
+    </div>
+
+    <div id="modal-inscripcion" class="modal-overlay">
+        <div class="modal">
+            <h2 id="modal-titulo">Inscripción</h2>
+            <div id="modal-inputs"></div>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="confirmarInscripcion()" id="btn-confirmar" class="btn-join" style="width:100%">Confirmar</button>
+                <button onclick="cerrarModal()" class="btn-leave">Cancelar</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>
