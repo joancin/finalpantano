@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Principal - Fiestas</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 30px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn-logout { background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        
+        h1 { color: #333; }
+        .section { margin-top: 30px; }
+        
+        /* Estilos de las tarjetas de menú */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; transition: transform 0.2s; cursor: pointer; }
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { margin-top: 0; color: #ff5722; }
+        .card p { color: #666; font-size: 14px; }
+
+        /* Clases para ocultar/mostrar según rol */
+        .admin-only, .festero-only, .user-only { display: none; }
+    </style>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      // --- TU CONFIGURACIÓN ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+        authDomain: "fiestas-pantano.firebaseapp.com",
+        projectId: "fiestas-pantano",
+        storageBucket: "fiestas-pantano.firebasestorage.app",
+        messagingSenderId: "801380435613",
+        appId: "1:801380435613:web:a842572cf7cee93ac57674",
+        measurementId: "G-EG2MZGBT1B"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      // 1. VERIFICAR SI ESTÁ LOGUEADO Y OBTENER ROL
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // El usuario está logueado, vamos a ver quién es en la base de datos
+            const docRef = doc(db, "usuarios", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const rol = data.rol; // 'admin', 'festero', o 'usuario'
+                const nombre = data.username;
+
+                document.getElementById("welcome-msg").innerText = `Hola, ${nombre} (${rol.toUpperCase()})`;
+
+                // MOSTRAR PANELES SEGÚN EL ROL
+                if (rol === 'admin') {
+                    mostrarClase('admin-only');
+                    mostrarClase('festero-only'); // El admin también puede hacer cosas de festero
+                } else if (rol === 'festero') {
+                    mostrarClase('festero-only');
+                }
+                // Todos ven lo de usuario
+                mostrarClase('user-only');
+
+            } else {
+                console.log("Error: Usuario autenticado pero no existe en base de datos 'usuarios'");
+            }
+        } else {
+            // Si no está logueado, lo mandamos al login
+            window.location.href = "index.html";
+        }
+      });
+
+      function mostrarClase(clase) {
+          const elementos = document.querySelectorAll('.' + clase);
+          elementos.forEach(el => el.style.display = "block");
+      }
+
+      // Función para cerrar sesión
+      window.cerrarSesion = () => {
+          signOut(auth).then(() => {
+              window.location.href = "index.html";
+          });
+      }
+
+      // Funciones placeholder (para programar luego)
+      window.irA = (donde) => {
+          alert("Próximamente: " + donde);
+      }
+    </script>
+</head>
+<body>
+
+    <div class="header">
+        <h2 id="welcome-msg">Cargando usuario...</h2>
+        <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
+
+    <div class="section admin-only">
+        <h3>🛠️ Panel de Administrador</h3>
+        <div class="menu-grid">
+            <div class="card" onclick="irA('crear_festero')">
+                <h3>Crear Festero</h3>
+                <p>Dar de alta organizadores manualmente</p>
+            </div>
+            <div class="card" onclick="irA('gestion_usuarios')">
+                <h3>Gestionar Usuarios</h3>
+                <p>Ver lista completa, borrar o resetear contraseñas</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section festero-only">
+        <h3>🎉 Zona de Organización</h3>
+        <div class="menu-grid">
+            <div class="card" onclick="irA('crear_actividad')">
+                <h3>Crear Actividad</h3>
+                <p>Publicar torneos, comidas o eventos</p>
+            </div>
+            <div class="card" onclick="irA('codigos_invitacion')">
+                <h3>Generar Invitaciones</h3>
+                <p>Crear códigos para nuevos usuarios</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section user-only">
+        <h3>📅 Actividades y Fiestas</h3>
+        <div class="menu-grid">
+            <div class="card" onclick="irA('ver_actividades')">
+                <h3>Ver Actividades</h3>
+                <p>Apúntate a torneos y eventos</p>
+            </div>
+            <div class="card" onclick="irA('foro')">
+                <h3>Foro del Pueblo</h3>
+                <p>Comenta y chismea</p>
+            </div>
+            <div class="card" onclick="irA('mis_inscripciones')">
+                <h3>Mis Inscripciones</h3>
+                <p>Ver dónde estás apuntado</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
