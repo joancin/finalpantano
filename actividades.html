@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividades - Fiestas</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; }
+        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 80px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        /* Tarjetas de Actividad */
+        .act-card { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 25px; transition: transform 0.2s; }
+        .act-card:hover { transform: translateY(-2px); }
+
+        .act-img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
+        .act-body { padding: 20px; }
+        
+        .act-title { margin: 0; font-size: 1.4rem; color: var(--accent); }
+        .act-meta { display: flex; gap: 15px; font-size: 0.9rem; color: gray; margin: 10px 0; align-items: center; }
+        .badge { background: #eee; color: #333; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        
+        .act-footer { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Botones de acción */
+        .btn-join { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-join:hover { background: #e64a19; }
+        
+        .btn-leave { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; }
+        .btn-leave:hover { background: #ff4444; color: white; }
+
+        .joined-msg { color: green; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+
+        .msg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; z-index: 1000; }
+    </style>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      // --- CONFIGURACIÓN ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+        authDomain: "fiestas-pantano.firebaseapp.com",
+        projectId: "fiestas-pantano",
+        storageBucket: "fiestas-pantano.firebasestorage.app",
+        messagingSenderId: "801380435613",
+        appId: "1:801380435613:web:a842572cf7cee93ac57674",
+        measurementId: "G-EG2MZGBT1B"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+      let currentUser = null;
+      let username = "";
+
+      onAuthStateChanged(auth, async (user) => {
+          if (!user) window.location.href = "index.html";
+          currentUser = user;
+          
+          // Obtener nombre del usuario para el registro
+          const uDoc = await getDoc(doc(db, "usuarios", user.uid));
+          if(uDoc.exists()) username = uDoc.data().username;
+          
+          aplicarTema();
+          cargarActividades();
+      });
+
+      function cargarActividades() {
+          const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
+          
+          onSnapshot(q, (snapshot) => {
+              const container = document.getElementById("activities-container");
+              container.innerHTML = "";
+
+              if (snapshot.empty) {
+                  container.innerHTML = "<p style='text-align:center'>No hay actividades programadas aún.</p>";
+                  return;
+              }
+
+              snapshot.forEach((docSnap) => {
+                  const act = docSnap.data();
+                  const actId = docSnap.id;
+                  const fecha = act.fecha.toDate ? act.fecha.toDate() : new Date(act.fecha);
+                  const fechaStr = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                  
+                  // COMPROBAR SI YA ESTOY APUNTADO
+                  // Buscamos si mi UID está en la lista de participantes (que ahora guardará objetos o IDs)
+                  // Para simplificar, asumiremos que 'participantes' es un array de objetos {uid: '...', nombre: '...'}
+                  // O un array simple de UIDs. Vamos a usar array de objetos para guardar nombre de equipo.
+                  
+                  const participantes = act.participantes || [];
+                  const estoyDentro = participantes.some(p => p.uid === currentUser.uid);
+
+                  // Lógica de imagen por defecto si falla
+                  let imgUrl = act.imagen || "";
+                  if(!imgUrl) {
+                      if(act.genero === 'torneo') imgUrl = 'https://cdn-icons-png.flaticon.com/512/1606/1606141.png';
+                      else imgUrl = 'https://cdn-icons-png.flaticon.com/512/3159/3159066.png';
+                  }
+
+                  // Renderizar tarjeta
+                  const div = document.createElement("div");
+                  div.className = "act-card";
+                  div.innerHTML = `
+                      <img src="${imgUrl}" class="act-img" onerror="this.src='https://placehold.co/600x200?text=Fiesta'">
+                      <div class="act-body">
+                          <h3 class="act-title">${act.titulo}</h3>
+                          <div class="act-meta">
+                              <span>📅 ${fechaStr}</span>
+                              <span class="badge">${act.modalidad}</span>
+                          </div>
+                          
+                          <div class="act-footer">
+                              <div id="status-${actId}">
+                                  ${estoyDentro 
+                                      ? `<span class="joined-msg"><span class="material-symbols-outlined">check_circle</span> Apuntado</span>` 
+                                      : `<span style="color:gray">${participantes.length} inscritos</span>`
+                                  }
+                              </div>
+                              
+                              ${estoyDentro
+                                  ? `<button class="btn-leave" onclick="desapuntarse('${actId}', '${act.titulo}')">Borrarme</button>`
+                                  : `<button class="btn-join" onclick="apuntarse('${actId}', '${act.modalidad}', '${act.titulo}')">¡Apuntarme!</button>`
+                              }
+                          </div>
+                      </div>
+                  `;
+                  container.appendChild(div);
+              });
+          });
+      }
+
+      // --- LÓGICA DE APUNTARSE ---
+      window.apuntarse = async (actId, modalidad, titulo) => {
+          let datosInscripcion = {
+              uid: currentUser.uid,
+              nombre: username,
+              fecha: new Date()
+          };
+
+          // Si es por equipos, pedimos nombre
+          if (modalidad !== 'individual') {
+              const nombreEquipo = prompt(`Para apuntarte a "${titulo}" necesitas un nombre de equipo (o pareja):`);
+              if (!nombreEquipo) return; // Cancelado
+              datosInscripcion.equipo = nombreEquipo;
+          }
+
+          try {
+              const actRef = doc(db, "actividades", actId);
+              await updateDoc(actRef, {
+                  participantes: arrayUnion(datosInscripcion)
+              });
+              mostrarToat("¡Te has apuntado correctamente!");
+          } catch (e) {
+              console.error(e);
+              alert("Error al apuntarse. Inténtalo de nuevo.");
+          }
+      }
+
+      // --- LÓGICA DE DESAPUNTARSE ---
+      window.desapuntarse = async (actId, titulo) => {
+          if(!confirm(`¿Quieres borrarte de "${titulo}"?`)) return;
+
+          try {
+              // Para borrar de un array de objetos en Firestore, necesitamos el objeto EXACTO.
+              // Como eso es difícil, haremos: LEER -> FILTRAR -> GUARDAR.
+              
+              const actRef = doc(db, "actividades", actId);
+              const docSnap = await getDoc(actRef);
+              if (docSnap.exists()) {
+                  const data = docSnap.data();
+                  const listaVieja = data.participantes || [];
+                  
+                  // Filtramos para quitarme a mí
+                  const listaNueva = listaVieja.filter(p => p.uid !== currentUser.uid);
+                  
+                  await updateDoc(actRef, { participantes: listaNueva });
+                  mostrarToat("Te has borrado de la actividad.");
+              }
+          } catch (e) {
+              console.error(e);
+              alert("Error al desapuntarse.");
+          }
+      }
+
+      function mostrarToat(txt) {
+          const t = document.getElementById("toast");
+          t.innerText = txt;
+          t.style.display = "block";
+          setTimeout(() => t.style.display = "none", 3000);
+      }
+
+      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Calendario de Fiestas</h1>
+            <button class="btn-back" onclick="window.location.href='panel.html'">
+                <span class="material-symbols-outlined">arrow_back</span> Volver
+            </button>
+        </div>
+
+        <div id="activities-container">
+            <p>Cargando eventos...</p>
+        </div>
+
+        <div id="toast" class="msg"></div>
+    </div>
+</body>
+</html>
