@@ -163,28 +163,26 @@
           const isDark = document.body.classList.contains('dark-mode');
           localStorage.setItem('theme', isDark ? 'dark' : 'light');
           
-          // Cambiar icono
           const icon = document.getElementById('theme-icon');
           icon.innerText = isDark ? 'light_mode' : 'dark_mode';
       }
 
-      // Cargar tema guardado al iniciar
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme === 'dark') {
           document.body.classList.add('dark-mode');
           document.getElementById('theme-icon').innerText = 'light_mode';
       }
 
-    window.irA = (lugar) => {
-        if (lugar === 'zona_admin') {
-            window.location.href = "admin.html";
-        } else if (lugar === 'zona_festero') {
-            // window.location.href = "gestion.html"; // Esto lo haremos luego
-            alert("Próximamente: Zona de Gestión de Actividades");
-        } else {
-            alert("Sección en construcción: " + lugar);
-        }
-    }
+      // --- NAVEGACIÓN ---
+      window.irA = (lugar) => {
+          if (lugar === 'zona_admin') {
+              window.location.href = "admin.html"; // <--- ESTO ES LO QUE ARREGLA EL PROBLEMA
+          } else if (lugar === 'zona_festero') {
+              alert("Próximamente: Zona de Gestión de Actividades");
+          } else {
+              alert("Sección en construcción: " + lugar);
+          }
+      }
     </script>
 </head>
 <body>
