@@ -21,7 +21,7 @@
       import { getFirestore, collection, query, where, getDocs, setDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      // --- TU CONFIGURACIÓN ---
+      // --- CONFIGURACIÓN ---
       const firebaseConfig = {
         apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
         authDomain: "fiestas-pantano.firebaseapp.com",
@@ -36,14 +36,10 @@
       const db = getFirestore(app);
       const auth = getAuth(app);
 
-      // Si ya está logueado, lo mandamos directo al panel
       onAuthStateChanged(auth, (user) => {
-          if (user) {
-             window.location.href = "panel.html";
-          }
+          if (user) window.location.href = "panel.html";
       });
 
-      // --- FUNCIONES ---
       window.toggleView = () => {
           document.getElementById('login-form').classList.toggle('hidden');
           document.getElementById('register-form').classList.toggle('hidden');
@@ -58,7 +54,6 @@
           try {
               const fakeEmail = user + "@fiestaspueblo.com";
               await signInWithEmailAndPassword(auth, fakeEmail, pass);
-              // La redirección la hace el onAuthStateChanged de arriba
           } catch (error) {
               console.error(error);
               msg.innerText = "Usuario o contraseña incorrectos";
@@ -68,34 +63,59 @@
       window.register = async () => {
         const user = document.getElementById("reg-user").value.trim().toLowerCase();
         const pass = document.getElementById("reg-pass").value;
-        const code = document.getElementById("reg-code").value.trim();
+        const codeInput = document.getElementById("reg-code").value.trim().toUpperCase(); // Convertimos a mayúsculas
         const msg = document.getElementById("msg");
+        const btn = document.getElementById("btn-reg");
 
-        if(!user || !pass || !code) { msg.innerText = "Rellena todo"; return; }
+        if(!user || !pass || !codeInput) { msg.innerText = "Rellena todo"; return; }
+        if(pass.length < 6) { msg.innerText = "Contraseña muy corta (min 6)"; return; }
 
         try {
-            // 1. Verificar código
-            const q = query(collection(db, "invitaciones"), where("codigo", "==", code), where("usado", "==", false));
+            msg.innerText = "Verificando código...";
+            btn.disabled = true;
+
+            // 1. BUSCAR CÓDIGO VÁLIDO
+            // Buscamos código que coincida Y que no esté usado
+            const q = query(collection(db, "invitaciones"), where("codigo", "==", codeInput), where("usado", "==", false));
             const querySnapshot = await getDocs(q);
 
-            if (querySnapshot.empty) throw new Error("Código inválido o usado");
+            if (querySnapshot.empty) {
+                throw new Error("El código no existe o ya ha sido gastado.");
+            }
 
-            let codigoId = "", rol = "usuario";
-            querySnapshot.forEach(d => { codigoId = d.id; rol = d.data().rol; });
+            // Seleccionamos EL PRIMER código válido que encontremos (para evitar problemas si hay duplicados antiguos)
+            const codigoDoc = querySnapshot.docs[0]; 
+            const codigoId = codigoDoc.id;
+            const rol = codigoDoc.data().rol || "usuario";
 
-            // 2. Crear Auth
+            // 2. CREAR USUARIO
+            msg.innerText = "Creando usuario...";
             const fakeEmail = user + "@fiestaspueblo.com";
             const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
             
-            // 3. Crear en DB
-            await setDoc(doc(db, "usuarios", cred.user.uid), { username: user, rol: rol, codigo: code });
+            // 3. GUARDAR DATOS
+            await setDoc(doc(db, "usuarios", cred.user.uid), { 
+                username: user, 
+                rol: rol, 
+                codigo_usado: codeInput 
+            });
             
-            // 4. Quemar código
-            await updateDoc(doc(db, "invitaciones", codigoId), { usado: true, usado_por: user });
+            // 4. ¡¡QUEMAR CÓDIGO!! (Aquí estaba la clave)
+            msg.innerText = "Finalizando...";
+            await updateDoc(doc(db, "invitaciones", codigoId), { 
+                usado: true, 
+                usado_por: user,
+                fecha_uso: new Date()
+            });
 
+            // Si todo va bien, el onAuthStateChanged nos redirigirá
+            
         } catch (e) {
             console.error(e);
-            msg.innerText = "Error: " + e.message;
+            let errorTxt = e.message;
+            if(errorTxt.includes("email-already-in-use")) errorTxt = "El usuario ya existe.";
+            msg.innerText = "Error: " + errorTxt;
+            btn.disabled = false;
         }
       }
     </script>
@@ -115,7 +135,7 @@
             <input type="text" id="reg-user" placeholder="Nuevo Usuario">
             <input type="password" id="reg-pass" placeholder="Contraseña (min 6)">
             <input type="text" id="reg-code" placeholder="Código de Invitación">
-            <button onclick="register()">Crear Cuenta</button>
+            <button id="btn-reg" onclick="register()">Crear Cuenta</button>
             <span class="toggle-link" onclick="toggleView()">¿Ya tienes cuenta? Entra aquí</span>
         </div>
 
