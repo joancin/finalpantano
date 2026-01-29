@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiestas del Pantano - Panel de Control</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
+        .card { background: white; max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        button { padding: 12px 24px; font-size: 16px; cursor: pointer; background: #ff5722; color: white; border: none; border-radius: 5px; transition: background 0.3s; }
+        button:hover { background: #e64a19; }
+        #status { margin-top: 20px; font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      // --- TUS DATOS DE CONEXIÓN ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+        authDomain: "fiestas-pantano.firebaseapp.com",
+        projectId: "fiestas-pantano",
+        storageBucket: "fiestas-pantano.firebasestorage.app",
+        messagingSenderId: "801380435613",
+        appId: "1:801380435613:web:a842572cf7cee93ac57674",
+        measurementId: "G-EG2MZGBT1B"
+      };
+
+      // Inicializar Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+      
+      console.log("Firebase inicializado");
+
+      // Función para probar la conexión
+      window.probarConexion = async () => {
+        const status = document.getElementById("status");
+        status.innerText = "Conectando con el servidor...";
+        status.className = "";
+        
+        try {
+            // Intentamos escribir en la base de datos
+            await addDoc(collection(db, "pruebas_conexion"), {
+                mensaje: "Conexión exitosa desde la web finalpantano",
+                fecha: new Date(),
+                usuario: "Admin de prueba"
+            });
+            
+            status.innerText = "✅ ¡FUNCIONA! Conexión establecida con éxito.";
+            status.className = "success";
+            alert("¡Genial! La base de datos y la web están conectadas.");
+            
+        } catch (e) {
+            console.error(e);
+            status.innerText = "❌ Error: " + e.message;
+            status.className = "error";
+            alert("Error: Mira el texto en rojo para más detalles.");
+        }
+      }
+    </script>
+</head>
+<body>
+    <div class="card">
+        <h1>Fiestas del Pantano</h1>
+        <p>Prueba de sistema</p>
+        <button onclick="window.probarConexion()">PROBAR CONEXIÓN</button>
+        <p id="status"></p>
+    </div>
+</body>
+</html>
