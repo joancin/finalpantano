@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fiestas del Pantano - Panel de Control</title>
+    <title>Registro - Fiestas del Pantano</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
-        .card { background: white; max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { color: #333; }
-        button { padding: 12px 24px; font-size: 16px; cursor: pointer; background: #ff5722; color: white; border: none; border-radius: 5px; transition: background 0.3s; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
+        h2 { color: #333; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #ff5722; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
         button:hover { background: #e64a19; }
-        #status { margin-top: 20px; font-weight: bold; }
-        .success { color: green; }
-        .error { color: red; }
+        .error { color: red; font-size: 14px; margin-top: 10px; display: none; }
+        .success { color: green; font-size: 14px; margin-top: 10px; display: none; }
+        .loading { opacity: 0.5; pointer-events: none; }
     </style>
-    
+
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore, collection, query, where, getDocs, setDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      // --- TUS DATOS DE CONEXIÓN ---
+      // --- TU CONFIGURACIÓN ---
       const firebaseConfig = {
         apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
         authDomain: "fiestas-pantano.firebaseapp.com",
@@ -31,46 +32,108 @@
         measurementId: "G-EG2MZGBT1B"
       };
 
-      // Inicializar Firebase
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
-      
-      console.log("Firebase inicializado");
 
-      // Función para probar la conexión
-      window.probarConexion = async () => {
-        const status = document.getElementById("status");
-        status.innerText = "Conectando con el servidor...";
-        status.className = "";
-        
+      // --- LÓGICA DE REGISTRO ---
+      window.registrarUsuario = async () => {
+        const user = document.getElementById("user").value.trim().toLowerCase(); // Guardamos usuario en minúsculas
+        const pass = document.getElementById("pass").value;
+        const code = document.getElementById("code").value.trim();
+        const msgError = document.getElementById("msgError");
+        const msgSuccess = document.getElementById("msgSuccess");
+        const btn = document.getElementById("btnReg");
+
+        // Limpiar mensajes
+        msgError.style.display = "none";
+        msgSuccess.style.display = "none";
+
+        if(!user || !pass || !code) {
+            msgError.innerText = "Rellena todos los campos";
+            msgError.style.display = "block";
+            return;
+        }
+
+        if(pass.length < 6) {
+            msgError.innerText = "La contraseña debe tener al menos 6 caracteres";
+            msgError.style.display = "block";
+            return;
+        }
+
         try {
-            // Intentamos escribir en la base de datos
-            await addDoc(collection(db, "pruebas_conexion"), {
-                mensaje: "Conexión exitosa desde la web finalpantano",
-                fecha: new Date(),
-                usuario: "Admin de prueba"
+            btn.classList.add("loading"); // Desactivar botón
+            btn.innerText = "Verificando...";
+
+            // 1. Buscar si el código existe y no está usado
+            const q = query(collection(db, "invitaciones"), where("codigo", "==", code), where("usado", "==", false));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                throw new Error("El código de invitación no existe o ya ha sido usado.");
+            }
+
+            // Recuperamos los datos del código (para saber qué rol darte)
+            let codigoDocId = "";
+            let nuevoRol = "usuario"; // por defecto
+            
+            querySnapshot.forEach((doc) => {
+                codigoDocId = doc.id;
+                nuevoRol = doc.data().rol;
             });
+
+            // 2. Crear usuario en Firebase Authentication (Inventamos un email falso para que Firebase funcione)
+            const fakeEmail = user + "@fiestaspueblo.com";
+            const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
+            const uid = userCredential.user.uid;
+
+            // 3. Guardar los datos del usuario en la base de datos
+            await setDoc(doc(db, "usuarios", uid), {
+                username: user,
+                rol: nuevoRol,
+                codigo_registro: code,
+                fecha_registro: new Date()
+            });
+
+            // 4. Marcar el código como USADO para que nadie más lo use
+            await updateDoc(doc(db, "invitaciones", codigoDocId), {
+                usado: true,
+                usado_por: user,
+                fecha_uso: new Date()
+            });
+
+            msgSuccess.innerText = `¡Bienvenido ${user}! Cuenta creada con rol de: ${nuevoRol}`;
+            msgSuccess.style.display = "block";
+            btn.innerText = "¡Registrado!";
             
-            status.innerText = "✅ ¡FUNCIONA! Conexión establecida con éxito.";
-            status.className = "success";
-            alert("¡Genial! La base de datos y la web están conectadas.");
-            
-        } catch (e) {
-            console.error(e);
-            status.innerText = "❌ Error: " + e.message;
-            status.className = "error";
-            alert("Error: Mira el texto en rojo para más detalles.");
+            // Aquí en el futuro redirigiremos a la página principal
+            // window.location.href = "panel.html";
+
+        } catch (error) {
+            console.error(error);
+            let mensaje = error.message;
+            if(mensaje.includes("auth/email-already-in-use")) mensaje = "Ese nombre de usuario ya está cogido.";
+            msgError.innerText = mensaje;
+            msgError.style.display = "block";
+            btn.innerText = "Crear Cuenta";
+            btn.classList.remove("loading");
         }
       }
     </script>
 </head>
 <body>
-    <div class="card">
-        <h1>Fiestas del Pantano</h1>
-        <p>Prueba de sistema</p>
-        <button onclick="window.probarConexion()">PROBAR CONEXIÓN</button>
-        <p id="status"></p>
+    <div class="container">
+        <h2>🎉 Fiestas del Pantano</h2>
+        <p>Introduce tu código de invitación</p>
+        
+        <input type="text" id="user" placeholder="Nombre de usuario (ej: joancin)" autocomplete="off">
+        <input type="password" id="pass" placeholder="Contraseña">
+        <input type="text" id="code" placeholder="Código de activación">
+        
+        <button id="btnReg" onclick="registrarUsuario()">Crear Cuenta</button>
+        
+        <p id="msgError" class="error"></p>
+        <p id="msgSuccess" class="success"></p>
     </div>
 </body>
 </html>
