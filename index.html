@@ -30,19 +30,24 @@
 
         /* LOGIN FLOTANTE */
         .login-section { margin-top: auto; padding-top: 40px; text-align: center; }
-        .btn-login-toggle { background: transparent; border: 1px solid #ccc; padding: 10px 25px; border-radius: 30px; cursor: pointer; color: #555; font-weight: bold; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-login-toggle { background: white; border: 1px solid #ccc; padding: 12px 30px; border-radius: 30px; cursor: pointer; color: #333; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .btn-login-toggle:active { transform: scale(0.95); }
 
         /* MODAL LOGIN / REGISTRO */
-        #login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; position: relative; }
+        #login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         
-        .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #eee; }
-        .tab { flex: 1; padding: 10px; cursor: pointer; color: gray; font-weight: bold; }
-        .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .tab { flex: 1; padding: 10px; cursor: pointer; color: gray; font-weight: bold; transition: color 0.3s; }
+        .tab.active { color: var(--accent); border-bottom: 3px solid var(--accent); margin-bottom: -2px; }
         
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-action { background: var(--accent); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-close { position: absolute; top: 10px; right: 15px; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
+        input { width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 1rem; transition: border 0.3s; }
+        input:focus { border-color: var(--accent); outline: none; }
+        
+        .btn-action { background: var(--accent); color: white; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1rem; transition: background 0.3s; }
+        .btn-action:hover { background: #e64a19; }
+        
+        .btn-close { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
         
         .hidden { display: none; }
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
@@ -51,7 +56,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDocs, query, collection, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDocs, query, collection, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
         
@@ -77,41 +82,84 @@
             }
         }
 
+        // --- LÓGICA DE INICIO DE SESIÓN CON USUARIO ---
         window.login = async () => {
-            const email = document.getElementById("log-email").value;
+            const user = document.getElementById("log-user").value.trim(); // Nombre de usuario
             const pass = document.getElementById("log-pass").value;
-            try { await signInWithEmailAndPassword(auth, email, pass); } 
-            catch (e) { alert("Error: " + e.message); }
+            
+            if(!user || !pass) return alert("Rellena todo");
+
+            // TRUCO: Reconstruimos el email falso
+            const fakeEmail = user.toLowerCase().replace(/\s+/g, '') + "@fiestaspantano.com";
+
+            const btn = document.getElementById("btn-login-action");
+            btn.innerText = "Entrando..."; btn.disabled = true;
+
+            try { 
+                await signInWithEmailAndPassword(auth, fakeEmail, pass); 
+            } catch (e) { 
+                console.error(e);
+                alert("Usuario o contraseña incorrectos");
+                btn.innerText = "Entrar"; btn.disabled = false;
+            }
         }
 
+        // --- LÓGICA DE REGISTRO CON CÓDIGO OBLIGATORIO ---
         window.registro = async () => {
-            const user = document.getElementById("reg-user").value;
-            const email = document.getElementById("reg-email").value;
+            const user = document.getElementById("reg-user").value.trim();
             const pass = document.getElementById("reg-pass").value;
-            const code = document.getElementById("reg-code").value.trim().toUpperCase(); // Código opcional
+            const code = document.getElementById("reg-code").value.trim().toUpperCase();
 
-            if (!user || !email || !pass) return alert("Rellena todo");
+            if (!user || !pass || !code) return alert("¡Todo es obligatorio! Necesitas un código.");
+
+            const btn = document.getElementById("btn-reg-action");
+            btn.innerText = "Verificando..."; btn.disabled = true;
 
             try {
-                // Verificar código si se pone
-                let rol = "usuario";
-                if (code) {
-                    const q = query(collection(db, "invitaciones"), where("codigo", "==", code), where("usado", "==", false));
-                    const snap = await getDocs(q);
-                    if (snap.empty) return alert("Código inválido o usado");
-                    rol = snap.docs[0].data().rol;
-                    // Marcar usado (simplificado)
+                // 1. Verificar si el usuario ya existe (para evitar duplicados feos)
+                const fakeEmail = user.toLowerCase().replace(/\s+/g, '') + "@fiestaspantano.com";
+
+                // 2. Verificar CÓDIGO en la base de datos
+                const q = query(collection(db, "invitaciones"), where("codigo", "==", code), where("usado", "==", false));
+                const snap = await getDocs(q);
+
+                if (snap.empty) {
+                    btn.innerText = "Crear Cuenta"; btn.disabled = false;
+                    return alert("⛔ Código INVÁLIDO o YA USADO.");
                 }
 
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                // 3. Si el código es bueno, sacamos el rol y el ID del código
+                const invitacionDoc = snap.docs[0];
+                const rolAsignado = invitacionDoc.data().rol; // 'usuario', 'festero', etc.
+
+                // 4. Crear usuario en Firebase Auth
+                const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
+
+                // 5. Guardar datos en Firestore
                 await setDoc(doc(db, "usuarios", cred.user.uid), {
                     username: user,
-                    email: email,
-                    rol: rol, // 'usuario', 'festero' o 'admin'
+                    email: fakeEmail, // Guardamos el fake por si acaso
+                    rol: rolAsignado,
+                    codigo_usado: code,
                     fecha_registro: new Date()
                 });
-                alert("¡Cuenta creada!");
-            } catch (e) { alert("Error: " + e.message); }
+
+                // 6. Marcar el código como USADO
+                await updateDoc(doc(db, "invitaciones", invitacionDoc.id), {
+                    usado: true,
+                    usado_por: user,
+                    fecha_uso: new Date()
+                });
+
+                alert("¡Bienvenido a la fiesta! 🎉");
+                // La redirección la hace el onAuthStateChanged automático
+
+            } catch (e) { 
+                console.error(e);
+                if(e.code === 'auth/email-already-in-use') alert("Ese nombre de usuario ya existe. Prueba otro.");
+                else alert("Error: " + e.message);
+                btn.innerText = "Crear Cuenta"; btn.disabled = false;
+            }
         }
     </script>
 </head>
@@ -152,17 +200,19 @@
             </div>
 
             <div id="form-login">
-                <input type="email" id="log-email" placeholder="Correo electrónico">
+                <input type="text" id="log-user" placeholder="Nombre de Usuario">
                 <input type="password" id="log-pass" placeholder="Contraseña">
-                <button class="btn-action" onclick="login()">Entrar</button>
+                <button id="btn-login-action" class="btn-action" onclick="login()">Entrar</button>
             </div>
 
             <div id="form-register" class="hidden">
-                <input type="text" id="reg-user" placeholder="Nombre de Usuario">
-                <input type="email" id="reg-email" placeholder="Correo electrónico">
+                <div style="background:#fff3e0; padding:10px; border-radius:8px; font-size:0.8rem; color:#e65100; margin-bottom:10px;">
+                    ⚠️ Necesitas un código de invitación para crear cuenta.
+                </div>
+                <input type="text" id="reg-user" placeholder="Elige tu Nombre de Usuario">
                 <input type="password" id="reg-pass" placeholder="Contraseña">
-                <input type="text" id="reg-code" placeholder="Código Festero (Opcional)">
-                <button class="btn-action" style="background:#4caf50" onclick="registro()">Registrarse</button>
+                <input type="text" id="reg-code" placeholder="CÓDIGO (Ej: VECINO24)" style="text-transform:uppercase; letter-spacing:1px; font-weight:bold;">
+                <button id="btn-reg-action" class="btn-action" style="background:#4caf50" onclick="registro()">Crear Cuenta</button>
             </div>
         </div>
     </div>
