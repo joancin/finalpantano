@@ -20,16 +20,13 @@
         .tab { padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; opacity: 0.6; }
         .tab.active { background: var(--accent); color: white; opacity: 1; }
 
-        /* Lista de Participantes */
         .list-item { background: var(--card); padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-group { display: flex; gap: 5px; }
         .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         
-        /* Botón Grande de Añadir */
         .btn-add-big { width: 100%; padding: 15px; background: var(--card); border: 2px dashed #ccc; border-radius: 10px; color: gray; font-weight: bold; cursor: pointer; margin-bottom: 20px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-add-big:hover { border-color: var(--accent); color: var(--accent); background: rgba(103, 58, 183, 0.05); }
 
-        /* Bracket Styles */
         .bracket-container { display: flex; overflow-x: auto; padding: 20px 0; gap: 40px; }
         .round { display: flex; flex-direction: column; justify-content: space-around; min-width: 220px; }
         .round-title { text-align: center; font-weight: bold; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; font-size: 0.9rem; }
@@ -45,8 +42,8 @@
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 200; }
         .modal { background: var(--card); padding: 25px; border-radius: 10px; width: 90%; max-width: 400px; color: var(--text); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        .modal h2 { margin-top: 0; color: var(--accent); }
-        .modal input { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; background: var(--bg); color: var(--text); }
+        .modal h2 { margin-top: 0; color: var(--accent); font-size: 1.2rem; }
+        .modal input { width: 100%; padding: 10px; margin: 5px 0 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; background: var(--bg); color: var(--text); }
         .member-row { display: flex; gap: 5px; }
         
         .msg { margin-top: 10px; font-weight: bold; display: none; }
@@ -111,7 +108,6 @@
           document.getElementById('section-'+tabName).classList.remove('hidden');
       }
 
-      // --- PARTICIPANTES ---
       function renderParticipantes() {
           const lista = document.getElementById("lista-participantes");
           lista.innerHTML = "";
@@ -143,40 +139,61 @@
           cargarDatos();
       }
 
-      // --- MODAL AÑADIR MANUALMENTE ---
+      // --- MODAL INTELIGENTE (LIMITADO POR ACTIVIDAD) ---
       window.abrirModalAdd = () => {
           const container = document.getElementById("modal-miembros-list");
           container.innerHTML = "";
           document.getElementById("modal-team-name").value = "";
           
-          // Por defecto ponemos 1 input de miembro
-          addMemberInput();
+          // LÓGICA DE LÍMITES
+          let limite = 1;
+          let etiqueta = "Miembros";
+
+          if(activityData.modalidad === 'parejas') {
+              limite = 2;
+              etiqueta = "Pareja (2 jugadores obligatorios)";
+          } else if(activityData.modalidad === 'grupo') {
+              limite = parseInt(activityData.tamano_equipo) || 4; // Por defecto 4 si falla
+              etiqueta = `Grupo (${limite} jugadores obligatorios)`;
+          } else {
+              // Individual
+              limite = 1;
+              etiqueta = "Jugador";
+          }
+          
+          document.getElementById("label-miembros").innerText = etiqueta;
+
+          // GENERAR CAMPOS AUTOMÁTICAMENTE
+          for(let i=0; i<limite; i++) {
+              const div = document.createElement("div");
+              div.className = "member-row";
+              div.innerHTML = `<input type="text" class="member-input" placeholder="Nombre del Jugador ${i+1}">`;
+              container.appendChild(div);
+          }
           
           document.getElementById("modal-add").style.display = "flex";
       }
 
-      window.cerrarModalAdd = () => {
-          document.getElementById("modal-add").style.display = "none";
-      }
-
-      window.addMemberInput = () => {
-          const container = document.getElementById("modal-miembros-list");
-          const div = document.createElement("div");
-          div.className = "member-row";
-          div.innerHTML = `<input type="text" class="member-input" placeholder="Nombre del jugador">`;
-          container.appendChild(div);
-      }
+      window.cerrarModalAdd = () => { document.getElementById("modal-add").style.display = "none"; }
 
       window.guardarManual = async () => {
           const nombreEquipo = document.getElementById("modal-team-name").value.trim();
           if(!nombreEquipo) { alert("Pon un nombre al equipo/pareja"); return; }
 
-          // Recoger miembros
+          // VALIDACIÓN ESTRICTA: TODOS LOS CAMPOS LLENOS
           const inputs = document.querySelectorAll(".member-input");
           let miembros = [];
+          let algunVacio = false;
+
           inputs.forEach(inp => {
-              if(inp.value.trim()) miembros.push({ nombre: inp.value.trim(), vinculado: false });
+              if(!inp.value.trim()) algunVacio = true;
+              else miembros.push({ nombre: inp.value.trim(), vinculado: false });
           });
+
+          if(algunVacio) {
+              alert(`⚠️ Faltan datos. Esta actividad requiere obligatoriamente ${inputs.length} jugadores.`);
+              return;
+          }
 
           const nuevo = { 
               capitan: "Admin", 
@@ -324,16 +341,13 @@
     <div id="modal-add" class="modal-overlay">
         <div class="modal">
             <h2>Añadir Participante</h2>
-            <label style="font-size: 12px; font-weight: bold;">Nombre del Equipo / Pareja</label>
+            <label style="font-size: 12px; font-weight: bold;">Nombre del Equipo</label>
             <input type="text" id="modal-team-name" placeholder="Ej: Los Primos">
             
-            <label style="font-size: 12px; font-weight: bold;">Miembros</label>
-            <div id="modal-miembros-list"></div>
+            <label id="label-miembros" style="font-size: 12px; font-weight: bold;">Miembros</label>
+            <div id="modal-miembros-list">
+                </div>
             
-            <button onclick="addMemberInput()" style="background:transparent; color:var(--accent); border:none; cursor:pointer; font-size:12px; margin-bottom:15px; display:flex; align-items:center; gap:5px;">
-                <span class="material-symbols-outlined" style="font-size:16px;">add</span> Añadir otro miembro
-            </button>
-
             <button class="action" onclick="guardarManual()">Guardar</button>
             <button class="secondary" onclick="cerrarModalAdd()">Cancelar</button>
         </div>
