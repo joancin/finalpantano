@@ -13,8 +13,6 @@
     
     <style>
         :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; }
-        
-        /* MODO OSCURO EN HTML */
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; transition: background 0.3s; }
@@ -26,8 +24,11 @@
         .role-admin { background: #e91e63; } .role-festero { background: #9c27b0; }
 
         .input-group { text-align: left; margin-top: 20px; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; }
-        .btn-save { background: var(--accent); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; display: none; }
+        .input-group label { font-size: 0.8rem; color: gray; margin-left: 5px; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; margin-top: 5px; }
+        
+        .btn-save { background: var(--accent); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; display: none; transition: background 0.3s; }
+        .btn-save:hover { background: #e64a19; }
 
         .menu-item { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
         .btn-logout { width: 100%; padding: 15px; background: #ffebee; color: #d32f2f; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -36,12 +37,13 @@
         .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.3s; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
         .nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 2px; }
-        .msg { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; }
+        .msg { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; z-index: 2000; }
     </style>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      // IMPORTANTE: Añadidos query, collection, where, getDocs para comprobar duplicados
+      import { getFirestore, doc, getDoc, updateDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
@@ -49,16 +51,20 @@
       const db = getFirestore(app);
       const auth = getAuth(app);
       let currentUser = null;
+      let currentUsername = "";
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
           currentUser = user;
           actualizarIconoTema();
+          
           const uDoc = await getDoc(doc(db, "usuarios", user.uid));
           if(uDoc.exists()) {
               const data = uDoc.data();
+              currentUsername = data.username; // Guardamos el nombre actual
               document.getElementById("user-alias").value = data.username;
               document.getElementById("avatar-initial").innerText = data.username.charAt(0).toUpperCase();
+              
               const rolEl = document.getElementById("user-role");
               rolEl.innerText = data.rol.toUpperCase();
               if(data.rol === 'admin') rolEl.classList.add('role-admin');
@@ -67,19 +73,54 @@
       });
 
       window.detectarCambio = () => { document.getElementById("btn-guardar").style.display = "block"; }
+
+      // --- GUARDAR CON COMPROBACIÓN DE DUPLICADOS ---
       window.guardarCambios = async () => {
-          const alias = document.getElementById("user-alias").value.trim();
-          if(!alias) return alert("Nombre vacío");
+          const nuevoAlias = document.getElementById("user-alias").value.trim();
+          
+          if(!nuevoAlias) return alert("El nombre no puede estar vacío");
+          if(nuevoAlias === currentUsername) return; // No ha cambiado nada
+
+          const btn = document.getElementById("btn-guardar");
+          btn.innerText = "Comprobando..."; btn.disabled = true;
+
           try {
-              await updateDoc(doc(db, "usuarios", currentUser.uid), { username: alias });
-              document.getElementById("avatar-initial").innerText = alias.charAt(0).toUpperCase();
-              const msg = document.getElementById("toast"); msg.style.display="block"; msg.innerText="✅ Guardado"; setTimeout(()=>msg.style.display="none", 3000);
-              document.getElementById("btn-guardar").style.display="none";
-          } catch(e) { alert("Error: " + e.message); }
+              // 1. Preguntar a la base de datos si alguien ya tiene ese nombre
+              const q = query(collection(db, "usuarios"), where("username", "==", nuevoAlias));
+              const querySnapshot = await getDocs(q);
+
+              // 2. Si encontramos a alguien...
+              if (!querySnapshot.empty) {
+                  // Comprobamos que no seamos nosotros mismos (por si acaso)
+                  if (querySnapshot.docs[0].id !== currentUser.uid) {
+                      btn.innerText = "Guardar Cambios"; btn.disabled = false;
+                      return alert("⛔ Ese nombre ya está cogido. Por favor, elige otro.");
+                  }
+              }
+
+              // 3. Si está libre, guardamos
+              await updateDoc(doc(db, "usuarios", currentUser.uid), { username: nuevoAlias });
+              
+              currentUsername = nuevoAlias; // Actualizamos local
+              document.getElementById("avatar-initial").innerText = nuevoAlias.charAt(0).toUpperCase();
+              
+              const msg = document.getElementById("toast"); 
+              msg.style.display="block"; msg.innerText="✅ Perfil actualizado"; 
+              setTimeout(()=>msg.style.display="none", 3000);
+              
+              btn.style.display="none";
+              btn.innerText = "Guardar Cambios"; btn.disabled = false;
+
+          } catch(e) { 
+              console.error(e);
+              alert("Error al guardar: " + e.message);
+              btn.innerText = "Guardar Cambios"; btn.disabled = false;
+          }
       }
+
       window.cambiarTema = () => {
-          document.body.classList.toggle('dark-mode'); // Cambia body por si acaso
-          document.documentElement.classList.toggle('dark-mode'); // Cambia HTML (lo importante)
+          document.body.classList.toggle('dark-mode');
+          document.documentElement.classList.toggle('dark-mode');
           localStorage.setItem('theme', document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light');
           actualizarIconoTema();
       }
@@ -98,9 +139,12 @@
         <div class="profile-card">
             <span id="user-role" class="role-badge">CARGANDO</span>
             <div id="avatar-initial" class="avatar-circle">?</div>
+            
             <div class="input-group">
+                <label>Tu Alias (Nombre público)</label>
                 <input type="text" id="user-alias" oninput="detectarCambio()">
             </div>
+            
             <button id="btn-guardar" class="btn-save" onclick="guardarCambios()">Guardar Cambios</button>
         </div>
 
