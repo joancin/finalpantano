@@ -17,16 +17,16 @@
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; padding-bottom: 90px; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-top: 140px; /* Espacio para header fijo */ }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-top: 140px; }
         
-        /* HEADER FIJO CON BUSCADOR Y FILTROS */
+        /* HEADER FIJO */
         .fixed-header { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg); z-index: 900; padding: 15px 20px 10px 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); box-sizing: border-box; transition: background 0.3s; }
         
         .search-box { position: relative; margin-bottom: 15px; }
         .search-box input { width: 100%; padding: 12px 12px 12px 45px; border-radius: 12px; border: none; background: var(--card); color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-family: inherit; box-sizing: border-box; }
         .search-box .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: gray; }
 
-        /* CHIPS DE FILTRO (SCROLL HORIZONTAL) */
+        /* CHIPS */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .filter-scroll::-webkit-scrollbar { display: none; }
         
@@ -40,9 +40,11 @@
         .act-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
         .card-badge { position: absolute; top: 15px; right: 15px; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: white; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
+        /* COLORES DE ETIQUETAS */
         .tag-deporte { background: #2196f3; }
         .tag-comida { background: #ff9800; }
         .tag-fiesta { background: #9c27b0; }
+        .tag-competicion { background: #fbc02d; color: #333 !important; } /* Color Dorado */
         .tag-otro { background: #607d8b; }
 
         .act-body { padding: 15px; }
@@ -69,7 +71,7 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
@@ -79,7 +81,7 @@
       
       let currentUser = null;
       let myUsername = "";
-      let allActivities = []; // Guardamos todas para filtrar sin recargar
+      let allActivities = [];
       let currentFilter = 'todos';
 
       onAuthStateChanged(auth, async (user) => {
@@ -94,9 +96,7 @@
           const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
           onSnapshot(q, (snapshot) => {
               allActivities = [];
-              snapshot.forEach(doc => {
-                  allActivities.push({ id: doc.id, ...doc.data() });
-              });
+              snapshot.forEach(doc => { allActivities.push({ id: doc.id, ...doc.data() }); });
               renderActivities();
           });
       }
@@ -106,15 +106,10 @@
           const searchVal = document.getElementById("search-input").value.toLowerCase();
           container.innerHTML = "";
 
-          // FILTRADO DOBLE (Chips + Buscador)
           const filtered = allActivities.filter(act => {
               const matchesSearch = act.titulo.toLowerCase().includes(searchVal);
-              // Asumimos que 'genero' es el campo para filtrar (deporte, comida, etc)
-              // Si no tienes ese campo, usa 'modalidad' o crea uno nuevo en Admin.
-              // Por defecto, simularemos categorías básicas si no existen.
               let category = act.genero || 'otro'; 
               const matchesFilter = currentFilter === 'todos' || category === currentFilter;
-              
               return matchesSearch && matchesFilter;
           });
 
@@ -125,12 +120,14 @@
               const inscritos = act.inscritos || [];
               let estoyDentro = inscritos.some(e => e.capitan_uid === currentUser.uid || (e.miembros && e.miembros.some(m => m.uid === currentUser.uid)));
               
-              // Determinar color e imagen
               let badgeColor = 'tag-otro';
-              let imgUrl = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600'; // Default Party
+              let imgUrl = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600';
               
               if(act.genero === 'deporte') { badgeColor = 'tag-deporte'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=600'; }
               if(act.genero === 'comida') { badgeColor = 'tag-comida'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=600'; }
+              if(act.genero === 'fiesta') { badgeColor = 'tag-fiesta'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1514525253440-b39345208668?auto=format&fit=crop&q=80&w=600'; }
+              // NUEVA CATEGORÍA
+              if(act.genero === 'competicion') { badgeColor = 'tag-competicion'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=600'; }
 
               container.innerHTML += `
                   <div class="act-card">
@@ -147,7 +144,8 @@
                               <button class="btn-icon" onclick="window.location.href='chat.html?id=${act.id}'"><span class="material-symbols-outlined">chat</span></button>
                               
                               ${act.genero === 'torneo' && act.bracket ? `<button class="btn-icon" onclick="window.location.href='ver_torneo.html?id=${act.id}'" style="color:#ff9800"><span class="material-symbols-outlined">trophy</span></button>` : ''}
-                              ${act.genero === 'carrera' ? `<button class="btn-icon" onclick="window.location.href='ver_carrera.html?id=${act.id}'" style="color:#4caf50"><span class="material-symbols-outlined">podium</span></button>` : ''}
+                              
+                              ${(act.genero === 'carrera' || act.genero === 'competicion') ? `<button class="btn-icon" onclick="window.location.href='ver_carrera.html?id=${act.id}'" style="color:#4caf50"><span class="material-symbols-outlined">podium</span></button>` : ''}
 
                               ${estoyDentro ? 
                                 `<button class="btn-join" style="background:#e0e0e0; color:#333;" onclick="alert('Ya estás apuntado')">✅ Apuntado</button>` : 
@@ -165,7 +163,6 @@
           renderActivities();
       }
 
-      // --- LOGICA INSCRIPCION (IGUAL QUE ANTES) ---
       let currentActId="", currentModalidad="", currentTeamSize=1;
       window.abrirModal = (id, mod, size) => {
           currentActId = id; currentModalidad = mod; currentTeamSize = size;
@@ -187,7 +184,6 @@
                   if(!name) throw new Error("Falta nombre equipo");
                   data.nombre_equipo = name;
                   const mates = document.querySelectorAll(".mate-input");
-                  // Aquí iría la lógica de buscar compañeros (simplificada para el ejemplo)
                   for(let input of mates) { if(input.value) data.miembros.push({nombre: input.value, vinculado: false}); }
               }
               await updateDoc(doc(db, "actividades", currentActId), { inscritos: arrayUnion(data) });
@@ -207,6 +203,7 @@
         
         <div class="filter-scroll">
             <div id="chip-todos" class="chip active" onclick="setFilter('todos')">Todos</div>
+            <div id="chip-competicion" class="chip" onclick="setFilter('competicion')">🏆 Competi</div>
             <div id="chip-deporte" class="chip" onclick="setFilter('deporte')">⚽ Deportes</div>
             <div id="chip-comida" class="chip" onclick="setFilter('comida')">🥘 Comidas</div>
             <div id="chip-fiesta" class="chip" onclick="setFilter('fiesta')">🎉 Fiesta</div>
@@ -233,7 +230,8 @@
         <a href="panel.html" class="nav-item">
             <span class="material-symbols-outlined">home</span>Inicio
         </a>
-        <a href="#" class="nav-item active"> <span class="material-symbols-outlined">event</span>Fiestas
+        <a href="#" class="nav-item active">
+            <span class="material-symbols-outlined">event</span>Fiestas
         </a>
         <a href="mis_inscripciones.html" class="nav-item">
             <span class="material-symbols-outlined">confirmation_number</span>Tickets
