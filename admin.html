@@ -88,7 +88,7 @@
                   total++;
                   if(u.rol === 'festero' || u.rol === 'admin') festeros++;
                   
-                  // Renderizar usuario
+                  // IMPORTANTE: data-name guarda el nombre en minúsculas para buscar
                   lista.innerHTML += `
                     <div class="user-item" data-name="${u.username.toLowerCase()}">
                         <div class="user-info">
@@ -104,6 +104,9 @@
               
               document.getElementById("stat-total").innerText = total;
               document.getElementById("stat-festeros").innerText = festeros;
+              
+              // Refrescar filtro por si había algo escrito
+              filtrarUsuarios(); 
           });
 
           // 2. CÓDIGOS VIP
@@ -130,19 +133,37 @@
           });
       }
 
+      // --- FUNCIÓN DE BÚSQUEDA CORREGIDA ---
+      window.filtrarUsuarios = () => {
+          const input = document.getElementById("search-user");
+          const filter = input.value.toLowerCase();
+          const items = document.getElementsByClassName("user-item");
+
+          for (let i = 0; i < items.length; i++) {
+              // Solo filtramos los que tengan el atributo data-name (para no afectar a la lista VIP)
+              if (items[i].hasAttribute("data-name")) {
+                  const name = items[i].getAttribute("data-name");
+                  if (name.indexOf(filter) > -1) {
+                      items[i].style.display = "flex";
+                  } else {
+                      items[i].style.display = "none";
+                  }
+              }
+          }
+      }
+
       window.crearVIP = async () => {
           const code = document.getElementById("vip-code").value.trim().toUpperCase();
           const role = document.getElementById("vip-role").value;
           if(code.length < 3) return alert("Código muy corto");
           
           try {
-              // Comprobar duplicado
               const q = query(collection(db, "invitaciones"), where("codigo", "==", code));
               const snap = await getDocs(q);
               if(!snap.empty) return alert("¡Ese código ya existe!");
 
               await addDoc(collection(db, "invitaciones"), {
-                  codigo: code, rol: role, usado: false, fecha_creacion: new Date()
+                  codigo: code, rol: role, usado: false, creado_por: currentUser.uid, fecha_creacion: new Date()
               });
               document.getElementById("vip-code").value = "";
               mostrarNoti("Código Creado", "#e8f5e9", "green");
@@ -157,14 +178,6 @@
       }
 
       window.borrarCodigo = async (id) => { if(confirm("¿Borrar este código?")) await deleteDoc(doc(db, "invitaciones", id)); }
-
-      window.filtrarUsuarios = () => {
-          const texto = document.getElementById("search-user").value.toLowerCase();
-          document.querySelectorAll(".user-item").forEach(item => {
-              const nombre = item.getAttribute("data-name");
-              item.style.display = nombre.includes(texto) ? "flex" : "none";
-          });
-      }
 
       function mostrarNoti(txt, bg, col) {
           const el = document.getElementById("noti");
@@ -214,7 +227,8 @@
             <span class="material-symbols-outlined" style="color:#00b894;">group</span>
             Censo de Usuarios
         </h3>
-        <input type="text" id="search-user" placeholder="🔍 Buscar usuario..." onkeyup="filtrarUsuarios()" style="margin-bottom:15px; background:#f0f2f5;">
+        
+        <input type="text" id="search-user" placeholder="🔍 Buscar usuario por nombre..." oninput="filtrarUsuarios()" style="margin-bottom:15px; background:#f0f2f5;">
         
         <div id="user-list" class="scroll-box">
             Cargando lista...
