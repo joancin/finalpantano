@@ -3,252 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Inscripciones</title>
+    <title>Mis Eventos</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --past: #757575; }
-        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --past: #b0b3b8; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; }
+        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 80px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; }
         .container { max-width: 800px; margin: 0 auto; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-
-        /* FILTROS (Pestañas tipo Pil) */
-        .filter-container { display: flex; gap: 10px; margin-bottom: 25px; background: var(--card); padding: 5px; border-radius: 50px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); width: fit-content; margin-left: auto; margin-right: auto; }
-        .filter-btn { border: none; background: transparent; padding: 10px 20px; border-radius: 40px; cursor: pointer; color: var(--text); font-weight: bold; transition: all 0.3s; }
-        .filter-btn.active { background: var(--accent); color: white; box-shadow: 0 2px 5px rgba(255, 87, 34, 0.4); }
-
-        /* TARJETAS */
-        .my-card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid var(--accent); display: flex; flex-direction: column; gap: 10px; transition: transform 0.2s; }
-        .my-card:hover { transform: translateY(-3px); }
+        .ticket-card { background: var(--card); border-left: 5px solid var(--accent); padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .ticket-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .ticket-date { color: gray; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        .ticket-role { position: absolute; top: 15px; right: 15px; background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: #333; }
         
-        /* Estilo para eventos pasados */
-        .my-card.past { border-left-color: var(--past); opacity: 0.8; }
-        .my-card.past .act-title { color: var(--past); text-decoration: line-through; }
-
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .act-title { margin: 0; font-size: 1.2rem; color: var(--accent); }
-        .act-date { font-size: 0.9rem; color: gray; display: flex; align-items: center; gap: 5px; margin-top: 5px; }
-        
-        .team-info { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-top: 5px; }
-        .team-name { font-weight: bold; color: var(--text); }
-        .team-members { font-size: 0.8rem; color: gray; margin-top: 2px; }
-
-        .card-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
-        .btn-action { padding: 8px 15px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-        
-        .btn-view { background: #2196f3; color: white; }
-        .btn-leave { background: #ffebee; color: #d32f2f; }
-        .btn-leave:hover { background: #ffcdd2; }
-
-        .tag-status { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
-        .tag-active { background: #e8f5e9; color: #2e7d32; }
-        .tag-ended { background: #eceff1; color: #546e7a; }
-
-        .hidden { display: none; }
-        .empty-msg { text-align: center; color: gray; margin-top: 40px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.3s; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+        .nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 2px; }
     </style>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      // --- CONFIGURACIÓN ---
-      const firebaseConfig = {
-        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
-        authDomain: "fiestas-pantano.firebaseapp.com",
-        projectId: "fiestas-pantano",
-        storageBucket: "fiestas-pantano.firebasestorage.app",
-        messagingSenderId: "801380435613",
-        appId: "1:801380435613:web:a842572cf7cee93ac57674",
-        measurementId: "G-EG2MZGBT1B"
-      };
-
+      const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
-      let currentUser = null;
 
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
-          currentUser = user;
-          aplicarTema();
-          cargarMisInscripciones();
-      });
-
-      // --- CARGAR DATOS ---
-      function cargarMisInscripciones() {
-          const q = query(collection(db, "actividades"), orderBy("fecha", "desc")); // Ordenar por fecha (más reciente primero)
+          if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
           
+          const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
           onSnapshot(q, (snapshot) => {
-              const listActive = document.getElementById("list-active");
-              const listPast = document.getElementById("list-past");
-              
-              listActive.innerHTML = "";
-              listPast.innerHTML = "";
-              
-              let countActive = 0;
-              let countPast = 0;
-              const hoy = new Date();
+              const lista = document.getElementById("my-tickets");
+              lista.innerHTML = "";
+              let count = 0;
 
               snapshot.forEach((docSnap) => {
                   const act = docSnap.data();
-                  const actId = docSnap.id;
-                  const fechaAct = act.fecha.toDate ? act.fecha.toDate() : new Date(act.fecha);
-                  
-                  // 1. BUSCAR SI ESTOY INSCRITO
-                  // La estructura es: inscritos = [ { capitan_uid: "...", miembros: [...] }, ... ]
                   const inscritos = act.inscritos || [];
-                  let miEquipo = null;
+                  let miRol = null;
 
-                  // Buscamos mi equipo
                   inscritos.forEach(equipo => {
-                      if (equipo.capitan_uid === currentUser.uid) miEquipo = equipo;
-                      if (equipo.miembros && equipo.miembros.some(m => m.uid === currentUser.uid)) miEquipo = equipo;
+                      if (equipo.capitan_uid === user.uid) miRol = "Capitán";
+                      else if (equipo.miembros && equipo.miembros.some(m => m.uid === user.uid)) miRol = "Miembro";
                   });
 
-                  // Si no estoy en esta actividad, pasamos a la siguiente
-                  if (!miEquipo) return;
-
-                  // 2. DETERMINAR SI ES PASADA O FUTURA
-                  const esPasada = fechaAct < hoy;
-                  
-                  // 3. RENDERIZAR TARJETA
-                  const fechaLegible = fechaAct.toLocaleDateString() + " " + fechaAct.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                  const miembrosNombres = miEquipo.miembros && miEquipo.miembros.length > 0 
-                      ? miEquipo.miembros.map(m => m.nombre).join(", ") 
-                      : "Sin acompañantes";
-                  
-                  const nombreEquipo = miEquipo.nombre_equipo ? `Equipo: ${miEquipo.nombre_equipo}` : (miEquipo.capitan === currentUser.displayName ? "Inscripción Individual" : `Capitán: ${miEquipo.capitan}`);
-
-                  const html = `
-                    <div class="my-card ${esPasada ? 'past' : ''}">
-                        <div class="card-header">
-                            <div>
-                                <h3 class="act-title">${act.titulo}</h3>
-                                <div class="act-date">
-                                    <span class="material-symbols-outlined" style="font-size:16px">calendar_today</span>
-                                    ${fechaLegible}
-                                </div>
-                            </div>
-                            <span class="tag-status ${esPasada ? 'tag-ended' : 'tag-active'}">
-                                ${esPasada ? 'Finalizado' : 'Próximo'}
-                            </span>
-                        </div>
-
-                        <div class="team-info">
-                            <div class="team-name">${nombreEquipo}</div>
-                            <div class="team-members">👥 ${miembrosNombres}</div>
-                        </div>
-
-                        <div class="card-actions">
-                             ${act.bracket ? 
-                                `<button class="btn-action btn-view" style="background:#ff9800" onclick="window.location.href='ver_torneo.html?id=${actId}'">
-                                    <span class="material-symbols-outlined">emoji_events</span> Cuadro
-                                </button>` : ''
-                            }
-                            
-                            ${!esPasada ? 
-                                `<button class="btn-action btn-leave" onclick="borrarse('${actId}', '${act.titulo}')">
-                                    <span class="material-symbols-outlined">cancel</span> Borrarme
-                                </button>` : ''
-                            }
-                        </div>
-                    </div>
-                  `;
-
-                  if (esPasada) {
-                      listPast.innerHTML += html;
-                      countPast++;
-                  } else {
-                      listActive.innerHTML += html;
-                      countActive++;
+                  if (miRol) {
+                      count++;
+                      const fecha = act.fecha.toDate ? act.fecha.toDate().toLocaleString() : new Date(act.fecha).toLocaleString();
+                      lista.innerHTML += `
+                        <div class="ticket-card">
+                            <div class="ticket-title">${act.titulo}</div>
+                            <div class="ticket-date"><span class="material-symbols-outlined" style="font-size:16px">event</span> ${fecha}</div>
+                            <div class="ticket-role">${miRol}</div>
+                        </div>`;
                   }
               });
-
-              // Mensajes si no hay nada
-              if(countActive === 0) listActive.innerHTML = `<div class="empty-msg"><span class="material-symbols-outlined" style="font-size:40px">event_busy</span><br>No tienes eventos próximos.</div>`;
-              if(countPast === 0) listPast.innerHTML = `<div class="empty-msg">No hay eventos finalizados.</div>`;
+              if(count === 0) lista.innerHTML = "<p style='text-align:center; margin-top:50px; color:gray;'>No estás apuntado a nada aún.</p>";
           });
-      }
-
-      // --- FILTROS VISUALES ---
-      window.filtrar = (tipo) => {
-          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-          document.getElementById('btn-'+tipo).classList.add('active');
-
-          if(tipo === 'proximos') {
-              document.getElementById('list-active').classList.remove('hidden');
-              document.getElementById('list-past').classList.add('hidden');
-          } else {
-              document.getElementById('list-active').classList.add('hidden');
-              document.getElementById('list-past').classList.remove('hidden');
-          }
-      }
-
-      // --- BORRARSE DE LA ACTIVIDAD ---
-      window.borrarse = async (actId, titulo) => {
-          if(!confirm(`¿Seguro que quieres borrarte de "${titulo}"? Perderás tu plaza.`)) return;
-
-          try {
-              // Necesitamos encontrar el objeto exacto en el array para borrarlo.
-              // Como Firestore arrayRemove requiere el objeto EXACTO, primero lo leemos.
-              const docRef = doc(db, "actividades", actId);
-              const docSnap = await getDoc(docRef);
-              
-              if(docSnap.exists()) {
-                  const data = docSnap.data();
-                  const inscritos = data.inscritos || [];
-                  
-                  // Buscamos el objeto donde soy capitán o miembro
-                  const miEquipoObj = inscritos.find(equipo => 
-                      equipo.capitan_uid === currentUser.uid || 
-                      (equipo.miembros && equipo.miembros.some(m => m.uid === currentUser.uid))
-                  );
-
-                  if(miEquipoObj) {
-                      await updateDoc(docRef, {
-                          inscritos: arrayRemove(miEquipoObj)
-                      });
-                      alert("Te has borrado correctamente.");
-                  } else {
-                      alert("No se encontró tu inscripción.");
-                  }
-              }
-          } catch (e) {
-              console.error(e);
-              alert("Error al borrarte: " + e.message);
-          }
-      }
-
-      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+      });
     </script>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Mis Inscripciones</h1>
-            <button class="btn-back" onclick="window.location.href='panel.html'">
-                <span class="material-symbols-outlined">arrow_back</span> Volver
-            </button>
-        </div>
-
-        <div class="filter-container">
-            <button id="btn-proximos" class="filter-btn active" onclick="filtrar('proximos')">Próximos</button>
-            <button id="btn-historial" class="filter-btn" onclick="filtrar('historial')">Historial</button>
-        </div>
-
-        <div id="list-active">
-            <p style="text-align:center">Cargando tus eventos...</p>
-        </div>
-
-        <div id="list-past" class="hidden">
-            </div>
-
+        <h1>🎟️ Mis Inscripciones</h1>
+        <div id="my-tickets">Cargando...</div>
     </div>
+
+    <nav class="bottom-nav">
+        <a href="panel.html" class="nav-item">
+            <span class="material-symbols-outlined">home</span>Inicio
+        </a>
+        <a href="actividades.html" class="nav-item">
+            <span class="material-symbols-outlined">event</span>Fiestas
+        </a>
+        <a href="#" class="nav-item active"> <span class="material-symbols-outlined">confirmation_number</span>Tickets
+        </a>
+        <a href="perfil.html" class="nav-item">
+            <span class="material-symbols-outlined">person</span>Perfil
+        </a>
+    </nav>
 </body>
 </html>
