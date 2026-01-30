@@ -3,39 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Los Festeros</title>
+    <title>Los Festeros 2025</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #f8f9fa; color: #333; margin: 0; padding: 20px; }
+        :root { --primary: #2d3436; --accent: #0984e3; --gold: #fdcb6e; --card-bg: rgba(255, 255, 255, 0.95); }
         
-        .header { text-align: center; margin-bottom: 30px; }
-        h1 { font-family: 'Anton', sans-serif; letter-spacing: 2px; font-size: 2.5rem; color: #333; margin: 0; text-transform: uppercase; }
-        
-        .grid-festeros { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; max-width: 800px; margin: 0 auto; }
-        
-        /* DISEÑO TIPO DORSAL/TICKET */
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; border: 2px solid #333; display: flex; flex-direction: column; }
-        
-        .card-num { background: #333; color: white; padding: 5px 10px; font-family: 'Anton', sans-serif; font-size: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-        .card-body { padding: 15px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-        
-        .name { font-weight: 800; font-size: 1.1rem; line-height: 1.2; text-transform: uppercase; }
-        .role { margin-top: 5px; font-size: 0.75rem; background: #ffeaa7; padding: 3px 8px; border-radius: 4px; display: inline-block; font-weight: bold; align-self: center; }
-        
-        /* Colores alternos para diversión */
-        .card:nth-child(odd) .card-num { background: #ff7675; }
-        .card:nth-child(even) .card-num { background: #74b9ff; }
-        .card:nth-child(3n) .card-num { background: #55efc4; color: #333; }
-        .card:nth-child(4n) .card-num { background: #a29bfe; color: white; }
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #74b9ff, #a29bfe); 
+            min-height: 100vh;
+            color: var(--primary);
+        }
 
-        /* Colaboradores */
-        .separator { text-align: center; margin: 40px 0 20px; font-weight: bold; color: gray; letter-spacing: 2px; }
-        .collab .card-num { background: #dfe6e9 !important; color: #636e72 !important; }
+        .btn-back { position: fixed; top: 20px; left: 20px; background: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .btn-back:active { transform: scale(0.9); }
 
-        .btn-back { position: fixed; top: 15px; left: 15px; background: white; border: 2px solid #333; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0 #333; z-index: 100; }
-        .btn-back:active { transform: translate(2px, 2px); box-shadow: none; }
+        .header { text-align: center; margin: 40px 0 50px; color: white; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        h1 { font-weight: 900; font-size: 3rem; margin: 0; letter-spacing: -1px; text-transform: uppercase; }
+        p { font-size: 1.1rem; opacity: 0.9; margin-top: 5px; font-weight: 400; }
+
+        /* GRID RESPONSIVO */
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+            gap: 20px; 
+            max-width: 1000px; 
+            margin: 0 auto 60px; 
+        }
+
+        /* TARJETA PRO */
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            overflow: hidden; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: fadeInUp 0.5s backwards;
+        }
+        
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+
+        .card-header { 
+            background: var(--primary); 
+            color: white; 
+            padding: 10px; 
+            font-size: 1.2rem; 
+            font-weight: 900; 
+            text-align: right; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        
+        .card-icon { opacity: 0.5; font-size: 1.2rem; }
+
+        .card-body { padding: 20px 15px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .name { font-weight: 700; font-size: 1.1rem; line-height: 1.3; text-transform: uppercase; color: #2d3436; }
+        .role { margin-top: 8px; font-size: 0.75rem; background: #dfe6e9; padding: 4px 10px; border-radius: 20px; display: inline-block; font-weight: 600; color: #636e72; }
+
+        /* ESTILOS ESPECIALES */
+        .card:nth-child(1) .card-header { background: #e17055; } /* Presi */
+        .card.collab .card-header { background: #00b894; } /* Colaboradores */
+
+        .section-divider { 
+            text-align: center; margin: 60px 0 30px; 
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+        }
+        .section-label { 
+            background: white; color: var(--primary); 
+            padding: 8px 25px; border-radius: 50px; 
+            font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsivo móvil extremo */
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            .grid-container { gap: 15px; grid-template-columns: repeat(2, 1fr); }
+            .card-body { padding: 15px 10px; }
+            .name { font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -45,53 +104,66 @@
     </button>
 
     <div class="header">
-        <h1>Festeros 2025</h1>
-        <p>Jóvenes pero responsables 😎</p>
+        <h1>Festeros<br>2025</h1>
+        <p>El equipo oficial</p>
     </div>
 
-    <div class="grid-festeros">
-        <div class="card">
-            <div class="card-num"><span>001</span></div>
-            <div class="card-body">
-                <div class="name">Rocio<br>Gil</div>
-                <div class="role">Presidenta</div>
-            </div>
+    <div id="lista-festeros" class="grid-container">
         </div>
 
-        <div class="card">
-            <div class="card-num"><span>002</span></div>
-            <div class="card-body">
-                <div class="name">Mario<br>Izquierdo</div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="card-num"><span>003</span></div>
-            <div class="card-body">
-                <div class="name">Idaira<br>Lloira</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-num"><span>004</span></div>
-            <div class="card-body">
-                <div class="name">Joan<br>Chirivella</div>
-            </div>
-        </div>
-        
-        </div>
-
-    <div class="separator">COLABORADORES</div>
-
-    <div class="grid-festeros">
-        <div class="card collab">
-            <div class="card-num"><span>C01</span></div>
-            <div class="card-body">
-                <div class="name">Celia<br>Sastriques</div>
-                <div class="role" style="background:#eee">Colab</div>
-            </div>
-        </div>
+    <div class="section-divider">
+        <div class="section-label">Colaboradores</div>
     </div>
 
+    <div id="lista-colaboradores" class="grid-container">
+        </div>
+
+    <script>
+        // --- LISTA DE FESTEROS ---
+        const nombres = [
+          "Rocio Gil","Mario Izquierdo","Idaira Lloira","Joan Chirivella",
+          "Paula Mata","Hugo Lopez","Isabel Lopez","Enrique Gil",
+          "Olga Moncholi","Dani Moncayo","Neus Adsuara","Paula Martínez",
+          "Miguel Santamaria","Carla Muñoz","Rebeca Muñoz","Nayara Muñoz",
+          "Alberto Lopez","Patri Lopez","Joan Ramirez","Enric Juan"
+        ];
+
+        // --- LISTA DE COLABORADORES ---
+        const colaboradores = [
+          "Celia Sastriques",
+          "Nicolas Santamaría"
+        ];
+
+        const containerFesteros = document.getElementById("lista-festeros");
+        const containerCollab = document.getElementById("lista-colaboradores");
+
+        // Función para pintar tarjetas
+        function renderCards(lista, container, esColaborador) {
+            lista.forEach((nombre, index) => {
+                const num = (index + 1).toString().padStart(3, '0'); // 001, 002...
+                const rol = (index === 0 && !esColaborador) ? "Presidenta" : (esColaborador ? "Colaborador/a" : "Festero/a");
+                const delay = index * 50; // Retraso para animación en cascada
+
+                const card = document.createElement("div");
+                card.className = esColaborador ? "card collab" : "card";
+                card.style.animationDelay = `${delay}ms`;
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="material-symbols-outlined card-icon">confirmation_number</span>
+                        <span>${esColaborador ? 'C' + (index+1) : num}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="name">${nombre}</div>
+                        <div class="role">${rol}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        renderCards(nombres, containerFesteros, false);
+        renderCards(colaboradores, containerCollab, true);
+    </script>
 </body>
 </html>
