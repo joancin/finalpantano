@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; --success: #4caf50; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; --success: #4caf50; --danger: #d32f2f; }
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
@@ -27,23 +27,46 @@
 
         .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 
-        .ticket { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; border: 1px solid var(--border); transition: transform 0.2s; }
+        .ticket { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer; }
         .ticket:active { transform: scale(0.98); }
         .ticket.past { opacity: 0.6; filter: grayscale(1); }
         
         .ticket-head { background: var(--accent); padding: 10px; height: 40px; position: relative; display: flex; justify-content: flex-end; }
         .ticket.past .ticket-head { background: gray; }
         
-        .btn-edit { background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        /* Botón Editar Equipo (Flotante en tarjeta) */
+        .btn-edit { background: rgba(255,255,255,0.3); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background 0.2s; }
+        .btn-edit:hover { background: rgba(255,255,255,0.5); }
 
         .ticket-body { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding-top: 10px; }
         .t-title { font-size: 0.95rem; margin: 0; margin-bottom: 5px; line-height: 1.2; font-weight: 800; }
         .t-date { font-size: 0.8rem; color: gray; display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
         .t-badge { display: inline-block; padding: 3px 8px; background: rgba(0,0,0,0.05); border-radius: 10px; font-size: 0.7rem; font-weight: bold; color: var(--text); border: 1px solid var(--border); width: fit-content; }
 
-        /* MODAL EDICIÓN */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
-        .modal { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; color: var(--text); }
+        /* MODAL DETALLES (ESTILO IDENTICO A ACTIVIDADES) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: flex-end; z-index: 2000; backdrop-filter: blur(3px); }
+        .modal { background: var(--card); padding: 25px; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px; color: var(--text); max-height: 90vh; overflow-y: auto; position: relative; animation: slideUp 0.3s; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
+        .detail-title { font-size: 1.5rem; margin: 0 0 10px 0; line-height: 1.2; }
+        .detail-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: gray; }
+        .detail-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .detail-header { font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
+
+        .participants-list { background: var(--bg); border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; }
+        .p-group { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .p-group:last-child { border: none; margin: 0; padding: 0; }
+        .p-cap { font-weight: bold; font-size: 0.9rem; color: var(--text); }
+        .p-members { font-size: 0.85rem; color: gray; margin-left: 10px; }
+
+        .btn-close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.1); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; }
+        
+        .btn-mini { padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-full { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; }
+        .btn-leave-lg { background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
+
+        /* INPUTS EDICIÓN */
         .modal input { width: 100%; padding: 12px; margin-bottom: 8px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; }
         .mate-found { border-color: var(--success) !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234caf50' width='18px' height='18px'%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
 
@@ -81,25 +104,21 @@
                   let miRol = null;
                   let miEquipo = null;
 
-                  // 1. Buscamos por UID (Vinculación exacta)
+                  // 1. Buscamos vinculación
                   const soyCapitan = inscritos.find(e => e.capitan_uid === user.uid);
                   const soyMiembroUID = inscritos.find(e => e.miembros && e.miembros.some(m => m.uid === user.uid));
                   
-                  if (soyCapitan) {
-                      miRol = "Capitán";
-                      miEquipo = soyCapitan;
-                  } else if (soyMiembroUID) {
-                      miRol = "Miembro";
-                      miEquipo = soyMiembroUID;
-                  } 
+                  if (soyCapitan) { miRol = "Capitán"; miEquipo = soyCapitan; } 
+                  else if (soyMiembroUID) { miRol = "Miembro"; miEquipo = soyMiembroUID; } 
 
                   if (miEquipo) {
                       allTickets.push({
                           id: docSnap.id,
+                          data: act, // Guardamos TODO el evento para mostrar detalles
                           titulo: act.titulo,
                           fecha: fechaEvento,
                           rol: miRol,
-                          equipo: miEquipo, // Guardamos objeto entero para editar
+                          equipo: miEquipo,
                           esPasado: fechaEvento < new Date()
                       });
                   }
@@ -123,10 +142,14 @@
               const fechaStr = t.fecha.toLocaleString([], {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
               const puedeEditar = t.rol === "Capitán" && !t.esPasado && t.equipo.miembros && t.equipo.miembros.length > 0;
 
+              // IMPORTANTE: onclick en el padre, y stopPropagation en el hijo (editar)
               container.innerHTML += `
-                <div class="ticket ${t.esPasado ? 'past' : ''}">
+                <div class="ticket ${t.esPasado ? 'past' : ''}" onclick="verDetalles('${t.id}')">
                     <div class="ticket-head">
-                        ${puedeEditar ? `<button class="btn-edit" onclick="abrirEdicion('${t.id}')"><span class="material-symbols-outlined" style="font-size:18px">edit</span></button>` : ''}
+                        ${puedeEditar ? 
+                            `<button class="btn-edit" onclick="event.stopPropagation(); abrirEdicion('${t.id}')">
+                                <span class="material-symbols-outlined" style="font-size:18px">edit</span>
+                             </button>` : ''}
                     </div>
                     <div class="ticket-body">
                         <div>
@@ -143,20 +166,88 @@
           });
       }
 
-      // --- LÓGICA DE EDICIÓN ---
-      let editActId = "";
-      let oldTeamData = null;
+      // --- MOSTRAR DETALLES COMPLETOS (NUEVO) ---
+      window.verDetalles = (ticketId) => {
+          const ticket = allTickets.find(t => t.id === ticketId);
+          if(!ticket) return;
+          const act = ticket.data; // Datos completos del evento
 
-      window.abrirEdicion = async (actId) => {
+          const modal = document.getElementById("modal-detalles");
+          const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString([], {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
+
+          // Generar lista de participantes (TODOS)
+          let participantsHTML = "";
+          const inscritos = act.inscritos || [];
+          if(inscritos.length === 0) participantsHTML = "<p>Nadie apuntado</p>";
+          else {
+              inscritos.forEach(equipo => {
+                  let membersNames = equipo.miembros ? equipo.miembros.map(m => m.nombre).join(", ") : "";
+                  participantsHTML += `
+                    <div class="p-group">
+                        <div class="p-cap">⭐ ${equipo.nombre_equipo} (Capitán)</div>
+                        ${membersNames ? `<div class="p-members">Compañeros: ${membersNames}</div>` : ''}
+                    </div>`;
+              });
+          }
+
+          document.getElementById("d-img").src = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
+          document.getElementById("d-title").innerText = act.titulo;
+          document.getElementById("d-date").innerHTML = `<span class="material-symbols-outlined">schedule</span> ${fechaStr}`;
+          document.getElementById("d-place").innerHTML = `<span class="material-symbols-outlined">location_on</span> ${act.lugar || 'Ubicación por definir'}`;
+          document.getElementById("d-list").innerHTML = participantsHTML;
+
+          // Botones de acción
+          const btnArea = document.getElementById("d-actions");
+          btnArea.innerHTML = `
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <button class="btn-mini" style="background:#e0f7fa; color:#006064; flex:1; justify-content:center;" onclick="window.location.href='chat.html?id=${ticket.id}'">💬 Chat</button>
+                ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-mini" style="background:#fff8e1; color:#ff6f00; flex:1; justify-content:center;" onclick="window.location.href='ver_carrera.html?id=${ticket.id}'">📊 Podio</button>` : ''}
+                ${act.genero === 'torneo' ? `<button class="btn-mini" style="background:#fce4ec; color:#880e4f; flex:1; justify-content:center;" onclick="window.location.href='ver_torneo.html?id=${ticket.id}'">🏆 Cuadro</button>` : ''}
+            </div>
+            ${!ticket.esPasado ? `<button class="btn-full btn-leave-lg" onclick="salirDeActividad('${ticket.id}', '${ticket.rol}')">🗑️ Desapuntarse</button>` : ''}
+          `;
+
+          modal.style.display = "flex";
+      }
+
+      window.cerrarDetalles = () => document.getElementById("modal-detalles").style.display = "none";
+
+      // --- SALIR DE ACTIVIDAD ---
+      window.salirDeActividad = async (actId, miRol) => {
+          if(!confirm("¿Seguro que quieres borrarte? Si eres capitán, se borrará todo el equipo.")) return;
+          try {
+              const actRef = doc(db, "actividades", actId);
+              const snap = await getDoc(actRef);
+              const data = snap.data();
+              let inscritos = data.inscritos;
+              let nuevosInscritos = [];
+
+              if (miRol === 'Capitán') {
+                  nuevosInscritos = inscritos.filter(e => e.capitan_uid !== currentUser.uid);
+              } else {
+                  nuevosInscritos = inscritos.map(equipo => {
+                      if (equipo.miembros && equipo.miembros.some(m => m.uid === currentUser.uid)) {
+                          equipo.miembros = equipo.miembros.filter(m => m.uid !== currentUser.uid);
+                      }
+                      return equipo;
+                  });
+              }
+              await updateDoc(actRef, { inscritos: nuevosInscritos });
+              alert("🗑️ Te has dado de baja.");
+              cerrarDetalles();
+          } catch(e) { alert("Error: " + e.message); }
+      }
+
+      // --- EDICIÓN DE EQUIPO (Mismo que antes) ---
+      let editActId = "";
+      window.abrirEdicion = (actId) => {
           editActId = actId;
           const ticket = allTickets.find(t => t.id === actId);
-          oldTeamData = ticket.equipo; // Guardamos datos antiguos para borrarlos
-          
           const modal = document.getElementById("modal-edit");
           const inputsDiv = document.getElementById("edit-inputs");
           inputsDiv.innerHTML = "";
           
-          oldTeamData.miembros.forEach((m, idx) => {
+          ticket.equipo.miembros.forEach((m, idx) => {
              inputsDiv.innerHTML += `
                 <input type="text" class="mate-input" 
                        value="${m.nombre}" 
@@ -164,14 +255,7 @@
                        placeholder="Compañero ${idx+1}" 
                        onkeyup="verificarUsuario(this)">`;
           });
-          
-          // Re-verificar visualmente los que ya tienen UID
-          setTimeout(() => {
-              document.querySelectorAll('.mate-input').forEach(inp => {
-                  if(inp.getAttribute('data-uid')) inp.classList.add('mate-found');
-              });
-          }, 100);
-
+          setTimeout(() => { document.querySelectorAll('.mate-input').forEach(inp => { if(inp.getAttribute('data-uid')) inp.classList.add('mate-found'); }); }, 100);
           modal.style.display = "flex";
       }
 
@@ -180,52 +264,27 @@
           if(val.length < 2) { input.classList.remove('mate-found'); input.removeAttribute('data-uid'); return; }
           const q = query(collection(db, "usuarios"), where("username", "==", val));
           const snap = await getDocs(q);
-          if(!snap.empty) {
-              input.classList.add('mate-found');
-              input.setAttribute('data-uid', snap.docs[0].id);
-          } else {
-              input.classList.remove('mate-found');
-              input.removeAttribute('data-uid');
-          }
+          if(!snap.empty) { input.classList.add('mate-found'); input.setAttribute('data-uid', snap.docs[0].id); } 
+          else { input.classList.remove('mate-found'); input.removeAttribute('data-uid'); }
       }
 
       window.guardarEdicion = async () => {
-          if(!confirm("¿Guardar cambios en el equipo?")) return;
+          if(!confirm("¿Guardar cambios?")) return;
           const btn = document.getElementById("btn-save-edit"); btn.innerText="..."; btn.disabled=true;
-          
           try {
-              // 1. Descargar documento actual
               const actRef = doc(db, "actividades", editActId);
               const actSnap = await getDoc(actRef);
-              const actData = actSnap.data();
-              let inscritos = actData.inscritos;
-
-              // 2. Crear nueva data
               const newMembers = [];
               document.querySelectorAll(".mate-input").forEach(inp => {
-                  if(inp.value.trim()) {
-                      newMembers.push({
-                          nombre: inp.value.trim(),
-                          uid: inp.getAttribute('data-uid') || null,
-                          vinculado: !!inp.getAttribute('data-uid')
-                      });
-                  }
+                  if(inp.value.trim()) newMembers.push({ nombre: inp.value.trim(), uid: inp.getAttribute('data-uid') || null, vinculado: !!inp.getAttribute('data-uid') });
               });
-
-              // 3. Modificar array localmente (reemplazar mi equipo)
-              const newInscritos = inscritos.map(insc => {
-                  if(insc.capitan_uid === currentUser.uid) {
-                      return { ...insc, miembros: newMembers };
-                  }
+              const newInscritos = actSnap.data().inscritos.map(insc => {
+                  if(insc.capitan_uid === currentUser.uid) return { ...insc, miembros: newMembers };
                   return insc;
               });
-
-              // 4. Subir a Firestore
               await updateDoc(actRef, { inscritos: newInscritos });
-              alert("✅ Equipo actualizado");
-              document.getElementById("modal-edit").style.display = "none";
-
-          } catch(e) { console.error(e); alert("Error: " + e.message); }
+              alert("✅ Actualizado"); document.getElementById("modal-edit").style.display = "none";
+          } catch(e) { alert(e.message); }
           btn.innerText="Guardar"; btn.disabled=false;
       }
       
@@ -245,6 +304,25 @@
             </label>
         </div>
         <div id="tickets-grid" class="tickets-grid">Cargando...</div>
+    </div>
+
+    <div id="modal-detalles" class="modal-overlay" onclick="if(event.target === this) cerrarDetalles()">
+        <div class="modal">
+            <button class="btn-close-modal" onclick="cerrarDetalles()">×</button>
+            
+            <img id="d-img" class="detail-img" src="">
+            <h2 id="d-title" class="detail-title">...</h2>
+            
+            <div id="d-date" class="detail-row"></div>
+            <div id="d-place" class="detail-row"></div>
+
+            <div id="d-actions" style="margin-top:20px;"></div>
+
+            <div class="detail-section">
+                <div class="detail-header">Lista de Asistentes</div>
+                <div id="d-list" class="participants-list"></div>
+            </div>
+        </div>
     </div>
 
     <div id="modal-edit" class="modal-overlay">
