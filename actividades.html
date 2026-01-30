@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Actividades</title>
-    
-    <script>
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
-    </script>
-
+    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -17,61 +13,48 @@
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; padding-bottom: 90px; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-top: 140px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-top: 150px; }
         
         /* HEADER FIJO */
-        .fixed-header { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg); z-index: 900; padding: 15px 20px 10px 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); box-sizing: border-box; transition: background 0.3s; }
+        .fixed-header { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg); z-index: 900; padding: 15px 20px 10px 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); transition: background 0.3s; }
         
         .search-box { position: relative; margin-bottom: 15px; }
-        .search-box input { width: 100%; padding: 12px 12px 12px 45px; border-radius: 12px; border: none; background: var(--card); color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-family: inherit; box-sizing: border-box; }
+        .search-box input { width: 100%; padding: 12px 12px 12px 45px; border-radius: 12px; border: none; background: var(--card); color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
         .search-box .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: gray; }
 
-        /* CHIPS */
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .filter-scroll::-webkit-scrollbar { display: none; }
-        
-        .chip { background: var(--card); border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; white-space: nowrap; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; color: gray; }
-        .chip.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3); }
+        .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .chip { background: var(--card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; white-space: nowrap; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: gray; }
+        .chip.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-        /* TARJETAS */
-        .act-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; transition: transform 0.2s; }
-        .act-card:active { transform: scale(0.98); }
-        
+        .act-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; }
         .act-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
         .card-badge { position: absolute; top: 15px; right: 15px; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: white; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
-        /* COLORES DE ETIQUETAS */
-        .tag-deporte { background: #2196f3; }
-        .tag-comida { background: #ff9800; }
-        .tag-fiesta { background: #9c27b0; }
-        .tag-concurso { background: #fbc02d; color: #333 !important; } /* Color Dorado para Concursos */
-        .tag-otro { background: #607d8b; }
-
+        .tag-deporte { background: #2196f3; } .tag-comida { background: #ff9800; } .tag-fiesta { background: #9c27b0; }
+        .tag-concurso { background: #fbc02d; color: #333 !important; } .tag-torneo { background: #e91e63; }
+        
         .act-body { padding: 15px; }
-        .act-title { margin: 0; font-size: 1.2rem; line-height: 1.2; margin-bottom: 5px; }
+        .act-title { margin: 0; font-size: 1.2rem; margin-bottom: 5px; }
         .act-meta { font-size: 0.85rem; color: gray; display: flex; align-items: center; gap: 5px; margin-bottom: 15px; }
+        .act-footer { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 15px; margin-top: 5px; }
         
-        .act-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 15px; margin-top: 5px; }
-        
-        .btn-join { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; margin-left: 10px; }
-        .btn-icon { background: rgba(0,0,0,0.05); border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); }
-        html.dark-mode .btn-icon { background: rgba(255,255,255,0.1); }
+        .btn-join { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-icon { background: rgba(0,0,0,0.05); border: none; width: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
-        .modal { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; color: var(--text); animation: slideUp 0.3s; }
-        .modal input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; box-sizing: border-box; background: var(--bg); color: var(--text); }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; color: var(--text); }
+        .modal input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.3s; }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-        .nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 2px; }
+        .material-symbols-outlined { font-size: 24px; }
     </style>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
@@ -108,8 +91,15 @@
 
           const filtered = allActivities.filter(act => {
               const matchesSearch = act.titulo.toLowerCase().includes(searchVal);
-              let category = act.genero || 'otro'; 
-              const matchesFilter = currentFilter === 'todos' || category === currentFilter;
+              const genero = act.genero || 'otro';
+              const audiencia = act.audiencia || 'todos';
+              
+              let matchesFilter = false;
+              if (currentFilter === 'todos') matchesFilter = true;
+              else if (currentFilter === 'infantil') matchesFilter = (audiencia === 'infantil');
+              else if (currentFilter === 'adultos') matchesFilter = (audiencia === 'adultos');
+              else matchesFilter = (genero === currentFilter); // Para deporte, concurso, torneo...
+
               return matchesSearch && matchesFilter;
           });
 
@@ -118,36 +108,38 @@
           filtered.forEach(act => {
               const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString([], {day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit'});
               const inscritos = act.inscritos || [];
-              let estoyDentro = inscritos.some(e => e.capitan_uid === currentUser.uid || (e.miembros && e.miembros.some(m => m.uid === currentUser.uid)));
+              
+              // COMPROBACIÓN ROBUSTA DE INSCRIPCIÓN
+              let estoyDentro = inscritos.some(e => e.capitan_uid === currentUser.uid); // Si soy capitán
+              if(!estoyDentro) {
+                 estoyDentro = inscritos.some(e => e.miembros && e.miembros.some(m => m.uid === currentUser.uid)); // Si soy miembro
+              }
               
               let badgeColor = 'tag-otro';
               let imgUrl = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600';
               
-              if(act.genero === 'deporte') { badgeColor = 'tag-deporte'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=600'; }
-              if(act.genero === 'comida') { badgeColor = 'tag-comida'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=600'; }
-              if(act.genero === 'fiesta') { badgeColor = 'tag-fiesta'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1514525253440-b39345208668?auto=format&fit=crop&q=80&w=600'; }
-              if(act.genero === 'concurso') { badgeColor = 'tag-concurso'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=600'; }
+              if(act.genero === 'deporte') { badgeColor = 'tag-deporte'; imgUrl = 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=600'; }
+              if(act.genero === 'concurso') { badgeColor = 'tag-concurso'; imgUrl = 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=600'; }
+              if(act.genero === 'torneo') { badgeColor = 'tag-torneo'; imgUrl = 'https://images.unsplash.com/photo-1551098888-c17562f02f9e?auto=format&fit=crop&q=80&w=600'; }
 
               container.innerHTML += `
                   <div class="act-card">
-                      <span class="card-badge ${badgeColor}">${act.genero || 'Evento'}</span>
+                      <span class="card-badge ${badgeColor}">${act.genero}</span>
                       <img src="${imgUrl}" class="act-img">
                       <div class="act-body">
                           <h3 class="act-title">${act.titulo}</h3>
                           <div class="act-meta">
                               <span class="material-symbols-outlined" style="font-size:18px">schedule</span> ${fechaStr}
                               <span style="margin: 0 5px">•</span>
-                              <span class="material-symbols-outlined" style="font-size:18px">group</span> ${act.modalidad}
+                              <span class="material-symbols-outlined" style="font-size:18px">group</span> ${act.audiencia ? act.audiencia.toUpperCase() : 'TODOS'}
                           </div>
                           <div class="act-footer">
                               <button class="btn-icon" onclick="window.location.href='chat.html?id=${act.id}'"><span class="material-symbols-outlined">chat</span></button>
-                              
-                              ${act.genero === 'torneo' && act.bracket ? `<button class="btn-icon" onclick="window.location.href='ver_torneo.html?id=${act.id}'" style="color:#ff9800"><span class="material-symbols-outlined">trophy</span></button>` : ''}
-                              
-                              ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-icon" onclick="window.location.href='ver_carrera.html?id=${act.id}'" style="color:#4caf50"><span class="material-symbols-outlined">podium</span></button>` : ''}
+                              ${act.genero === 'torneo' ? `<button class="btn-icon" onclick="window.location.href='ver_torneo.html?id=${act.id}'" style="color:#e91e63"><span class="material-symbols-outlined">trophy</span></button>` : ''}
+                              ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-icon" onclick="window.location.href='ver_carrera.html?id=${act.id}'" style="color:#fbc02d"><span class="material-symbols-outlined">podium</span></button>` : ''}
 
                               ${estoyDentro ? 
-                                `<button class="btn-join" style="background:#e0e0e0; color:#333;" onclick="alert('Ya estás apuntado')">✅ Apuntado</button>` : 
+                                `<button class="btn-join" style="background:#e0e0e0; color:#333;" onclick="alert('✅ Ya estás dentro.')">Apuntado</button>` : 
                                 `<button class="btn-join" onclick="abrirModal('${act.id}', '${act.modalidad}', ${act.tamano_equipo || 1})">Inscribirse</button>`}
                           </div>
                       </div>
@@ -167,9 +159,20 @@
           currentActId = id; currentModalidad = mod; currentTeamSize = size;
           const m = document.getElementById("modal-inscripcion");
           const c = document.getElementById("modal-inputs");
-          document.getElementById("modal-titulo").innerText = mod === 'individual' ? "Confirmar Inscripción" : `Equipo (${mod})`;
-          c.innerHTML = mod === 'individual' ? "<p>¿Te apuntas?</p>" : `<input type="text" id="team-name" placeholder="Nombre del Equipo">` + 
-                        Array.from({length: mod==='parejas'?1:(size-1)}).map((_,i)=>`<input type="text" class="mate-input" placeholder="Compañero ${i+1}">`).join('');
+          document.getElementById("modal-titulo").innerText = mod === 'individual' ? "Confirmar" : `Equipo (${mod})`;
+          
+          let html = "";
+          if(mod === 'individual') html = "<p>¿Confirmar asistencia?</p>";
+          else {
+              // NO PEDIMOS NOMBRE DE EQUIPO. Usamos el nombre del usuario.
+              html = `<p style="font-size:0.9rem; color:gray">Tu equipo se llamará: <strong>${myUsername}</strong></p>`;
+              html += `<p style="font-size:0.8rem">Añade a tus compañeros:</p>`;
+              const numCompis = mod === 'parejas' ? 1 : (size - 1);
+              for(let i=0; i<numCompis; i++) {
+                  html += `<input type="text" class="mate-input" placeholder="Nombre compañero ${i+1}">`;
+              }
+          }
+          c.innerHTML = html;
           m.style.display = "flex";
       }
       window.cerrarModal = () => document.getElementById("modal-inscripcion").style.display="none";
@@ -178,42 +181,37 @@
           const btn = document.getElementById("btn-confirmar"); btn.innerText="..."; btn.disabled=true;
           try {
               let data = { capitan: myUsername, capitan_uid: currentUser.uid, fecha: new Date(), miembros: [] };
+              
+              // SI ES EQUIPO, PONEMOS EL NOMBRE DEL CAPITÁN COMO NOMBRE DE EQUIPO
               if(currentModalidad !== 'individual') {
-                  const name = document.getElementById("team-name").value;
-                  if(!name) throw new Error("Falta nombre equipo");
-                  data.nombre_equipo = name;
+                  data.nombre_equipo = myUsername; // <-- CAMBIO CLAVE
                   const mates = document.querySelectorAll(".mate-input");
                   for(let input of mates) { if(input.value) data.miembros.push({nombre: input.value, vinculado: false}); }
               }
               await updateDoc(doc(db, "actividades", currentActId), { inscritos: arrayUnion(data) });
-              alert("✅ ¡Dentro!"); cerrarModal(); cargarActividades();
+              alert("✅ ¡Inscrito correctamente!"); cerrarModal(); cargarActividades();
           } catch(e) { alert(e.message); }
           btn.innerText="Confirmar"; btn.disabled=false;
       }
     </script>
 </head>
 <body>
-    
     <div class="fixed-header">
         <div class="search-box">
             <span class="material-symbols-outlined icon">search</span>
             <input type="text" id="search-input" placeholder="Buscar evento..." oninput="renderActivities()">
         </div>
-        
         <div class="filter-scroll">
             <div id="chip-todos" class="chip active" onclick="setFilter('todos')">Todos</div>
+            <div id="chip-infantil" class="chip" onclick="setFilter('infantil')">👶 Infantil</div>
+            <div id="chip-adultos" class="chip" onclick="setFilter('adultos')">🔞 Adultos</div>
+            <div id="chip-torneo" class="chip" onclick="setFilter('torneo')">🎾 Torneos</div>
             <div id="chip-concurso" class="chip" onclick="setFilter('concurso')">🏆 Concurso</div>
-            <div id="chip-deporte" class="chip" onclick="setFilter('deporte')">⚽ Deportes</div>
-            <div id="chip-comida" class="chip" onclick="setFilter('comida')">🥘 Comidas</div>
             <div id="chip-fiesta" class="chip" onclick="setFilter('fiesta')">🎉 Fiesta</div>
-            <div id="chip-otro" class="chip" onclick="setFilter('otro')">🎲 Otros</div>
         </div>
     </div>
-
-    <div class="container" id="activities-container">
-        <p style="text-align:center; color:gray;">Cargando...</p>
-    </div>
-
+    <div class="container" id="activities-container"><p style="text-align:center;">Cargando...</p></div>
+    
     <div id="modal-inscripcion" class="modal-overlay">
         <div class="modal">
             <h2 id="modal-titulo" style="margin-top:0">Inscripción</h2>
@@ -226,18 +224,10 @@
     </div>
 
     <nav class="bottom-nav">
-        <a href="panel.html" class="nav-item">
-            <span class="material-symbols-outlined">home</span>Inicio
-        </a>
-        <a href="#" class="nav-item active">
-            <span class="material-symbols-outlined">event</span>Fiestas
-        </a>
-        <a href="mis_inscripciones.html" class="nav-item">
-            <span class="material-symbols-outlined">confirmation_number</span>Tickets
-        </a>
-        <a href="perfil.html" class="nav-item">
-            <span class="material-symbols-outlined">person</span>Perfil
-        </a>
+        <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
+        <a href="#" class="nav-item active"><span class="material-symbols-outlined">event</span>Fiestas</a>
+        <a href="mis_inscripciones.html" class="nav-item"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
+        <a href="perfil.html" class="nav-item"><span class="material-symbols-outlined">person</span>Perfil</a>
     </nav>
 </body>
 </html>
