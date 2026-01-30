@@ -12,17 +12,16 @@
         
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
         .container { max-width: 800px; margin: 0 auto; }
-        
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
-        /* PODIO VISUAL */
+        /* PODIO */
         .podium-admin { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; align-items: flex-end; height: 150px; }
-        .podium-slot { flex: 1; max-width: 150px; border-radius: 10px 10px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 10px; color: white; text-align: center; position: relative; transition: all 0.3s; }
+        .podium-slot { flex: 1; max-width: 150px; border-radius: 10px 10px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 10px; color: white; text-align: center; position: relative; }
         
-        .slot-1 { background: #ffd700; height: 100%; border: 2px solid #e6c200; z-index: 2; } /* Oro */
-        .slot-2 { background: #c0c0c0; height: 80%; border: 2px solid #aaaaaa; z-index: 1; } /* Plata */
-        .slot-3 { background: #cd7f32; height: 60%; border: 2px solid #b87333; z-index: 0; } /* Bronce */
+        .slot-1 { background: #ffd700; height: 100%; border: 2px solid #e6c200; }
+        .slot-2 { background: #c0c0c0; height: 80%; border: 2px solid #aaaaaa; }
+        .slot-3 { background: #cd7f32; height: 60%; border: 2px solid #b87333; }
 
         .winner-name { font-weight: bold; margin-top: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
         .btn-clear-pos { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.2); border: none; color: white; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 10px; display: none; }
@@ -35,7 +34,6 @@
         .medal-actions { display: flex; gap: 5px; }
         .btn-medal { border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 1.2rem; transition: transform 0.2s; opacity: 0.5; filter: grayscale(100%); }
         .btn-medal:hover { transform: scale(1.2); opacity: 1; filter: grayscale(0%); }
-        
         .gold { background: #fff9c4; } .gold:hover { background: #ffd700; }
         .silver { background: #eceff1; } .silver:hover { background: #c0c0c0; }
         .bronze { background: #efebe9; } .bronze:hover { background: #cd7f32; }
@@ -117,7 +115,6 @@
           lista.innerHTML = "";
           const inscritos = activityData.inscritos || [];
           const podio = activityData.podio || {};
-
           const getName = (p) => p.nombre_equipo || p.capitan; 
 
           inscritos.forEach((p) => {
@@ -135,8 +132,7 @@
                       <button class="btn-medal gold" onclick="asignarMedalla(1, '${nombre}')" title="Primer Puesto">🥇</button>
                       <button class="btn-medal silver" onclick="asignarMedalla(2, '${nombre}')" title="Segundo Puesto">🥈</button>
                       <button class="btn-medal bronze" onclick="asignarMedalla(3, '${nombre}')" title="Tercer Puesto">🥉</button>
-                  </div>
-              `;
+                  </div>`;
               lista.appendChild(div);
           });
           document.getElementById("count-part").innerText = inscritos.length;
@@ -148,7 +144,6 @@
               if(podio.p1 && podio.p1.nombre === nombreGanador) podio.p1 = null;
               if(podio.p2 && podio.p2.nombre === nombreGanador) podio.p2 = null;
               if(podio.p3 && podio.p3.nombre === nombreGanador) podio.p3 = null;
-              
               const nuevoGanador = { nombre: nombreGanador, fecha: new Date() };
               if(posicion === 1) podio.p1 = nuevoGanador;
               if(posicion === 2) podio.p2 = nuevoGanador;
