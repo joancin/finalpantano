@@ -8,7 +8,6 @@
     <script>
         if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
@@ -30,22 +29,23 @@
         /* TICKET STYLE */
         .ticket { background: var(--card); border-radius: 16px; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
         
-        /* Efecto de borde dentado (opcional, visualmente chulo) */
-        .ticket::before, .ticket::after { content: ""; position: absolute; top: 70%; width: 20px; height: 20px; background: var(--bg); border-radius: 50%; z-index: 10; }
+        /* Efecto de borde dentado */
+        .ticket::before, .ticket::after { content: ""; position: absolute; top: 70px; width: 20px; height: 20px; background: var(--bg); border-radius: 50%; z-index: 10; }
         .ticket::before { left: -10px; }
         .ticket::after { right: -10px; }
-        .ticket-divider { border-top: 2px dashed var(--border); margin-top: 15px; margin-bottom: 15px; position: relative; }
+        
+        /* Línea discontinua */
+        .ticket-divider { position: absolute; top: 79px; left: 15px; right: 15px; border-top: 2px dashed rgba(255,255,255,0.5); z-index: 5; }
 
-        .ticket-header { background: var(--accent); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .ticket-body { padding: 20px; }
+        .ticket-header { background: var(--accent); color: white; padding: 20px; padding-bottom: 35px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .ticket-body { padding: 20px; padding-top: 30px; }
         
-        .t-title { font-size: 1.2rem; font-weight: 800; margin: 0; }
-        .t-role { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .t-title { font-size: 1.2rem; font-weight: 800; margin: 0; line-height: 1.2; }
+        .t-role { background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; white-space: nowrap; }
         
-        .t-info { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: gray; margin-bottom: 5px; }
+        .t-info { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--text); margin-bottom: 8px; }
+        .t-info span { color: var(--accent); }
         
-        .qr-area { display: flex; justify-content: center; padding: 10px; background: white; border-radius: 10px; margin-top: 10px; width: fit-content; margin-left: auto; margin-right: auto; }
-
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
         .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.3s; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
@@ -56,15 +56,13 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
-
-      let currentTab = 'activos';
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
@@ -92,24 +90,20 @@
 
                   if (miRol) {
                       const fechaStr = fechaEvento.toLocaleString([], {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-                      // ID único para el div del QR
-                      const qrId = `qr-${docSnap.id}`;
-                      // Dato que guarda el QR (Usuario + Actividad)
-                      const qrData = JSON.stringify({u: user.uid, a: docSnap.id});
-
+                      
                       const html = `
                         <div class="ticket">
+                            <div class="ticket-divider"></div>
                             <div class="ticket-header" style="background:${esPasado ? 'gray' : 'var(--accent)'}">
-                                <h3 class="t-title">${act.titulo}</h3>
+                                <div style="flex:1; padding-right:10px;">
+                                    <h3 class="t-title">${act.titulo}</h3>
+                                </div>
                                 <span class="t-role">${miRol}</span>
                             </div>
                             <div class="ticket-body">
                                 <div class="t-info"><span class="material-symbols-outlined">calendar_month</span> ${fechaStr}</div>
                                 <div class="t-info"><span class="material-symbols-outlined">location_on</span> ${act.lugar || 'Ubicación por definir'}</div>
-                                
-                                <div class="ticket-divider"></div>
-                                <div style="text-align:center; font-size:0.8rem; color:gray; margin-bottom:5px;">Muestra este código en la entrada</div>
-                                <div id="${qrId}" class="qr-area"></div>
+                                <div class="t-info"><span class="material-symbols-outlined">group</span> Equipo: ${equipo.nombre_equipo || 'Individual'}</div>
                             </div>
                         </div>`;
 
@@ -118,15 +112,6 @@
                       } else {
                           listActivos.innerHTML += html; hasActive = true;
                       }
-
-                      // GENERAR QR (pequeño retraso para que el div exista)
-                      setTimeout(() => {
-                          const container = document.getElementById(qrId);
-                          if(container) {
-                              container.innerHTML = ""; // Limpiar
-                              new QRCode(container, { text: qrData, width: 100, height: 100 });
-                          }
-                      }, 100);
                   }
               });
 
