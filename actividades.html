@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; --success: #4caf50; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; --danger: #d32f2f; }
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; padding-bottom: 90px; }
@@ -24,30 +24,54 @@
         .chip { background: var(--card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; white-space: nowrap; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: gray; }
         .chip.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-        .act-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; }
+        /* TARJETAS */
+        .act-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; cursor: pointer; transition: transform 0.2s; }
+        .act-card:active { transform: scale(0.98); }
+        
         .act-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
         .card-badge { position: absolute; top: 15px; right: 15px; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: white; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
         .tag-deporte { background: #2196f3; } .tag-comida { background: #ff9800; } .tag-fiesta { background: #9c27b0; }
-        .tag-concurso { background: #fbc02d; color: #333 !important; } .tag-torneo { background: #e91e63; }
+        .tag-concurso { background: #fbc02d; color: #333 !important; } .tag-torneo { background: #e91e63; } .tag-otro { background: #607d8b; }
         
         .act-body { padding: 15px; }
         .act-title { margin: 0; font-size: 1.2rem; margin-bottom: 5px; }
         .act-meta { font-size: 0.85rem; color: gray; display: flex; align-items: center; gap: 5px; margin-bottom: 15px; }
-        .act-footer { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 15px; margin-top: 5px; }
-        .btn-join { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; }
-        .btn-icon { background: rgba(0,0,0,0.05); border: none; width: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); }
+        
+        /* BOTONES DE LA TARJETA (Solo acciones rápidas) */
+        .act-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-mini { padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-status-ok { background: #e8f5e9; color: #2e7d32; }
+        .btn-status-in { background: var(--accent); color: white; }
 
-        /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
-        .modal { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; color: var(--text); }
+        /* MODALES */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: flex-end; z-index: 2000; backdrop-filter: blur(3px); }
+        .modal { background: var(--card); padding: 25px; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px; color: var(--text); max-height: 90vh; overflow-y: auto; position: relative; animation: slideUp 0.3s; }
         
-        .input-mate-container { position: relative; margin-bottom: 8px; }
-        .modal input { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; transition: border-color 0.3s; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        /* ESTILOS DETALLES */
+        .detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
+        .detail-title { font-size: 1.5rem; margin: 0 0 10px 0; line-height: 1.2; }
+        .detail-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: gray; }
+        .detail-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .detail-header { font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
+
+        .participants-list { background: var(--bg); border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; }
+        .p-group { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .p-group:last-child { border: none; margin: 0; padding: 0; }
+        .p-cap { font-weight: bold; font-size: 0.9rem; color: var(--text); }
+        .p-members { font-size: 0.85rem; color: gray; margin-left: 10px; }
+
+        .btn-close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.1); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; }
         
-        /* ESTILOS DE VINCULACIÓN */
-        .mate-found { border-color: var(--success) !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234caf50' width='18px' height='18px'%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
-        .helper-text { font-size: 0.7rem; color: gray; margin-bottom: 15px; margin-top: -5px; }
+        .btn-full { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; }
+        .btn-join-lg { background: var(--accent); color: white; }
+        .btn-leave-lg { background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
+
+        /* INPUTS INSCRIPCIÓN */
+        .modal input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; }
+        .mate-found { border-color: #4caf50 !important; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
         .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
@@ -112,11 +136,8 @@
               const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString([], {day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit'});
               const inscritos = act.inscritos || [];
               
-              // Verificamos si estoy dentro (por UID capitán o UID miembro)
-              let estoyDentro = inscritos.some(e => 
-                  e.capitan_uid === currentUser.uid || 
-                  (e.miembros && e.miembros.some(m => m.uid === currentUser.uid))
-              );
+              // Comprobar si estoy dentro
+              let estoyDentro = inscritos.some(e => e.capitan_uid === currentUser.uid || (e.miembros && e.miembros.some(m => m.uid === currentUser.uid)));
               
               let badgeColor = 'tag-otro';
               let imgUrl = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600';
@@ -124,8 +145,9 @@
               if(act.genero === 'concurso') { badgeColor = 'tag-concurso'; imgUrl = 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=600'; }
               if(act.genero === 'torneo') { badgeColor = 'tag-torneo'; imgUrl = 'https://images.unsplash.com/photo-1551098888-c17562f02f9e?auto=format&fit=crop&q=80&w=600'; }
 
+              // CLICK EN LA TARJETA ABRE DETALLES
               container.innerHTML += `
-                  <div class="act-card">
+                  <div class="act-card" onclick="verDetalles('${act.id}')">
                       <span class="card-badge ${badgeColor}">${act.genero}</span>
                       <img src="${imgUrl}" class="act-img">
                       <div class="act-body">
@@ -135,14 +157,12 @@
                               <span style="margin: 0 5px">•</span>
                               <span class="material-symbols-outlined" style="font-size:18px">group</span> ${act.audiencia ? act.audiencia.toUpperCase() : 'TODOS'}
                           </div>
-                          <div class="act-footer">
-                              <button class="btn-icon" onclick="window.location.href='chat.html?id=${act.id}'"><span class="material-symbols-outlined">chat</span></button>
-                              ${act.genero === 'torneo' ? `<button class="btn-icon" onclick="window.location.href='ver_torneo.html?id=${act.id}'" style="color:#e91e63"><span class="material-symbols-outlined">trophy</span></button>` : ''}
-                              ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-icon" onclick="window.location.href='ver_carrera.html?id=${act.id}'" style="color:#fbc02d"><span class="material-symbols-outlined">podium</span></button>` : ''}
-
+                          
+                          <div class="act-actions">
                               ${estoyDentro ? 
-                                `<button class="btn-join" style="background:#e0e0e0; color:#333;" onclick="window.location.href='mis_inscripciones.html'">✅ Ver Ticket</button>` : 
-                                `<button class="btn-join" onclick="abrirModal('${act.id}', '${act.modalidad}', ${act.tamano_equipo || 1})">Inscribirse</button>`}
+                                `<button class="btn-mini btn-status-ok"><span class="material-symbols-outlined" style="font-size:18px">check</span> Apuntado</button>` : 
+                                `<button class="btn-mini btn-status-in">Ver / Apuntarse</button>`
+                              }
                           </div>
                       </div>
                   </div>`;
@@ -156,10 +176,76 @@
           renderActivities();
       }
 
-      let currentActId="", currentModalidad="", currentTeamSize=1;
+      // --- VER DETALLES Y PARTICIPANTES ---
+      window.verDetalles = (id) => {
+          const act = allActivities.find(a => a.id === id);
+          if(!act) return;
+
+          const modal = document.getElementById("modal-detalles");
+          const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString([], {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
+          
+          let estoyDentro = false;
+          let miRol = null; // 'capitan' o 'miembro'
+
+          // Generar lista de participantes
+          let participantsHTML = "";
+          const inscritos = act.inscritos || [];
+          
+          if(inscritos.length === 0) {
+              participantsHTML = "<p style='color:gray; font-size:0.9rem'>Aún no hay nadie apuntado. ¡Sé el primero!</p>";
+          } else {
+              inscritos.forEach(equipo => {
+                  let membersNames = equipo.miembros ? equipo.miembros.map(m => m.nombre).join(", ") : "";
+                  participantsHTML += `
+                    <div class="p-group">
+                        <div class="p-cap">⭐ ${equipo.nombre_equipo} (Capitán)</div>
+                        ${membersNames ? `<div class="p-members">Compañeros: ${membersNames}</div>` : ''}
+                    </div>`;
+
+                  // Verificar si soy yo
+                  if(equipo.capitan_uid === currentUser.uid) { estoyDentro = true; miRol = 'capitan'; }
+                  if(equipo.miembros && equipo.miembros.some(m => m.uid === currentUser.uid)) { estoyDentro = true; miRol = 'miembro'; }
+              });
+          }
+
+          // Inyectar contenido en el modal
+          document.getElementById("d-img").src = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
+          document.getElementById("d-title").innerText = act.titulo;
+          document.getElementById("d-date").innerHTML = `<span class="material-symbols-outlined">schedule</span> ${fechaStr}`;
+          document.getElementById("d-place").innerHTML = `<span class="material-symbols-outlined">location_on</span> ${act.lugar || 'Ubicación por definir'}`;
+          document.getElementById("d-list").innerHTML = participantsHTML;
+
+          // Botones de Acción
+          const btnArea = document.getElementById("d-actions");
+          btnArea.innerHTML = "";
+
+          // Botones Extra (Chat/Podio)
+          let extraBtns = `<div style="display:flex; gap:10px; margin-bottom:10px;">
+                <button class="btn-mini" style="background:#e0f7fa; color:#006064; flex:1; justify-content:center;" onclick="window.location.href='chat.html?id=${act.id}'">💬 Chat</button>
+                ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-mini" style="background:#fff8e1; color:#ff6f00; flex:1; justify-content:center;" onclick="window.location.href='ver_carrera.html?id=${act.id}'">📊 Podio</button>` : ''}
+                ${act.genero === 'torneo' ? `<button class="btn-mini" style="background:#fce4ec; color:#880e4f; flex:1; justify-content:center;" onclick="window.location.href='ver_torneo.html?id=${act.id}'">🏆 Cuadro</button>` : ''}
+          </div>`;
+          
+          btnArea.innerHTML += extraBtns;
+
+          if (estoyDentro) {
+              btnArea.innerHTML += `<button class="btn-full btn-leave-lg" onclick="salirDeActividad('${act.id}', '${miRol}')">🗑️ Desapuntarse</button>`;
+          } else {
+              btnArea.innerHTML += `<button class="btn-full btn-join-lg" onclick="prepararInscripcion('${act.id}', '${act.modalidad}', ${act.tamano_equipo || 1})">📝 Inscribirse</button>`;
+          }
+
+          modal.style.display = "flex";
+      }
+
+      window.cerrarDetalles = () => document.getElementById("modal-detalles").style.display = "none";
+
+      // --- LOGICA DE INSCRIPCIÓN (MODAL 2) ---
+      let currentActId="", currentModalidad="";
       
-      window.abrirModal = (id, mod, size) => {
-          currentActId = id; currentModalidad = mod; currentTeamSize = size;
+      window.prepararInscripcion = (id, mod, size) => {
+          document.getElementById("modal-detalles").style.display = "none"; // Cerrar detalles
+          currentActId = id; currentModalidad = mod;
+          
           const m = document.getElementById("modal-inscripcion");
           const c = document.getElementById("modal-inputs");
           document.getElementById("modal-titulo").innerText = mod === 'individual' ? "Confirmar" : `Equipo (${mod})`;
@@ -168,72 +254,81 @@
           if(mod === 'individual') html = "<p>¿Confirmar asistencia?</p>";
           else {
               html = `<p style="font-size:0.9rem; color:gray">Capitán: <strong>${myUsername}</strong></p>`;
-              html += `<div class="helper-text">Escribe el nombre de usuario exacto para vincularlo (se pondrá verde).</div>`;
+              html += `<div class="helper-text" style="font-size:0.75rem; color:gray; margin-bottom:10px;">Escribe el usuario exacto para vincularlo (se pone verde).</div>`;
               const numCompis = mod === 'parejas' ? 1 : (size - 1);
               for(let i=0; i<numCompis; i++) {
-                  // INPUT CON EVENTO DE BÚSQUEDA (onblur para comprobar al salir)
-                  html += `<div class="input-mate-container">
-                             <input type="text" class="mate-input" placeholder="Usuario compañero ${i+1}" onkeyup="verificarUsuario(this)">
-                           </div>`;
+                  html += `<div class="input-mate-container"><input type="text" class="mate-input" placeholder="Usuario compañero ${i+1}" onkeyup="verificarUsuario(this)"></div>`;
               }
           }
           c.innerHTML = html;
           m.style.display = "flex";
       }
-      window.cerrarModal = () => document.getElementById("modal-inscripcion").style.display="none";
-      
-      // FUNCIÓN MÁGICA: VERIFICAR USUARIO
+      window.cerrarInscripcion = () => document.getElementById("modal-inscripcion").style.display="none";
+
       window.verificarUsuario = async (input) => {
           const val = input.value.trim();
-          if(val.length < 2) { 
-              input.classList.remove('mate-found'); 
-              input.removeAttribute('data-uid');
-              return; 
-          }
-
-          // Consultamos a Firestore si existe el usuario
+          if(val.length < 2) { input.classList.remove('mate-found'); input.removeAttribute('data-uid'); return; }
           const q = query(collection(db, "usuarios"), where("username", "==", val));
           const snap = await getDocs(q);
-
-          if(!snap.empty) {
-              const uData = snap.docs[0];
-              input.classList.add('mate-found');
-              input.setAttribute('data-uid', uData.id); // Guardamos el UID secreto
-          } else {
-              input.classList.remove('mate-found');
-              input.removeAttribute('data-uid');
-          }
+          if(!snap.empty) { input.classList.add('mate-found'); input.setAttribute('data-uid', snap.docs[0].id); } 
+          else { input.classList.remove('mate-found'); input.removeAttribute('data-uid'); }
       }
-      
+
       window.confirmarInscripcion = async () => {
           const btn = document.getElementById("btn-confirmar"); btn.innerText="..."; btn.disabled=true;
           try {
               let data = { capitan: myUsername, capitan_uid: currentUser.uid, fecha: new Date(), miembros: [] };
-              
               if(currentModalidad !== 'individual') {
                   data.nombre_equipo = myUsername; 
                   const inputs = document.querySelectorAll(".mate-input");
-                  
                   inputs.forEach(input => {
                       if(input.value.trim()) {
-                          // AQUÍ ESTÁ LA MAGIA DE LA VINCULACIÓN
-                          data.miembros.push({
-                              nombre: input.value.trim(), 
-                              uid: input.getAttribute('data-uid') || null, // Si se encontró, guardamos UID
-                              vinculado: !!input.getAttribute('data-uid')
-                          });
+                          data.miembros.push({ nombre: input.value.trim(), uid: input.getAttribute('data-uid') || null, vinculado: !!input.getAttribute('data-uid') });
                       }
                   });
               }
               await updateDoc(doc(db, "actividades", currentActId), { inscritos: arrayUnion(data) });
-              alert("✅ ¡Inscrito! Tus compañeros vinculados recibirán su ticket."); 
-              cerrarModal(); cargarActividades();
+              alert("✅ ¡Inscrito!"); cerrarInscripcion(); cargarActividades();
           } catch(e) { alert(e.message); }
           btn.innerText="Confirmar"; btn.disabled=false;
+      }
+
+      // --- LOGICA DESAPUNTARSE (SALIR) ---
+      window.salirDeActividad = async (actId, miRol) => {
+          if(!confirm("¿Seguro que quieres borrarte de esta actividad?")) return;
+          
+          try {
+              const actRef = doc(db, "actividades", actId);
+              const snap = await getDoc(actRef);
+              const data = snap.data();
+              let inscritos = data.inscritos;
+              let nuevosInscritos = [];
+
+              if (miRol === 'capitan') {
+                  // Si soy capitán, borro todo mi equipo (filtro para que NO pase mi equipo)
+                  nuevosInscritos = inscritos.filter(e => e.capitan_uid !== currentUser.uid);
+              } else {
+                  // Si soy miembro, busco mi equipo y me borro SOLO A MÍ de la lista de miembros
+                  nuevosInscritos = inscritos.map(equipo => {
+                      if (equipo.miembros && equipo.miembros.some(m => m.uid === currentUser.uid)) {
+                          // Filtro los miembros para quitarme a mí
+                          equipo.miembros = equipo.miembros.filter(m => m.uid !== currentUser.uid);
+                      }
+                      return equipo;
+                  });
+              }
+
+              await updateDoc(actRef, { inscritos: nuevosInscritos });
+              alert("🗑️ Te has dado de baja.");
+              cerrarDetalles();
+              cargarActividades();
+
+          } catch(e) { console.error(e); alert("Error al salir: " + e.message); }
       }
     </script>
 </head>
 <body>
+    
     <div class="fixed-header">
         <div class="search-box">
             <span class="material-symbols-outlined icon">search</span>
@@ -248,14 +343,34 @@
             <div id="chip-fiesta" class="chip" onclick="setFilter('fiesta')">🎉 Fiesta</div>
         </div>
     </div>
+
     <div class="container" id="activities-container"><p style="text-align:center;">Cargando...</p></div>
     
-    <div id="modal-inscripcion" class="modal-overlay">
+    <div id="modal-detalles" class="modal-overlay" onclick="if(event.target === this) cerrarDetalles()">
         <div class="modal">
+            <button class="btn-close-modal" onclick="cerrarDetalles()">×</button>
+            
+            <img id="d-img" class="detail-img" src="">
+            <h2 id="d-title" class="detail-title">...</h2>
+            
+            <div id="d-date" class="detail-row"></div>
+            <div id="d-place" class="detail-row"></div>
+
+            <div id="d-actions" style="margin-top:20px;"></div>
+
+            <div class="detail-section">
+                <div class="detail-header">Lista de Asistentes</div>
+                <div id="d-list" class="participants-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-inscripcion" class="modal-overlay">
+        <div class="modal" style="max-width:400px; border-radius:20px;">
             <h2 id="modal-titulo" style="margin-top:0">Inscripción</h2>
             <div id="modal-inputs"></div>
             <div style="margin-top:20px; display:flex; gap:10px;">
-                <button onclick="cerrarModal()" style="flex:1; padding:12px; background:transparent; border:1px solid #ccc; border-radius:10px;">Cancelar</button>
+                <button onclick="cerrarInscripcion()" style="flex:1; padding:12px; background:transparent; border:1px solid #ccc; border-radius:10px;">Cancelar</button>
                 <button onclick="confirmarInscripcion()" id="btn-confirmar" style="flex:1; padding:12px; background:var(--accent); color:white; border:none; border-radius:10px; font-weight:bold;">Confirmar</button>
             </div>
         </div>
