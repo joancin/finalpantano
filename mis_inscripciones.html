@@ -2,8 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Tickets</title>
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
+    
+    <script>
+        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
+    </script>
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -33,11 +38,14 @@
         .ticket:active { transform: scale(0.98); }
         .ticket.past { opacity: 0.6; filter: grayscale(1); }
         
-        .ticket-head { background: var(--accent); padding: 10px; height: 40px; }
+        .ticket-head { background: var(--accent); padding: 10px; height: 40px; position: relative; }
         .ticket.past .ticket-head { background: gray; }
         
-        .ticket-body { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .t-title { font-size: 0.95rem; margin: 0; margin-bottom: 5px; line-height: 1.2; }
+        /* Círculo decorativo */
+        .ticket-head::after { content: ""; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: var(--card); border-radius: 50%; }
+
+        .ticket-body { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding-top: 20px; }
+        .t-title { font-size: 0.95rem; margin: 0; margin-bottom: 5px; line-height: 1.2; font-weight: 800; }
         .t-date { font-size: 0.8rem; color: gray; display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
         
         .t-badge { display: inline-block; padding: 3px 8px; background: rgba(0,0,0,0.05); border-radius: 10px; font-size: 0.7rem; font-weight: bold; color: var(--text); border: 1px solid var(--border); width: fit-content; }
@@ -50,7 +58,7 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
@@ -59,10 +67,15 @@
       const auth = getAuth(app);
 
       let allTickets = [];
+      let myUsername = "";
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
           
+          // Obtenemos tu nombre de usuario para buscar también por nombre (para registros viejos)
+          const uDoc = await getDoc(doc(db, "usuarios", user.uid));
+          if(uDoc.exists()) myUsername = uDoc.data().username;
+
           const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
           onSnapshot(q, (snapshot) => {
               allTickets = [];
@@ -71,25 +84,22 @@
                   const inscritos = act.inscritos || [];
                   const fechaEvento = act.fecha.toDate ? act.fecha.toDate() : new Date(act.fecha);
                   
-                  // BÚSQUEDA EXHAUSTIVA DE TU PARTICIPACIÓN
                   let miRol = null;
                   let miEquipo = null;
 
-                  // 1. Buscamos si eres Capitán
-                  const soyCapitan = inscritos.find(e => e.capitan_uid === user.uid);
-                  if (soyCapitan) {
-                      miRol = "Capitán";
-                      miEquipo = soyCapitan;
+                  // 1. ¿SOY CAPITÁN? (Por UID o por Nombre)
+                  const capitan = inscritos.find(e => e.capitan_uid === user.uid || e.capitan === myUsername);
+                  
+                  if (capitan) {
+                      miRol = "Titular";
+                      miEquipo = capitan;
                   } else {
-                      // 2. Si no, buscamos si eres miembro dentro de algún equipo
-                      const soyMiembro = inscritos.find(e => e.miembros && e.miembros.some(m => m.uid === user.uid)); // Nota: aquí uid puede no existir si no se vinculó, pero buscamos por nombre o lógica futura.
-                      // CORRECCIÓN: Como ahora guardamos nombres manuales en "miembros", no podemos asegurar el UID ahí.
-                      // Pero el requisito era que "Capitan inscribe". El capitán siempre sale.
-                      // Si queremos que los miembros vean el ticket, el capitán debería haber seleccionado usuarios reales, 
-                      // pero en el modal simple solo escribimos "Nombres". 
-                      // POR TANTO: Solo el Capitán ve el ticket oficial en esta versión simple, 
-                      // O bien asumimos que si tu nombre coincide con un miembro, te lo mostramos (arriesgado por duplicados).
-                      // MANTENEMOS: Solo Capitán ve el ticket seguro por UID.
+                      // 2. ¿SOY MIEMBRO? (Buscamos por nombre en la lista de miembros)
+                      const miembro = inscritos.find(e => e.miembros && e.miembros.some(m => m.nombre === myUsername));
+                      if (miembro) {
+                          miRol = "Acompañante";
+                          miEquipo = miembro;
+                      }
                   }
 
                   if (miEquipo) {
@@ -97,9 +107,8 @@
                           id: docSnap.id,
                           titulo: act.titulo,
                           fecha: fechaEvento,
-                          lugar: act.lugar,
                           rol: miRol,
-                          equipo: miEquipo.nombre_equipo,
+                          equipo: miEquipo.nombre_equipo || 'Individual',
                           esPasado: fechaEvento < new Date()
                       });
                   }
@@ -117,7 +126,7 @@
           const filtered = allTickets.filter(t => hidePast ? !t.esPasado : true);
 
           if(filtered.length === 0) {
-              container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:gray; margin-top:40px;">No hay tickets que mostrar.</p>`;
+              container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:gray; margin-top:40px;">No encuentro entradas con tu usuario.</p>`;
               return;
           }
 
@@ -134,8 +143,8 @@
                             <div class="t-date"><span class="material-symbols-outlined" style="font-size:16px">group</span> ${t.equipo}</div>
                         </div>
                         <div style="margin-top:10px;">
-                            <span class="t-badge">${t.rol}</span>
-                            ${t.esPasado ? '<span class="t-badge" style="background:#eee">FINALIZADO</span>' : ''}
+                            <span class="t-badge" style="${t.rol === 'Titular' ? 'background:#e3f2fd; color:#1565c0' : 'background:#f3e5f5; color:#7b1fa2'}">${t.rol}</span>
+                            ${t.esPasado ? '<span class="t-badge" style="background:#eee; color:gray">FINALIZADO</span>' : ''}
                         </div>
                     </div>
                 </div>`;
