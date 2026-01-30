@@ -125,7 +125,14 @@
                                   }
                               </div>
                               
+
+
                               <div style="display:flex; gap:5px;">
+                                  
+                                  <button class="btn-join" style="background:#607d8b; padding:8px 12px;" onclick="window.location.href='chat.html?id=${actId}'" title="Chat del Grupo">
+                                      <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle;">chat</span>
+                                  </button>
+
                                   ${act.genero === 'torneo' && act.bracket 
                                       ? `<button class="btn-join" style="background:#ff9800; padding:8px 15px;" onclick="window.location.href='ver_torneo.html?id=${actId}'">🏆 Ver Cuadro</button>` 
                                       : ''
