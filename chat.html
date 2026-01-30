@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat de Actividad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        :root { --bg: #e5ddd5; --header: #075e54; --my-msg: #dcf8c6; --other-msg: white; }
+        body.dark-mode { --bg: #1a1a1a; --header: #242526; --my-msg: #056162; --other-msg: #262d31; color: white; }
+        
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* CABECERA */
+        .chat-header { background: var(--header); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-back { background: transparent; border: none; color: white; cursor: pointer; display: flex; align-items: center; }
+        .chat-info h2 { margin: 0; font-size: 1rem; }
+        .chat-info span { font-size: 0.8rem; opacity: 0.8; }
+
+        /* ZONA DE MENSAJES */
+        .chat-area { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .msg { max-width: 75%; padding: 8px 12px; border-radius: 8px; position: relative; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-wrap: break-word; }
+        
+        .msg.mine { align-self: flex-end; background: var(--my-msg); border-top-right-radius: 0; }
+        .msg.others { align-self: flex-start; background: var(--other-msg); border-top-left-radius: 0; }
+        
+        .msg-author { font-size: 0.75rem; color: #e91e63; font-weight: bold; margin-bottom: 2px; display: block; }
+        .msg.mine .msg-author { display: none; } /* No mostrar mi nombre en mis mensajes */
+        
+        .msg-time { font-size: 0.7rem; color: gray; float: right; margin-top: 5px; margin-left: 10px; }
+
+        /* INPUT AREA */
+        .input-area { background: #f0f0f0; padding: 10px; display: flex; gap: 10px; align-items: center; }
+        body.dark-mode .input-area { background: #1e1e1e; }
+        
+        input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ccc; outline: none; }
+        button.send-btn { background: #075e54; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.1s; }
+        button.send-btn:active { transform: scale(0.9); }
+
+    </style>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, doc, collection, addDoc, query, orderBy, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+        authDomain: "fiestas-pantano.firebaseapp.com",
+        projectId: "fiestas-pantano",
+        storageBucket: "fiestas-pantano.firebasestorage.app",
+        messagingSenderId: "801380435613",
+        appId: "1:801380435613:web:a842572cf7cee93ac57674",
+        measurementId: "G-EG2MZGBT1B"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+      
+      let activityId = "";
+      let currentUser = null;
+      let username = "Anónimo";
+
+      onAuthStateChanged(auth, async (user) => {
+          if (!user) window.location.href = "index.html";
+          currentUser = user;
+          
+          // Obtener nombre de usuario
+          const uDoc = await getDoc(doc(db, "usuarios", user.uid));
+          if(uDoc.exists()) username = uDoc.data().username;
+
+          aplicarTema();
+          
+          const params = new URLSearchParams(window.location.search);
+          activityId = params.get("id");
+          if(!activityId) { window.location.href = "actividades.html"; }
+          
+          cargarInfoActividad();
+          escucharMensajes();
+      });
+
+      async function cargarInfoActividad() {
+          const docSnap = await getDoc(doc(db, "actividades", activityId));
+          if(docSnap.exists()) {
+              document.getElementById("chat-title").innerText = docSnap.data().titulo;
+          }
+      }
+
+      function escucharMensajes() {
+          // Subcolección "mensajes" dentro de la actividad
+          const q = query(collection(db, "actividades", activityId, "mensajes"), orderBy("fecha", "asc"));
+          
+          onSnapshot(q, (snapshot) => {
+              const chatArea = document.getElementById("chat-area");
+              chatArea.innerHTML = "";
+              
+              snapshot.forEach((doc) => {
+                  const msg = doc.data();
+                  const esMio = msg.uid === currentUser.uid;
+                  
+                  const fecha = msg.fecha.toDate ? msg.fecha.toDate() : new Date(msg.fecha);
+                  const hora = fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                  const div = document.createElement("div");
+                  div.className = `msg ${esMio ? 'mine' : 'others'}`;
+                  div.innerHTML = `
+                      <span class="msg-author">${msg.autor}</span>
+                      ${msg.texto}
+                      <span class="msg-time">${hora}</span>
+                  `;
+                  chatArea.appendChild(div);
+              });
+              
+              // Auto-scroll al final
+              chatArea.scrollTop = chatArea.scrollHeight;
+          });
+      }
+
+      window.enviarMensaje = async () => {
+          const input = document.getElementById("msg-input");
+          const texto = input.value.trim();
+          if(!texto) return;
+
+          try {
+              await addDoc(collection(db, "actividades", activityId, "mensajes"), {
+                  texto: texto,
+                  autor: username,
+                  uid: currentUser.uid,
+                  fecha: new Date()
+              });
+              input.value = "";
+          } catch (e) {
+              console.error("Error enviando mensaje", e);
+          }
+      }
+
+      // Enviar con Enter
+      window.checkEnter = (e) => { if(e.key === 'Enter') enviarMensaje(); }
+
+      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+    </script>
+</head>
+<body>
+    <div class="chat-header">
+        <button class="btn-back" onclick="window.history.back()">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div class="chat-info">
+            <h2 id="chat-title">Cargando...</h2>
+            <span>Chat de actividad</span>
+        </div>
+    </div>
+
+    <div id="chat-area" class="chat-area">
+        </div>
+
+    <div class="input-area">
+        <input type="text" id="msg-input" placeholder="Escribe un mensaje..." onkeypress="checkEnter(event)">
+        <button class="send-btn" onclick="enviarMensaje()">
+            <span class="material-symbols-outlined">send</span>
+        </button>
+    </div>
+</body>
+</html>
