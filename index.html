@@ -55,7 +55,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDocs, query, collection, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
@@ -64,7 +64,15 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        onAuthStateChanged(auth, (user) => { if (user) window.location.href = "panel.html"; });
+        // BANDERA DE CONTROL PARA EVITAR EL ERROR
+        let isRegistering = false;
+
+        onAuthStateChanged(auth, (user) => {
+            // SOLO redirigir si el usuario existe Y NO estamos en medio de un registro
+            if (user && !isRegistering) {
+                window.location.href = "panel.html";
+            }
+        });
 
         window.abrirLogin = () => document.getElementById("login-modal").style.display = "flex";
         window.cerrarLogin = () => document.getElementById("login-modal").style.display = "none";
@@ -82,21 +90,20 @@
             }
         }
 
-        // --- LÓGICA DE INICIO DE SESIÓN CON USUARIO ---
+        // --- LÓGICA DE LOGIN ---
         window.login = async () => {
-            const user = document.getElementById("log-user").value.trim(); // Nombre de usuario
+            const user = document.getElementById("log-user").value.trim();
             const pass = document.getElementById("log-pass").value;
             
             if(!user || !pass) return alert("Rellena todo");
 
-            // TRUCO: Reconstruimos el email falso
             const fakeEmail = user.toLowerCase().replace(/\s+/g, '') + "@fiestaspantano.com";
-
             const btn = document.getElementById("btn-login-action");
             btn.innerText = "Entrando..."; btn.disabled = true;
 
             try { 
                 await signInWithEmailAndPassword(auth, fakeEmail, pass); 
+                // El onAuthStateChanged se encargará de redirigir
             } catch (e) { 
                 console.error(e);
                 alert("Usuario o contraseña incorrectos");
@@ -104,60 +111,70 @@
             }
         }
 
-        // --- LÓGICA DE REGISTRO CON CÓDIGO OBLIGATORIO ---
+        // --- LÓGICA DE REGISTRO ARREGLADA ---
         window.registro = async () => {
             const user = document.getElementById("reg-user").value.trim();
             const pass = document.getElementById("reg-pass").value;
             const code = document.getElementById("reg-code").value.trim().toUpperCase();
 
-            if (!user || !pass || !code) return alert("¡Todo es obligatorio! Necesitas un código.");
+            if (!user || !pass || !code) return alert("¡Todo es obligatorio!");
 
             const btn = document.getElementById("btn-reg-action");
-            btn.innerText = "Verificando..."; btn.disabled = true;
+            btn.innerText = "Procesando..."; btn.disabled = true;
+
+            // ACTIVAMOS EL FRENO DE MANO PARA QUE NO REDIRIJA ANTES DE TIEMPO
+            isRegistering = true;
 
             try {
-                // 1. Verificar si el usuario ya existe (para evitar duplicados feos)
+                // 1. Preparar email falso
                 const fakeEmail = user.toLowerCase().replace(/\s+/g, '') + "@fiestaspantano.com";
 
-                // 2. Verificar CÓDIGO en la base de datos
+                // 2. Verificar código
                 const q = query(collection(db, "invitaciones"), where("codigo", "==", code), where("usado", "==", false));
                 const snap = await getDocs(q);
 
                 if (snap.empty) {
+                    isRegistering = false; // Quitamos freno
                     btn.innerText = "Crear Cuenta"; btn.disabled = false;
                     return alert("⛔ Código INVÁLIDO o YA USADO.");
                 }
 
-                // 3. Si el código es bueno, sacamos el rol y el ID del código
                 const invitacionDoc = snap.docs[0];
-                const rolAsignado = invitacionDoc.data().rol; // 'usuario', 'festero', etc.
+                const rolAsignado = invitacionDoc.data().rol;
 
-                // 4. Crear usuario en Firebase Auth
+                // 3. Crear usuario (Esto dispara el login, pero isRegistering=true lo frena)
                 const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
 
-                // 5. Guardar datos en Firestore
+                // 4. Guardar en Base de Datos (AHORA SÍ TIENE TIEMPO)
                 await setDoc(doc(db, "usuarios", cred.user.uid), {
                     username: user,
-                    email: fakeEmail, // Guardamos el fake por si acaso
+                    email: fakeEmail,
                     rol: rolAsignado,
                     codigo_usado: code,
                     fecha_registro: new Date()
                 });
 
-                // 6. Marcar el código como USADO
+                // 5. Marcar código como usado
                 await updateDoc(doc(db, "invitaciones", invitacionDoc.id), {
                     usado: true,
                     usado_por: user,
                     fecha_uso: new Date()
                 });
 
-                alert("¡Bienvenido a la fiesta! 🎉");
-                // La redirección la hace el onAuthStateChanged automático
+                // 6. AHORA SÍ, REDIRIGIMOS MANUALMENTE
+                alert("¡Bienvenido/a! 🎉");
+                window.location.href = "panel.html";
 
             } catch (e) { 
                 console.error(e);
-                if(e.code === 'auth/email-already-in-use') alert("Ese nombre de usuario ya existe. Prueba otro.");
+                isRegistering = false; // Quitamos freno por si acaso
+                
+                // Si el error es que el usuario ya existe, limpiamos
+                if (auth.currentUser) await signOut(auth);
+
+                if(e.code === 'auth/email-already-in-use') alert("Ese nombre de usuario ya existe.");
                 else alert("Error: " + e.message);
+                
                 btn.innerText = "Crear Cuenta"; btn.disabled = false;
             }
         }
@@ -168,7 +185,7 @@
     <div class="hero">
         <span class="material-symbols-outlined logo-icon">celebration</span>
         <h1>Fiestas<br>Pantano</h1>
-        <p>Tu App de fiestas</p>
+        <p>Toda la información en tu bolsillo</p>
     </div>
 
     <div class="public-grid">
