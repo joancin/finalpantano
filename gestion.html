@@ -239,4 +239,49 @@
                 <input type="datetime-local" id="act-fecha">
                 <input type="url" id="act-imagen" placeholder="Enlace de imagen (Opcional)">
                 
-                <div style="display
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:12px;">Tipo</label>
+                        <select id="act-genero">
+                            <option value="torneo">🏆 Torneo (Bracket)</option>
+                            <option value="carrera">🏃 Carrera (Podio)</option>
+                            <option value="comida">🥘 Comida/Cena</option>
+                            <option value="fiesta">🪩 Fiesta/Evento</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:12px;">Categoría</label>
+                        <select id="act-categoria">
+                            <option value="todos">🌍 Todos</option>
+                            <option value="infantil">👶 Infantil</option>
+                            <option value="adulto">🍺 Adultos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <label style="font-size:12px;">Modalidad de Inscripción</label>
+                    <select id="act-modalidad" onchange="checkModalidad()">
+                        <option value="individual">👤 Individual</option>
+                        <option value="parejas">👥 Parejas</option>
+                        <option value="grupo">👨‍👩‍👧‍👦 Grupo</option>
+                    </select>
+                </div>
+
+                <div id="div-grupo-size" class="hidden">
+                    <label style="font-size:12px;">Personas por grupo</label>
+                    <input type="number" id="act-tamano" value="4" min="2" max="20">
+                </div>
+
+                <button class="action" onclick="crearActividad()">Publicar Actividad</button>
+                <p id="status-act" class="msg"></p>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+                
+                <h3 style="font-size: 14px;">Actividades Creadas</h3>
+                <div id="lista-actividades"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
