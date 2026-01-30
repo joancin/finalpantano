@@ -173,17 +173,17 @@
           document.getElementById('theme-icon').innerText = 'light_mode';
       }
 
-      // --- NAVEGACIÓN ---
+      // --- NAVEGACIÓN CORREGIDA ---
       window.irA = (lugar) => {
           if (lugar === 'zona_admin') {
               window.location.href = "admin.html"; 
           } else if (lugar === 'zona_festero') {
               window.location.href = "gestion.html";
-          }else if (lugar === 'ver_actividades') {
+          } else if (lugar === 'ver_actividades') {
               window.location.href = "actividades.html";
           } else if (lugar === 'mis_inscripciones') {
               window.location.href = "mis_inscripciones.html";
-      }else {
+          } else {
               alert("Sección en construcción: " + lugar);
           }
       }
