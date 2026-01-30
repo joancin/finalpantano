@@ -3,143 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - Fiestas del Pantano</title>
+    <title>Fiestas Pantano</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;800&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        h2 { color: #333; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #ff5722; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 15px; }
-        button:hover { background: #e64a19; }
-        .toggle-link { margin-top: 15px; display: block; color: #ff5722; cursor: pointer; text-decoration: underline; font-size: 14px; }
-        .hidden { display: none; }
-        .error { color: red; font-size: 14px; margin-top: 10px; }
+        :root { --bg: #f0f2f5; --card: white; --accent: #ff5722; --text: #333; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        .hero { text-align: center; margin-bottom: 40px; padding-top: 20px; }
+        .logo-icon { font-size: 4rem; color: var(--accent); margin-bottom: 10px; animation: bounce 2s infinite; }
+        h1 { margin: 0; font-size: 2.5rem; line-height: 1.1; }
+        p { color: gray; margin-top: 5px; }
+
+        /* GRID DE ACCESO PÚBLICO */
+        .public-grid { display: grid; gap: 15px; max-width: 500px; margin: 0 auto; width: 100%; }
+        
+        .public-card { background: var(--card); padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: inherit; transition: transform 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+        .public-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        
+        .card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; flex-shrink: 0; }
+        
+        /* Colores específicos */
+        .c-festeros { background: linear-gradient(135deg, #FF6B6B, #EE5253); }
+        .c-migany { background: linear-gradient(135deg, #FDCB6E, #E17055); }
+        .c-rifa { background: linear-gradient(135deg, #0984e3, #6c5ce7); }
+
+        .card-info h3 { margin: 0; font-size: 1.1rem; }
+        .card-info span { font-size: 0.8rem; color: gray; }
+
+        /* LOGIN FLOTANTE */
+        .login-section { margin-top: auto; padding-top: 40px; text-align: center; }
+        .btn-login-toggle { background: transparent; border: 1px solid #ccc; padding: 8px 20px; border-radius: 20px; cursor: pointer; color: gray; font-size: 0.9rem; }
+        
+        /* MODAL LOGIN (Oculto por defecto) */
+        #login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; }
+        .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-enter { background: var(--accent); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-close { margin-top: 10px; background: transparent; border: none; color: gray; cursor: pointer; text-decoration: underline; }
+
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
     </style>
-
+    
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, query, where, getDocs, setDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // Tu configuración Firebase aquí (omito para no repetir, usa la misma de siempre)
+        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-      // --- CONFIGURACIÓN ---
-      const firebaseConfig = {
-        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
-        authDomain: "fiestas-pantano.firebaseapp.com",
-        projectId: "fiestas-pantano",
-        storageBucket: "fiestas-pantano.firebasestorage.app",
-        messagingSenderId: "801380435613",
-        appId: "1:801380435613:web:a842572cf7cee93ac57674",
-        measurementId: "G-EG2MZGBT1B"
-      };
+        onAuthStateChanged(auth, (user) => {
+            if (user) window.location.href = "panel.html"; // Si ya está logueado, entra directo
+        });
 
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const auth = getAuth(app);
-
-      onAuthStateChanged(auth, (user) => {
-          if (user) window.location.href = "panel.html";
-      });
-
-      window.toggleView = () => {
-          document.getElementById('login-form').classList.toggle('hidden');
-          document.getElementById('register-form').classList.toggle('hidden');
-          document.getElementById('msg').innerText = "";
-      }
-
-      window.login = async () => {
-          const user = document.getElementById("login-user").value.trim().toLowerCase();
-          const pass = document.getElementById("login-pass").value;
-          const msg = document.getElementById("msg");
-          
-          try {
-              const fakeEmail = user + "@fiestaspueblo.com";
-              await signInWithEmailAndPassword(auth, fakeEmail, pass);
-          } catch (error) {
-              console.error(error);
-              msg.innerText = "Usuario o contraseña incorrectos";
-          }
-      }
-
-      window.register = async () => {
-        const user = document.getElementById("reg-user").value.trim().toLowerCase();
-        const pass = document.getElementById("reg-pass").value;
-        const codeInput = document.getElementById("reg-code").value.trim().toUpperCase(); // Convertimos a mayúsculas
-        const msg = document.getElementById("msg");
-        const btn = document.getElementById("btn-reg");
-
-        if(!user || !pass || !codeInput) { msg.innerText = "Rellena todo"; return; }
-        if(pass.length < 6) { msg.innerText = "Contraseña muy corta (min 6)"; return; }
-
-        try {
-            msg.innerText = "Verificando código...";
-            btn.disabled = true;
-
-            // 1. BUSCAR CÓDIGO VÁLIDO
-            // Buscamos código que coincida Y que no esté usado
-            const q = query(collection(db, "invitaciones"), where("codigo", "==", codeInput), where("usado", "==", false));
-            const querySnapshot = await getDocs(q);
-
-            if (querySnapshot.empty) {
-                throw new Error("El código no existe o ya ha sido gastado.");
-            }
-
-            // Seleccionamos EL PRIMER código válido que encontremos (para evitar problemas si hay duplicados antiguos)
-            const codigoDoc = querySnapshot.docs[0]; 
-            const codigoId = codigoDoc.id;
-            const rol = codigoDoc.data().rol || "usuario";
-
-            // 2. CREAR USUARIO
-            msg.innerText = "Creando usuario...";
-            const fakeEmail = user + "@fiestaspueblo.com";
-            const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
-            
-            // 3. GUARDAR DATOS
-            await setDoc(doc(db, "usuarios", cred.user.uid), { 
-                username: user, 
-                rol: rol, 
-                codigo_usado: codeInput 
-            });
-            
-            // 4. ¡¡QUEMAR CÓDIGO!! (Aquí estaba la clave)
-            msg.innerText = "Finalizando...";
-            await updateDoc(doc(db, "invitaciones", codigoId), { 
-                usado: true, 
-                usado_por: user,
-                fecha_uso: new Date()
-            });
-
-            // Si todo va bien, el onAuthStateChanged nos redirigirá
-            
-        } catch (e) {
-            console.error(e);
-            let errorTxt = e.message;
-            if(errorTxt.includes("email-already-in-use")) errorTxt = "El usuario ya existe.";
-            msg.innerText = "Error: " + errorTxt;
-            btn.disabled = false;
+        window.abrirLogin = () => document.getElementById("login-modal").style.display = "flex";
+        window.cerrarLogin = () => document.getElementById("login-modal").style.display = "none";
+        
+        window.entrar = async () => {
+            const email = document.getElementById("email").value;
+            const pass = document.getElementById("pass").value;
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (e) { alert("Error: " + e.message); }
         }
-      }
     </script>
 </head>
 <body>
-    <div class="container">
-        <div id="login-form">
-            <h2>🔑 Entrar</h2>
-            <input type="text" id="login-user" placeholder="Usuario">
-            <input type="password" id="login-pass" placeholder="Contraseña">
-            <button onclick="login()">Iniciar Sesión</button>
-            <span class="toggle-link" onclick="toggleView()">¿No tienes cuenta? Regístrate aquí</span>
-        </div>
 
-        <div id="register-form" class="hidden">
-            <h2>📝 Registro</h2>
-            <input type="text" id="reg-user" placeholder="Nuevo Usuario">
-            <input type="password" id="reg-pass" placeholder="Contraseña (min 6)">
-            <input type="text" id="reg-code" placeholder="Código de Invitación">
-            <button id="btn-reg" onclick="register()">Crear Cuenta</button>
-            <span class="toggle-link" onclick="toggleView()">¿Ya tienes cuenta? Entra aquí</span>
-        </div>
-
-        <p id="msg" class="error"></p>
+    <div class="hero">
+        <span class="material-symbols-outlined logo-icon">celebration</span>
+        <h1>Fiestas<br>Pantano</h1>
+        <p>Toda la información en tu bolsillo</p>
     </div>
+
+    <div class="public-grid">
+        <a href="festeros.html" class="public-card">
+            <div class="card-icon c-festeros">
+                <span class="material-symbols-outlined">diversity_3</span>
+            </div>
+            <div class="card-info">
+                <h3>Los Festeros</h3>
+                <span>Conoce al equipo</span>
+            </div>
+        </a>
+
+        <a href="migany.html" class="public-card">
+            <div class="card-icon c-migany">
+                <span class="material-symbols-outlined">stars</span>
+            </div>
+            <div class="card-info">
+                <h3>Mig Any: Vaquero</h3>
+                <span>2 Abril - El Rancho</span>
+            </div>
+        </a>
+
+        <a href="#" onclick="alert('Próximamente...')" class="public-card"> <div class="card-icon c-rifa">
+                <span class="material-symbols-outlined">confirmation_number</span>
+            </div>
+            <div class="card-info">
+                <h3>Sorteo / Rifa</h3>
+                <span>Comprueba tu número</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="login-section">
+        <button class="btn-login-toggle" onclick="abrirLogin()">Soy Usuario / Festero</button>
+    </div>
+
+    <div id="login-modal">
+        <div class="login-box">
+            <h2>Acceso Privado</h2>
+            <input type="email" id="email" placeholder="Correo electrónico">
+            <input type="password" id="pass" placeholder="Contraseña">
+            <button class="btn-enter" onclick="entrar()">Entrar</button>
+            <button class="btn-close" onclick="cerrarLogin()">Volver</button>
+        </div>
+    </div>
+
 </body>
 </html>
