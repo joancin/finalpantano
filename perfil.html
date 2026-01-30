@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; --danger: #d32f2f; }
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; transition: background 0.3s; }
@@ -20,18 +20,28 @@
         
         .profile-card { background: var(--card); border-radius: 20px; padding: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .avatar-circle { width: 100px; height: 100px; background: var(--accent); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 40px; margin: 0 auto 15px auto; font-weight: bold; }
+        
         .role-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px; display: inline-block; }
         .role-admin { background: #e91e63; } .role-festero { background: #9c27b0; }
 
         .input-group { text-align: left; margin-top: 20px; }
         .input-group label { font-size: 0.8rem; color: gray; margin-left: 5px; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; margin-top: 5px; }
         
-        .btn-save { background: var(--accent); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; display: none; transition: background 0.3s; }
-        .btn-save:hover { background: #e64a19; }
+        /* ESTILO PARA INPUT BLOQUEADO */
+        .input-wrapper { position: relative; }
+        .input-wrapper .icon-lock { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: gray; font-size: 1.2rem; }
+        
+        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.05); color: gray; box-sizing: border-box; margin-top: 5px; cursor: not-allowed; }
+        html.dark-mode .input-group input { background: rgba(255,255,255,0.05); color: #888; }
 
         .menu-item { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-        .btn-logout { width: 100%; padding: 15px; background: #ffebee; color: #d32f2f; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        .btn-logout { width: 100%; padding: 15px; background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        /* BOTÓN DE BORRAR CUENTA */
+        .btn-delete-account { width: 100%; padding: 15px; background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
+        .btn-delete-account:hover { background: #ffcdd2; }
+        html.dark-mode .btn-delete-account { background: rgba(211, 47, 47, 0.1); border-color: #ef9a9a; color: #ef9a9a; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
         .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.3s; }
@@ -42,16 +52,15 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      // IMPORTANTE: Añadidos query, collection, where, getDocs para comprobar duplicados
-      import { getFirestore, doc, getDoc, updateDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      // Importamos deleteUser (aunque usaremos currentUser.delete())
+      import { getAuth, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
       let currentUser = null;
-      let currentUsername = "";
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
@@ -61,7 +70,6 @@
           const uDoc = await getDoc(doc(db, "usuarios", user.uid));
           if(uDoc.exists()) {
               const data = uDoc.data();
-              currentUsername = data.username; // Guardamos el nombre actual
               document.getElementById("user-alias").value = data.username;
               document.getElementById("avatar-initial").innerText = data.username.charAt(0).toUpperCase();
               
@@ -72,49 +80,35 @@
           }
       });
 
-      window.detectarCambio = () => { document.getElementById("btn-guardar").style.display = "block"; }
+      // --- ELIMINAR CUENTA COMPLETA ---
+      window.eliminarCuenta = async () => {
+          if(!confirm("⚠️ ¿ESTÁS SEGURO?\n\nEsta acción es irreversible. Se borrará tu usuario y tendrás que registrarte de nuevo si quieres volver.")) return;
 
-      // --- GUARDAR CON COMPROBACIÓN DE DUPLICADOS ---
-      window.guardarCambios = async () => {
-          const nuevoAlias = document.getElementById("user-alias").value.trim();
-          
-          if(!nuevoAlias) return alert("El nombre no puede estar vacío");
-          if(nuevoAlias === currentUsername) return; // No ha cambiado nada
-
-          const btn = document.getElementById("btn-guardar");
-          btn.innerText = "Comprobando..."; btn.disabled = true;
+          const btn = document.getElementById("btn-delete");
+          btn.innerText = "Borrando..."; btn.disabled = true;
 
           try {
-              // 1. Preguntar a la base de datos si alguien ya tiene ese nombre
-              const q = query(collection(db, "usuarios"), where("username", "==", nuevoAlias));
-              const querySnapshot = await getDocs(q);
+              const uid = currentUser.uid;
 
-              // 2. Si encontramos a alguien...
-              if (!querySnapshot.empty) {
-                  // Comprobamos que no seamos nosotros mismos (por si acaso)
-                  if (querySnapshot.docs[0].id !== currentUser.uid) {
-                      btn.innerText = "Guardar Cambios"; btn.disabled = false;
-                      return alert("⛔ Ese nombre ya está cogido. Por favor, elige otro.");
-                  }
-              }
+              // 1. Borrar datos de Firestore
+              await deleteDoc(doc(db, "usuarios", uid));
 
-              // 3. Si está libre, guardamos
-              await updateDoc(doc(db, "usuarios", currentUser.uid), { username: nuevoAlias });
-              
-              currentUsername = nuevoAlias; // Actualizamos local
-              document.getElementById("avatar-initial").innerText = nuevoAlias.charAt(0).toUpperCase();
-              
-              const msg = document.getElementById("toast"); 
-              msg.style.display="block"; msg.innerText="✅ Perfil actualizado"; 
-              setTimeout(()=>msg.style.display="none", 3000);
-              
-              btn.style.display="none";
-              btn.innerText = "Guardar Cambios"; btn.disabled = false;
+              // 2. Borrar cuenta de Autenticación
+              await deleteUser(currentUser);
 
-          } catch(e) { 
+              alert("Tu cuenta ha sido eliminada.");
+              window.location.href = "index.html";
+
+          } catch(e) {
               console.error(e);
-              alert("Error al guardar: " + e.message);
-              btn.innerText = "Guardar Cambios"; btn.disabled = false;
+              btn.innerText = "🗑️ Eliminar mi Cuenta"; btn.disabled = false;
+
+              // Si pide login reciente
+              if(e.code === 'auth/requires-recent-login') {
+                  alert("⚠️ SEGURIDAD:\nPara borrar tu cuenta, Google necesita confirmar que eres tú.\n\nPor favor:\n1. Cierra sesión.\n2. Vuelve a entrar.\n3. Intenta borrar la cuenta de nuevo.");
+              } else {
+                  alert("Error al borrar: " + e.message);
+              }
           }
       }
 
@@ -141,11 +135,12 @@
             <div id="avatar-initial" class="avatar-circle">?</div>
             
             <div class="input-group">
-                <label>Tu Alias (Nombre público)</label>
-                <input type="text" id="user-alias" oninput="detectarCambio()">
+                <label>Tu Alias (No se puede modificar)</label>
+                <div class="input-wrapper">
+                    <input type="text" id="user-alias" disabled>
+                    <span class="material-symbols-outlined icon-lock">lock</span>
+                </div>
             </div>
-            
-            <button id="btn-guardar" class="btn-save" onclick="guardarCambios()">Guardar Cambios</button>
         </div>
 
         <div class="menu-item" onclick="cambiarTema()">
@@ -159,6 +154,15 @@
         <button class="btn-logout" onclick="cerrarSesion()">
             <span class="material-symbols-outlined">logout</span> Cerrar Sesión
         </button>
+
+        <button id="btn-delete" class="btn-delete-account" onclick="eliminarCuenta()">
+            <span class="material-symbols-outlined">delete_forever</span> Eliminar mi Cuenta
+        </button>
+        
+        <p style="text-align:center; color:gray; font-size:0.75rem; margin-top:10px;">
+            Al eliminar tu cuenta, tu nombre quedará libre para un nuevo registro.
+        </p>
+
         <div id="toast" class="msg"></div>
     </div>
 
