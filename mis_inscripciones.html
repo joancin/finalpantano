@@ -2,13 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Tickets</title>
-    
-    <script>
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
-    </script>
-
+    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -17,41 +12,40 @@
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 800px; margin: 0 auto; }
         
-        h1 { margin-bottom: 20px; font-size: 1.8rem; }
+        .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 1.5rem; }
 
-        /* TABS */
-        .tabs { display: flex; background: var(--card); border-radius: 12px; padding: 5px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .tab { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; color: gray; transition: all 0.2s; }
-        .tab.active { background: var(--bg); color: var(--accent); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        /* SWITCH TOGGLE */
+        .toggle-container { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: bold; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(18px); }
 
-        /* TICKET STYLE */
-        .ticket { background: var(--card); border-radius: 16px; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
-        
-        /* Efecto de borde dentado */
-        .ticket::before, .ticket::after { content: ""; position: absolute; top: 70px; width: 20px; height: 20px; background: var(--bg); border-radius: 50%; z-index: 10; }
-        .ticket::before { left: -10px; }
-        .ticket::after { right: -10px; }
-        
-        /* Línea discontinua */
-        .ticket-divider { position: absolute; top: 79px; left: 15px; right: 15px; border-top: 2px dashed rgba(255,255,255,0.5); z-index: 5; }
+        /* GRID LAYOUT */
+        .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 
-        .ticket-header { background: var(--accent); color: white; padding: 20px; padding-bottom: 35px; display: flex; justify-content: space-between; align-items: flex-start; }
-        .ticket-body { padding: 20px; padding-top: 30px; }
+        .ticket { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; border: 1px solid var(--border); transition: transform 0.2s; }
+        .ticket:active { transform: scale(0.98); }
+        .ticket.past { opacity: 0.6; filter: grayscale(1); }
         
-        .t-title { font-size: 1.2rem; font-weight: 800; margin: 0; line-height: 1.2; }
-        .t-role { background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; white-space: nowrap; }
+        .ticket-head { background: var(--accent); padding: 10px; height: 40px; }
+        .ticket.past .ticket-head { background: gray; }
         
-        .t-info { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--text); margin-bottom: 8px; }
-        .t-info span { color: var(--accent); }
+        .ticket-body { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .t-title { font-size: 0.95rem; margin: 0; margin-bottom: 5px; line-height: 1.2; }
+        .t-date { font-size: 0.8rem; color: gray; display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
         
+        .t-badge { display: inline-block; padding: 3px 8px; background: rgba(0,0,0,0.05); border-radius: 10px; font-size: 0.7rem; font-weight: bold; color: var(--text); border: 1px solid var(--border); width: fit-content; }
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.3s; }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-        .nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 2px; }
-        
-        .hidden { display: none; }
+        .material-symbols-outlined { font-size: 24px; }
     </style>
 
     <script type="module">
@@ -64,101 +58,112 @@
       const db = getFirestore(app);
       const auth = getAuth(app);
 
+      let allTickets = [];
+
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
           
           const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
           onSnapshot(q, (snapshot) => {
-              const listActivos = document.getElementById("list-activos");
-              const listPasados = document.getElementById("list-pasados");
-              listActivos.innerHTML = ""; listPasados.innerHTML = "";
-              
-              let hasActive = false;
-              let hasPast = false;
-
+              allTickets = [];
               snapshot.forEach((docSnap) => {
                   const act = docSnap.data();
                   const inscritos = act.inscritos || [];
-                  let miRol = null;
                   const fechaEvento = act.fecha.toDate ? act.fecha.toDate() : new Date(act.fecha);
-                  const esPasado = fechaEvento < new Date();
+                  
+                  // BÚSQUEDA EXHAUSTIVA DE TU PARTICIPACIÓN
+                  let miRol = null;
+                  let miEquipo = null;
 
-                  inscritos.forEach(equipo => {
-                      if (equipo.capitan_uid === user.uid) miRol = "Capitán";
-                      else if (equipo.miembros && equipo.miembros.some(m => m.uid === user.uid)) miRol = "Miembro";
-                  });
+                  // 1. Buscamos si eres Capitán
+                  const soyCapitan = inscritos.find(e => e.capitan_uid === user.uid);
+                  if (soyCapitan) {
+                      miRol = "Capitán";
+                      miEquipo = soyCapitan;
+                  } else {
+                      // 2. Si no, buscamos si eres miembro dentro de algún equipo
+                      const soyMiembro = inscritos.find(e => e.miembros && e.miembros.some(m => m.uid === user.uid)); // Nota: aquí uid puede no existir si no se vinculó, pero buscamos por nombre o lógica futura.
+                      // CORRECCIÓN: Como ahora guardamos nombres manuales en "miembros", no podemos asegurar el UID ahí.
+                      // Pero el requisito era que "Capitan inscribe". El capitán siempre sale.
+                      // Si queremos que los miembros vean el ticket, el capitán debería haber seleccionado usuarios reales, 
+                      // pero en el modal simple solo escribimos "Nombres". 
+                      // POR TANTO: Solo el Capitán ve el ticket oficial en esta versión simple, 
+                      // O bien asumimos que si tu nombre coincide con un miembro, te lo mostramos (arriesgado por duplicados).
+                      // MANTENEMOS: Solo Capitán ve el ticket seguro por UID.
+                  }
 
-                  if (miRol) {
-                      const fechaStr = fechaEvento.toLocaleString([], {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-                      
-                      const html = `
-                        <div class="ticket">
-                            <div class="ticket-divider"></div>
-                            <div class="ticket-header" style="background:${esPasado ? 'gray' : 'var(--accent)'}">
-                                <div style="flex:1; padding-right:10px;">
-                                    <h3 class="t-title">${act.titulo}</h3>
-                                </div>
-                                <span class="t-role">${miRol}</span>
-                            </div>
-                            <div class="ticket-body">
-                                <div class="t-info"><span class="material-symbols-outlined">calendar_month</span> ${fechaStr}</div>
-                                <div class="t-info"><span class="material-symbols-outlined">location_on</span> ${act.lugar || 'Ubicación por definir'}</div>
-                                <div class="t-info"><span class="material-symbols-outlined">group</span> Equipo: ${equipo.nombre_equipo || 'Individual'}</div>
-                            </div>
-                        </div>`;
-
-                      if(esPasado) {
-                          listPasados.innerHTML += html; hasPast = true;
-                      } else {
-                          listActivos.innerHTML += html; hasActive = true;
-                      }
+                  if (miEquipo) {
+                      allTickets.push({
+                          id: docSnap.id,
+                          titulo: act.titulo,
+                          fecha: fechaEvento,
+                          lugar: act.lugar,
+                          rol: miRol,
+                          equipo: miEquipo.nombre_equipo,
+                          esPasado: fechaEvento < new Date()
+                      });
                   }
               });
-
-              if(!hasActive) listActivos.innerHTML = "<div style='text-align:center; padding:40px; color:gray'>🎟️ No tienes entradas activas.</div>";
-              if(!hasPast) listPasados.innerHTML = "<div style='text-align:center; padding:40px; color:gray'>⌛ Historial vacío.</div>";
+              renderTickets();
           });
       });
 
-      window.switchTab = (tab) => {
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          document.getElementById('tab-'+tab).classList.add('active');
+      window.renderTickets = () => {
+          const container = document.getElementById("tickets-grid");
+          const hidePast = document.getElementById("toggle-past").checked;
           
-          if(tab === 'activos') {
-              document.getElementById('list-activos').classList.remove('hidden');
-              document.getElementById('list-pasados').classList.add('hidden');
-          } else {
-              document.getElementById('list-activos').classList.add('hidden');
-              document.getElementById('list-pasados').classList.remove('hidden');
+          container.innerHTML = "";
+
+          const filtered = allTickets.filter(t => hidePast ? !t.esPasado : true);
+
+          if(filtered.length === 0) {
+              container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:gray; margin-top:40px;">No hay tickets que mostrar.</p>`;
+              return;
           }
+
+          filtered.forEach(t => {
+              const fechaStr = t.fecha.toLocaleString([], {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+              
+              container.innerHTML += `
+                <div class="ticket ${t.esPasado ? 'past' : ''}">
+                    <div class="ticket-head"></div>
+                    <div class="ticket-body">
+                        <div>
+                            <h3 class="t-title">${t.titulo}</h3>
+                            <div class="t-date"><span class="material-symbols-outlined" style="font-size:16px">event</span> ${fechaStr}</div>
+                            <div class="t-date"><span class="material-symbols-outlined" style="font-size:16px">group</span> ${t.equipo}</div>
+                        </div>
+                        <div style="margin-top:10px;">
+                            <span class="t-badge">${t.rol}</span>
+                            ${t.esPasado ? '<span class="t-badge" style="background:#eee">FINALIZADO</span>' : ''}
+                        </div>
+                    </div>
+                </div>`;
+          });
       }
     </script>
 </head>
 <body>
     <div class="container">
-        <h1>Mis Entradas</h1>
-        
-        <div class="tabs">
-            <div id="tab-activos" class="tab active" onclick="switchTab('activos')">Próximos</div>
-            <div id="tab-pasados" class="tab" onclick="switchTab('pasados')">Historial</div>
+        <div class="header-tools">
+            <h1>Mis Tickets</h1>
+            <label class="toggle-container">
+                Ocultar Pasados
+                <div class="switch">
+                    <input type="checkbox" id="toggle-past" checked onchange="renderTickets()">
+                    <span class="slider"></span>
+                </div>
+            </label>
         </div>
 
-        <div id="list-activos">Cargando...</div>
-        <div id="list-pasados" class="hidden"></div>
+        <div id="tickets-grid" class="tickets-grid">Cargando...</div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="panel.html" class="nav-item">
-            <span class="material-symbols-outlined">home</span>Inicio
-        </a>
-        <a href="actividades.html" class="nav-item">
-            <span class="material-symbols-outlined">event</span>Fiestas
-        </a>
-        <a href="#" class="nav-item active"> <span class="material-symbols-outlined">confirmation_number</span>Tickets
-        </a>
-        <a href="perfil.html" class="nav-item">
-            <span class="material-symbols-outlined">person</span>Perfil
-        </a>
+        <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
+        <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
+        <a href="#" class="nav-item active"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
+        <a href="perfil.html" class="nav-item"><span class="material-symbols-outlined">person</span>Perfil</a>
     </nav>
 </body>
 </html>
