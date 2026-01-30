@@ -3,56 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Festera</title>
+    <title>Gestión de Carrera</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #9c27b0; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #4caf50; }
         body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
         
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        
-        .grid-gestion { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
-        @media (max-width: 800px) { .grid-gestion { grid-template-columns: 1fr; } }
 
-        .card { background: var(--card); padding: 25px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid #ddd; padding-bottom: 10px; font-size: 1.2rem; }
+        /* PODIO VISUAL */
+        .podium-admin { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; align-items: flex-end; height: 150px; }
+        .podium-slot { flex: 1; max-width: 150px; border-radius: 10px 10px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 10px; color: white; text-align: center; position: relative; transition: all 0.3s; }
         
-        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; background: var(--card); color: var(--text); }
-        button.action { width: 100%; background: var(--accent); color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        button.action:hover { opacity: 0.9; }
+        .slot-1 { background: #ffd700; height: 100%; border: 2px solid #e6c200; z-index: 2; } /* Oro */
+        .slot-2 { background: #c0c0c0; height: 80%; border: 2px solid #aaaaaa; z-index: 1; } /* Plata */
+        .slot-3 { background: #cd7f32; height: 60%; border: 2px solid #b87333; z-index: 0; } /* Bronce */
 
-        .scroll-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
-        .list-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        
-        .activity-item { background: rgba(0,0,0,0.02); margin-bottom: 8px; padding: 10px; border-radius: 5px; border-left: 4px solid var(--accent); display: flex; gap: 10px; align-items: center; }
-        .activity-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #ddd; }
-        .activity-content { flex: 1; }
-        
-        .activity-header { display: flex; justify-content: space-between; font-weight: bold; align-items: flex-start; }
-        .activity-details { font-size: 12px; color: gray; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; }
-        .btn-del { background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; }
+        .winner-name { font-weight: bold; margin-top: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .btn-clear-pos { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.2); border: none; color: white; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 10px; display: none; }
+        .podium-slot:hover .btn-clear-pos { display: block; }
 
-        .tag { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; display: inline-block; }
-        .tag.free { background: #e8f5e9; color: green; }
-        .tag.used { background: #ffebee; color: red; }
+        .runner-list { list-style: none; padding: 0; }
+        .runner-item { background: var(--card); padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .runner-name { font-weight: bold; font-size: 1.1rem; }
         
-        /* Etiquetas nuevas */
-        .tag-cat-adulto { background: #333; color: white; }
-        .tag-cat-infantil { background: #ffeb3b; color: #333; }
-        .tag-cat-todos { background: #2196f3; color: white; }
+        .medal-actions { display: flex; gap: 5px; }
+        .btn-medal { border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 1.2rem; transition: transform 0.2s; opacity: 0.5; filter: grayscale(100%); }
+        .btn-medal:hover { transform: scale(1.2); opacity: 1; filter: grayscale(0%); }
+        
+        .gold { background: #fff9c4; } .gold:hover { background: #ffd700; }
+        .silver { background: #eceff1; } .silver:hover { background: #c0c0c0; }
+        .bronze { background: #efebe9; } .bronze:hover { background: #cd7f32; }
 
-        .msg { margin-top: 10px; font-weight: bold; display: none; }
-        .success { color: green; } .error { color: red; }
-        .hidden { display: none; }
+        .assigned-1 .runner-item { border-left: 5px solid #ffd700; background: #fffde7; }
+        .assigned-2 .runner-item { border-left: 5px solid #c0c0c0; background: #f5f5f5; }
+        .assigned-3 .runner-item { border-left: 5px solid #cd7f32; background: #fff3e0; }
     </style>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot, where, getDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = {
@@ -68,226 +63,133 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
-      let currentUser = null;
+      
+      let activityId = "";
+      let activityData = null;
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
-          const docSnap = await getDoc(doc(db, "usuarios", user.uid));
-          if (!docSnap.exists() || (docSnap.data().rol !== 'festero' && docSnap.data().rol !== 'admin')) {
-              window.location.href = "panel.html";
+          const uDoc = await getDoc(doc(db, "usuarios", user.uid));
+          if(!uDoc.exists() || (uDoc.data().rol !== 'admin' && uDoc.data().rol !== 'festero')) {
+              window.location.href = "panel.html"; return;
           }
-          currentUser = user;
-          aplicarTema();
-          escucharCodigos();
-          escucharActividades();
+          if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+
+          const params = new URLSearchParams(window.location.search);
+          activityId = params.get("id");
+          if(!activityId) { window.location.href = "gestion.html"; }
+          cargarDatos();
       });
 
-      // --- CÓDIGOS ---
-      window.generarCodigo = async () => {
-          const codeInput = document.getElementById("new-code");
-          const codigo = codeInput.value.trim().toUpperCase();
-          const status = document.getElementById("status-code");
-
-          if(codigo.length < 3) { mostrarMsg(status, "Mínimo 3 letras", "error"); return; }
-          try {
-              const q = query(collection(db, "invitaciones"), where("codigo", "==", codigo));
-              const querySnapshot = await getDocs(q);
-              if (!querySnapshot.empty) { mostrarMsg(status, "¡Ya existe!", "error"); return; }
-
-              await addDoc(collection(db, "invitaciones"), {
-                  codigo: codigo, rol: "usuario", usado: false, creado_por: currentUser.uid, fecha_creacion: new Date()
-              });
-              mostrarMsg(status, `✅ Código ${codigo} creado.`, "success");
-              codeInput.value = ""; 
-          } catch (e) { console.error(e); mostrarMsg(status, "Error: " + e.message, "error"); }
-      }
-
-      function escucharCodigos() {
-          const q = query(collection(db, "invitaciones"), orderBy("fecha_creacion", "desc"));
-          onSnapshot(q, (snapshot) => {
-              const lista = document.getElementById("lista-codigos");
-              lista.innerHTML = "";
-              if(snapshot.empty) { lista.innerHTML = "<li>Sin códigos.</li>"; return; }
-              snapshot.forEach((doc) => {
-                  const d = doc.data();
-                  const estadoClass = d.usado ? "used" : "free";
-                  const estadoTexto = d.usado ? `${d.usado_por}` : "LIBRE";
-                  lista.innerHTML += `<li class="list-item"><div><strong>${d.codigo}</strong></div><span class="tag ${estadoClass}">${estadoTexto}</span></li>`;
-              });
-          });
-      }
-
-      // --- ACTIVIDADES ---
-      window.checkModalidad = () => {
-          const tipo = document.getElementById("act-modalidad").value;
-          const divGrupo = document.getElementById("div-grupo-size");
-          if (tipo === 'grupo') divGrupo.classList.remove("hidden"); else divGrupo.classList.add("hidden");
-      }
-
-      window.crearActividad = async () => {
-          const titulo = document.getElementById("act-titulo").value;
-          const fecha = document.getElementById("act-fecha").value;
-          const genero = document.getElementById("act-genero").value;
-          const categoria = document.getElementById("act-categoria").value; // NUEVO
-          const modalidad = document.getElementById("act-modalidad").value;
-          const tamano = document.getElementById("act-tamano").value;
-          const imagen = document.getElementById("act-imagen").value.trim();
-          const status = document.getElementById("status-act");
-
-          if(!titulo || !fecha) { mostrarMsg(status, "Pon título y fecha", "error"); return; }
+      async function cargarDatos() {
+          const docSnap = await getDoc(doc(db, "actividades", activityId));
+          if(!docSnap.exists()) return;
+          activityData = docSnap.data();
           
-          let equipoSize = 1;
-          if(modalidad === 'parejas') equipoSize = 2;
-          if(modalidad === 'grupo') equipoSize = parseInt(tamano) || 3;
+          document.getElementById("page-title").innerText = "Carrera: " + activityData.titulo;
+          renderPodio();
+          renderCorredores();
+      }
 
-          // Icono por defecto inteligente
-          let imgFinal = imagen;
-          if(!imgFinal) {
-              if(genero === 'carrera') imgFinal = 'https://cdn-icons-png.flaticon.com/512/2553/2553658.png';
-              else if(genero === 'torneo') imgFinal = 'https://cdn-icons-png.flaticon.com/512/1606/1606141.png';
-              else if(genero === 'comida') imgFinal = 'https://cdn-icons-png.flaticon.com/512/1638/1638069.png';
-              else imgFinal = 'https://cdn-icons-png.flaticon.com/512/3159/3159066.png';
+      function renderPodio() {
+          const podio = activityData.podio || { p1: null, p2: null, p3: null };
+          updateSlot("slot-2", podio.p2);
+          updateSlot("slot-1", podio.p1);
+          updateSlot("slot-3", podio.p3);
+      }
+
+      function updateSlot(id, data) {
+          const el = document.getElementById(id);
+          const nameEl = el.querySelector(".winner-name");
+          const btnClear = el.querySelector(".btn-clear-pos");
+          if(data) {
+              nameEl.innerText = data.nombre;
+              btnClear.style.display = "block";
+              btnClear.onclick = () => asignarMedalla(id === 'slot-1' ? 1 : id === 'slot-2' ? 2 : 3, null);
+          } else {
+              nameEl.innerText = "-";
+              btnClear.style.display = "none";
           }
-
-          try {
-              await addDoc(collection(db, "actividades"), {
-                  titulo: titulo,
-                  fecha: new Date(fecha),
-                  genero: genero,
-                  categoria: categoria, // GUARDAR CATEGORÍA
-                  modalidad: modalidad,
-                  tamano_equipo: equipoSize,
-                  imagen: imgFinal,
-                  creado_por: currentUser.uid,
-                  participantes: [],
-                  inscritos: [] // Array importante para la nueva lógica
-              });
-
-              mostrarMsg(status, "✅ Actividad publicada", "success");
-              document.getElementById("act-titulo").value = "";
-          } catch (e) { console.error(e); mostrarMsg(status, "Error: " + e.message, "error"); }
       }
 
-      function escucharActividades() {
-          const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
-          onSnapshot(q, (snapshot) => {
-              const lista = document.getElementById("lista-actividades");
-              lista.innerHTML = "";
-              if(snapshot.empty) { lista.innerHTML = "<p>No hay actividades.</p>"; return; }
+      function renderCorredores() {
+          const lista = document.getElementById("lista-corredores");
+          lista.innerHTML = "";
+          const inscritos = activityData.inscritos || [];
+          const podio = activityData.podio || {};
 
-              snapshot.forEach((docSnap) => {
-                  const act = docSnap.data();
-                  const fechaLegible = act.fecha.toDate ? act.fecha.toDate().toLocaleString() : new Date(act.fecha).toLocaleString();
-                  const inscritosCount = act.inscritos ? act.inscritos.length : 0;
-                  
-                  // Lógica del botón de gestión
-                  let botonGestion = "";
-                  
-                  if (act.genero === 'torneo') {
-                      botonGestion = `<button style="background:#2196f3; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" onclick="window.location.href='torneo.html?id=${docSnap.id}'">Gestionar Torneo</button>`;
-                  } else if (act.genero === 'carrera') {
-                      botonGestion = `<button style="background:#4caf50; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" onclick="alert('Próximamente: Gestionar Carrera (Podio)')">Gestionar Carrera</button>`;
-                  }
+          const getName = (p) => p.nombre_equipo || p.capitan; 
 
-                  const html = `
-                    <div class="activity-item">
-                        <img src="${act.imagen}" class="activity-img" alt="img" onerror="this.src='https://placehold.co/50'">
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <span>${act.titulo}</span>
-                                <div>
-                                    ${botonGestion}
-                                    <button class="btn-del" onclick="borrarActividad('${docSnap.id}', '${act.titulo}')">X</button>
-                                </div>
-                            </div>
-                            <div class="activity-details">
-                                <span>📅 ${fechaLegible}</span>
-                                <span class="tag tag-cat-${act.categoria || 'todos'}">${(act.categoria || 'Todos').toUpperCase()}</span>
-                                <span style="background:#eee; padding:2px 5px; border-radius:4px; font-size:10px;">${act.genero.toUpperCase()}</span>
-                                <span>👥 ${inscritosCount} apuntados</span>
-                            </div>
-                        </div>
-                    </div>
-                  `;
-                  lista.innerHTML += html;
-              });
+          inscritos.forEach((p) => {
+              const nombre = getName(p);
+              let claseFila = "";
+              if (podio.p1 && podio.p1.nombre === nombre) claseFila = "assigned-1";
+              if (podio.p2 && podio.p2.nombre === nombre) claseFila = "assigned-2";
+              if (podio.p3 && podio.p3.nombre === nombre) claseFila = "assigned-3";
+
+              const div = document.createElement("div");
+              div.className = `runner-item ${claseFila}`;
+              div.innerHTML = `
+                  <span class="runner-name">${nombre}</span>
+                  <div class="medal-actions">
+                      <button class="btn-medal gold" onclick="asignarMedalla(1, '${nombre}')" title="Primer Puesto">🥇</button>
+                      <button class="btn-medal silver" onclick="asignarMedalla(2, '${nombre}')" title="Segundo Puesto">🥈</button>
+                      <button class="btn-medal bronze" onclick="asignarMedalla(3, '${nombre}')" title="Tercer Puesto">🥉</button>
+                  </div>
+              `;
+              lista.appendChild(div);
           });
+          document.getElementById("count-part").innerText = inscritos.length;
       }
 
-      window.borrarActividad = async (id, titulo) => {
-          if(confirm(`¿Borrar "${titulo}"?`)) await deleteDoc(doc(db, "actividades", id));
+      window.asignarMedalla = async (posicion, nombreGanador) => {
+          let podio = activityData.podio || { p1: null, p2: null, p3: null };
+          if (nombreGanador) {
+              if(podio.p1 && podio.p1.nombre === nombreGanador) podio.p1 = null;
+              if(podio.p2 && podio.p2.nombre === nombreGanador) podio.p2 = null;
+              if(podio.p3 && podio.p3.nombre === nombreGanador) podio.p3 = null;
+              
+              const nuevoGanador = { nombre: nombreGanador, fecha: new Date() };
+              if(posicion === 1) podio.p1 = nuevoGanador;
+              if(posicion === 2) podio.p2 = nuevoGanador;
+              if(posicion === 3) podio.p3 = nuevoGanador;
+          } else {
+              if(posicion === 1) podio.p1 = null;
+              if(posicion === 2) podio.p2 = null;
+              if(posicion === 3) podio.p3 = null;
+          }
+          try {
+              await updateDoc(doc(db, "actividades", activityId), { podio: podio });
+              cargarDatos(); 
+          } catch(e) { console.error(e); alert("Error: " + e.message); }
       }
-
-      function mostrarMsg(el, txt, tipo) { el.innerText = txt; el.className = "msg " + tipo; el.style.display = "block"; setTimeout(()=>el.style.display='none', 4000); }
-      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
     </script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎉 Gestión Festera</h1>
-            <button class="btn-back" onclick="window.location.href='panel.html'"><span class="material-symbols-outlined">arrow_back</span> Volver</button>
+            <h1 id="page-title">Cargando...</h1>
+            <button class="btn-back" onclick="window.location.href='gestion.html'">Volver</button>
         </div>
-        <div class="grid-gestion">
-            <div class="card">
-                <h2>🎫 Invitaciones</h2>
-                <input type="text" id="new-code" placeholder="Código (ej: VECINO24)">
-                <button class="action" onclick="generarCodigo()">Crear Código</button>
-                <p id="status-code" class="msg"></p>
-                <h3 style="margin-top:20px; font-size: 14px;">Historial</h3>
-                <ul id="lista-codigos" class="scroll-list"><li>Cargando...</li></ul>
+        <div class="podium-admin">
+            <div id="slot-2" class="podium-slot slot-2">
+                <span style="font-size:1.5rem">🥈</span>
+                <span class="winner-name">-</span>
+                <button class="btn-clear-pos">X</button>
             </div>
-
-            <div class="card">
-                <h2>📅 Crear Actividad</h2>
-                
-                <input type="text" id="act-titulo" placeholder="Título (ej: Carrera de Sacos)">
-                <input type="datetime-local" id="act-fecha">
-                <input type="url" id="act-imagen" placeholder="Enlace de imagen (Opcional)">
-                
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1;">
-                        <label style="font-size:12px;">Tipo</label>
-                        <select id="act-genero">
-                            <option value="torneo">🏆 Torneo (Bracket)</option>
-                            <option value="carrera">🏃 Carrera (Podio)</option>
-                            <option value="comida">🥘 Comida/Cena</option>
-                            <option value="fiesta">🪩 Fiesta/Evento</option>
-                        </select>
-                    </div>
-                    <div style="flex:1;">
-                        <label style="font-size:12px;">Categoría</label>
-                        <select id="act-categoria">
-                            <option value="todos">🌍 Todos</option>
-                            <option value="infantil">👶 Infantil</option>
-                            <option value="adulto">🍺 Adultos</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div style="margin-top:10px;">
-                    <label style="font-size:12px;">Modalidad de Inscripción</label>
-                    <select id="act-modalidad" onchange="checkModalidad()">
-                        <option value="individual">👤 Individual</option>
-                        <option value="parejas">👥 Parejas</option>
-                        <option value="grupo">👨‍👩‍👧‍👦 Grupo</option>
-                    </select>
-                </div>
-
-                <div id="div-grupo-size" class="hidden">
-                    <label style="font-size:12px;">Personas por grupo</label>
-                    <input type="number" id="act-tamano" value="4" min="2" max="20">
-                </div>
-
-                <button class="action" onclick="crearActividad()">Publicar Actividad</button>
-                <p id="status-act" class="msg"></p>
-
-                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-                
-                <h3 style="font-size: 14px;">Actividades Creadas</h3>
-                <div id="lista-actividades"></div>
+            <div id="slot-1" class="podium-slot slot-1">
+                <span style="font-size:2rem">🥇</span>
+                <span class="winner-name">-</span>
+                <button class="btn-clear-pos">X</button>
+            </div>
+            <div id="slot-3" class="podium-slot slot-3">
+                <span style="font-size:1.2rem">🥉</span>
+                <span class="winner-name">-</span>
+                <button class="btn-clear-pos">X</button>
             </div>
         </div>
+        <h3>Participantes (<span id="count-part">0</span>)</h3>
+        <div id="lista-corredores" class="runner-list"></div>
     </div>
 </body>
 </html>
