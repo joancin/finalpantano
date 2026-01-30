@@ -111,4 +111,183 @@
               snapshot.forEach((doc) => {
                   const d = doc.data();
                   const estadoClass = d.usado ? "used" : "free";
-                  const estadoTexto = d.usado ? `${d.usado
+                  const estadoTexto = d.usado ? `${d.usado_por}` : "LIBRE";
+                  lista.innerHTML += `<li class="list-item"><div><strong>${d.codigo}</strong></div><span class="tag ${estadoClass}">${estadoTexto}</span></li>`;
+              });
+          });
+      }
+
+      // --- ACTIVIDADES ---
+      window.checkModalidad = () => {
+          const tipo = document.getElementById("act-modalidad").value;
+          const divGrupo = document.getElementById("div-grupo-size");
+          if (tipo === 'grupo') divGrupo.classList.remove("hidden"); else divGrupo.classList.add("hidden");
+      }
+
+      window.crearActividad = async () => {
+          const titulo = document.getElementById("act-titulo").value;
+          const fecha = document.getElementById("act-fecha").value;
+          const genero = document.getElementById("act-genero").value;
+          const categoria = document.getElementById("act-categoria").value; 
+          const modalidad = document.getElementById("act-modalidad").value;
+          const tamano = document.getElementById("act-tamano").value;
+          const imagen = document.getElementById("act-imagen").value.trim();
+          const status = document.getElementById("status-act");
+
+          if(!titulo || !fecha) { mostrarMsg(status, "Pon título y fecha", "error"); return; }
+          
+          let equipoSize = 1;
+          if(modalidad === 'parejas') equipoSize = 2;
+          if(modalidad === 'grupo') equipoSize = parseInt(tamano) || 3;
+
+          let imgFinal = imagen;
+          if(!imgFinal) {
+              if(genero === 'carrera') imgFinal = 'https://cdn-icons-png.flaticon.com/512/2553/2553658.png';
+              else if(genero === 'torneo') imgFinal = 'https://cdn-icons-png.flaticon.com/512/1606/1606141.png';
+              else if(genero === 'comida') imgFinal = 'https://cdn-icons-png.flaticon.com/512/1638/1638069.png';
+              else imgFinal = 'https://cdn-icons-png.flaticon.com/512/3159/3159066.png';
+          }
+
+          try {
+              await addDoc(collection(db, "actividades"), {
+                  titulo: titulo,
+                  fecha: new Date(fecha),
+                  genero: genero,
+                  categoria: categoria,
+                  modalidad: modalidad,
+                  tamano_equipo: equipoSize,
+                  imagen: imgFinal,
+                  creado_por: currentUser.uid,
+                  participantes: [],
+                  inscritos: []
+              });
+
+              mostrarMsg(status, "✅ Actividad publicada", "success");
+              document.getElementById("act-titulo").value = "";
+          } catch (e) { console.error(e); mostrarMsg(status, "Error: " + e.message, "error"); }
+      }
+
+      function escucharActividades() {
+          const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
+          onSnapshot(q, (snapshot) => {
+              const lista = document.getElementById("lista-actividades");
+              lista.innerHTML = "";
+              if(snapshot.empty) { lista.innerHTML = "<p>No hay actividades.</p>"; return; }
+
+              snapshot.forEach((docSnap) => {
+                  const act = docSnap.data();
+                  const fechaLegible = act.fecha.toDate ? act.fecha.toDate().toLocaleString() : new Date(act.fecha).toLocaleString();
+                  const inscritosCount = act.inscritos ? act.inscritos.length : 0;
+                  
+                  let botonGestion = "";
+                  
+                  // --- AQUÍ ESTÁ LA CORRECCIÓN CLAVE ---
+                  if (act.genero === 'torneo') {
+                      botonGestion = `<button style="background:#2196f3; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" onclick="window.location.href='torneo.html?id=${docSnap.id}'">Gestionar Torneo</button>`;
+                  } else if (act.genero === 'carrera') {
+                      // AHORA SÍ REDIRIGE A LA CARRERA
+                      botonGestion = `<button style="background:#4caf50; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" onclick="window.location.href='carrera.html?id=${docSnap.id}'">Gestionar Carrera</button>`;
+                  }
+
+                  const html = `
+                    <div class="activity-item">
+                        <img src="${act.imagen}" class="activity-img" alt="img" onerror="this.src='https://placehold.co/50'">
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <span>${act.titulo}</span>
+                                <div>
+                                    ${botonGestion}
+                                    <button class="btn-del" onclick="borrarActividad('${docSnap.id}', '${act.titulo}')">X</button>
+                                </div>
+                            </div>
+                            <div class="activity-details">
+                                <span>📅 ${fechaLegible}</span>
+                                <span class="tag tag-cat-${act.categoria || 'todos'}">${(act.categoria || 'Todos').toUpperCase()}</span>
+                                <span style="background:#eee; padding:2px 5px; border-radius:4px; font-size:10px;">${act.genero.toUpperCase()}</span>
+                                <span>👥 ${inscritosCount} apuntados</span>
+                            </div>
+                        </div>
+                    </div>
+                  `;
+                  lista.innerHTML += html;
+              });
+          });
+      }
+
+      window.borrarActividad = async (id, titulo) => {
+          if(confirm(`¿Borrar "${titulo}"?`)) await deleteDoc(doc(db, "actividades", id));
+      }
+
+      function mostrarMsg(el, txt, tipo) { el.innerText = txt; el.className = "msg " + tipo; el.style.display = "block"; setTimeout(()=>el.style.display='none', 4000); }
+      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Gestión Festera</h1>
+            <button class="btn-back" onclick="window.location.href='panel.html'"><span class="material-symbols-outlined">arrow_back</span> Volver</button>
+        </div>
+        <div class="grid-gestion">
+            <div class="card">
+                <h2>🎫 Invitaciones</h2>
+                <input type="text" id="new-code" placeholder="Código (ej: VECINO24)">
+                <button class="action" onclick="generarCodigo()">Crear Código</button>
+                <p id="status-code" class="msg"></p>
+                <h3 style="margin-top:20px; font-size: 14px;">Historial</h3>
+                <ul id="lista-codigos" class="scroll-list"><li>Cargando...</li></ul>
+            </div>
+
+            <div class="card">
+                <h2>📅 Crear Actividad</h2>
+                
+                <input type="text" id="act-titulo" placeholder="Título (ej: Carrera de Sacos)">
+                <input type="datetime-local" id="act-fecha">
+                <input type="url" id="act-imagen" placeholder="Enlace de imagen (Opcional)">
+                
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:12px;">Tipo</label>
+                        <select id="act-genero">
+                            <option value="torneo">🏆 Torneo (Bracket)</option>
+                            <option value="carrera">🏃 Carrera (Podio)</option>
+                            <option value="comida">🥘 Comida/Cena</option>
+                            <option value="fiesta">🪩 Fiesta/Evento</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:12px;">Categoría</label>
+                        <select id="act-categoria">
+                            <option value="todos">🌍 Todos</option>
+                            <option value="infantil">👶 Infantil</option>
+                            <option value="adulto">🍺 Adultos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <label style="font-size:12px;">Modalidad de Inscripción</label>
+                    <select id="act-modalidad" onchange="checkModalidad()">
+                        <option value="individual">👤 Individual</option>
+                        <option value="parejas">👥 Parejas</option>
+                        <option value="grupo">👨‍👩‍👧‍👦 Grupo</option>
+                    </select>
+                </div>
+
+                <div id="div-grupo-size" class="hidden">
+                    <label style="font-size:12px;">Personas por grupo</label>
+                    <input type="number" id="act-tamano" value="4" min="2" max="20">
+                </div>
+
+                <button class="action" onclick="crearActividad()">Publicar Actividad</button>
+                <p id="status-act" class="msg"></p>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+                
+                <h3 style="font-size: 14px;">Actividades Creadas</h3>
+                <div id="lista-actividades"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
