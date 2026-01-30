@@ -128,7 +128,7 @@
           const titulo = document.getElementById("act-titulo").value;
           const fecha = document.getElementById("act-fecha").value;
           const genero = document.getElementById("act-genero").value;
-          const categoria = document.getElementById("act-categoria").value; // NUEVO
+          const categoria = document.getElementById("act-categoria").value;
           const modalidad = document.getElementById("act-modalidad").value;
           const tamano = document.getElementById("act-tamano").value;
           const imagen = document.getElementById("act-imagen").value.trim();
@@ -140,7 +140,6 @@
           if(modalidad === 'parejas') equipoSize = 2;
           if(modalidad === 'grupo') equipoSize = parseInt(tamano) || 3;
 
-          // Icono por defecto inteligente
           let imgFinal = imagen;
           if(!imgFinal) {
               if(genero === 'carrera') imgFinal = 'https://cdn-icons-png.flaticon.com/512/2553/2553658.png';
@@ -154,13 +153,13 @@
                   titulo: titulo,
                   fecha: new Date(fecha),
                   genero: genero,
-                  categoria: categoria, // GUARDAR CATEGORÍA
+                  categoria: categoria,
                   modalidad: modalidad,
                   tamano_equipo: equipoSize,
                   imagen: imgFinal,
                   creado_por: currentUser.uid,
                   participantes: [],
-                  inscritos: [] // Array importante para la nueva lógica
+                  inscritos: []
               });
 
               mostrarMsg(status, "✅ Actividad publicada", "success");
@@ -180,13 +179,14 @@
                   const fechaLegible = act.fecha.toDate ? act.fecha.toDate().toLocaleString() : new Date(act.fecha).toLocaleString();
                   const inscritosCount = act.inscritos ? act.inscritos.length : 0;
                   
-                  // Lógica del botón de gestión
+                  // --- AQUÍ ESTABA EL ERROR, AHORA ESTÁ CORREGIDO ---
                   let botonGestion = "";
                   
                   if (act.genero === 'torneo') {
                       botonGestion = `<button style="background:#2196f3; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" onclick="window.location.href='torneo.html?id=${docSnap.id}'">Gestionar Torneo</button>`;
                   } else if (act.genero === 'carrera') {
-                      botonGestion = `<button style="background:#4caf50; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" onclick="alert('Próximamente: Gestionar Carrera (Podio)')">Gestionar Carrera</button>`;
+                      // ENLACE CORRECTO A LA PÁGINA DE CARRERA
+                      botonGestion = `<button style="background:#4caf50; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" onclick="window.location.href='carrera.html?id=${docSnap.id}'">Gestionar Carrera</button>`;
                   }
 
                   const html = `
