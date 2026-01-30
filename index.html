@@ -14,8 +14,6 @@
     
     <style>
         :root { --bg: #f0f2f5; --card: white; --accent: #ff5722; --text: #333; }
-        
-        /* MODO OSCURO APLICADO AL HTML */
         html.dark-mode { --bg: #18191a; --card: #242526; --text: #e4e6eb; }
 
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; transition: background 0.3s; }
@@ -25,11 +23,9 @@
         h1 { margin: 0; font-size: 2.5rem; line-height: 1.1; }
         p { color: gray; margin-top: 5px; }
 
-        /* GRID PÚBLICO */
         .public-grid { display: grid; gap: 15px; max-width: 500px; margin: 0 auto; width: 100%; }
         .public-card { background: var(--card); padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: inherit; transition: transform 0.2s; }
         .public-card:hover { transform: translateY(-3px); }
-        
         .card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; flex-shrink: 0; }
         .c-festeros { background: linear-gradient(135deg, #FF6B6B, #EE5253); }
         .c-migany { background: linear-gradient(135deg, #FDCB6E, #E17055); }
@@ -37,12 +33,10 @@
         .card-info h3 { margin: 0; font-size: 1.1rem; }
         .card-info span { font-size: 0.8rem; color: gray; }
 
-        /* LOGIN FLOTANTE */
         .login-section { margin-top: auto; padding-top: 40px; text-align: center; }
         .btn-login-toggle { background: white; border: 1px solid #ccc; padding: 12px 30px; border-radius: 30px; cursor: pointer; color: #333; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s; }
         .btn-login-toggle:active { transform: scale(0.95); }
 
-        /* MODAL LOGIN / REGISTRO */
         #login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         
@@ -57,9 +51,7 @@
         .btn-action:hover { background: #e64a19; }
         
         .btn-close { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
-        
         .hidden { display: none; }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
     </style>
     
     <script type="module">
@@ -72,14 +64,10 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-        // Control para evitar redirección prematura
         let isRegistering = false;
 
         onAuthStateChanged(auth, (user) => {
-            if (user && !isRegistering) {
-                window.location.href = "panel.html";
-            }
+            if (user && !isRegistering) window.location.href = "panel.html";
         });
 
         window.abrirLogin = () => document.getElementById("login-modal").style.display = "flex";
@@ -88,7 +76,6 @@
         window.switchTab = (tab) => {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
-            
             if(tab === 'login') {
                 document.getElementById('form-login').classList.remove('hidden');
                 document.getElementById('form-register').classList.add('hidden');
@@ -98,27 +85,18 @@
             }
         }
 
-        // --- LÓGICA DE LOGIN ---
         window.login = async () => {
             const user = document.getElementById("log-user").value.trim();
             const pass = document.getElementById("log-pass").value;
-            
             if(!user || !pass) return alert("Rellena todo");
-
             const fakeEmail = user.toLowerCase().replace(/\s+/g, '') + "@fiestaspantano.com";
             const btn = document.getElementById("btn-login-action");
             btn.innerText = "Entrando..."; btn.disabled = true;
-
-            try { 
-                await signInWithEmailAndPassword(auth, fakeEmail, pass); 
-            } catch (e) { 
-                console.error(e);
-                alert("Usuario o contraseña incorrectos");
-                btn.innerText = "Entrar"; btn.disabled = false;
-            }
+            try { await signInWithEmailAndPassword(auth, fakeEmail, pass); } 
+            catch (e) { console.error(e); alert("Usuario o contraseña incorrectos"); btn.innerText = "Entrar"; btn.disabled = false; }
         }
 
-        // --- LÓGICA DE REGISTRO ---
+        // --- REGISTRO INTELIGENTE ---
         window.registro = async () => {
             const user = document.getElementById("reg-user").value.trim();
             const pass = document.getElementById("reg-pass").value;
@@ -128,7 +106,7 @@
 
             const btn = document.getElementById("btn-reg-action");
             btn.innerText = "Procesando..."; btn.disabled = true;
-            isRegistering = true; // Frenamos redirección
+            isRegistering = true;
 
             try {
                 const fakeEmail = user.toLowerCase().replace(/\s+/g, '') + "@fiestaspantano.com";
@@ -136,13 +114,11 @@
                 let codigoValido = false;
                 let invitacionId = null;
 
-                // TRUCO DE EMERGENCIA (Puedes borrar esto si ya tienes Admin)
                 if (code === "SOYELJEFE") { 
                     rolAsignado = "admin"; codigoValido = true; 
                 } else {
                     const q = query(collection(db, "invitaciones"), where("codigo", "==", code), where("usado", "==", false));
                     const snap = await getDocs(q);
-                    
                     if (!snap.empty) {
                         const docInv = snap.docs[0];
                         rolAsignado = docInv.data().rol;
@@ -152,19 +128,14 @@
                 }
 
                 if (!codigoValido) {
-                    isRegistering = false;
-                    btn.innerText = "Crear Cuenta"; btn.disabled = false;
+                    isRegistering = false; btn.innerText = "Crear Cuenta"; btn.disabled = false;
                     return alert("⛔ Código INVÁLIDO o YA USADO.");
                 }
 
                 const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
 
                 await setDoc(doc(db, "usuarios", cred.user.uid), {
-                    username: user,
-                    email: fakeEmail,
-                    rol: rolAsignado,
-                    codigo_usado: code,
-                    fecha_registro: new Date()
+                    username: user, email: fakeEmail, rol: rolAsignado, codigo_usado: code, fecha_registro: new Date()
                 });
 
                 if(invitacionId) {
@@ -172,25 +143,25 @@
                         usado: true, usado_por: user, fecha_uso: new Date()
                     });
                 }
-
-                alert("¡Bienvenido/a! 🎉");
-                window.location.href = "panel.html";
+                alert("¡Bienvenido/a! 🎉"); window.location.href = "panel.html";
 
             } catch (e) { 
                 console.error(e);
                 isRegistering = false;
                 if (auth.currentUser) await signOut(auth);
 
-                if(e.code === 'auth/email-already-in-use') alert("Ese nombre de usuario ya existe.");
-                else alert("Error: " + e.message);
-                
+                // --- DETECTOR DE USUARIO FANTASMA ---
+                if(e.code === 'auth/email-already-in-use') {
+                    alert(`⚠️ EL NOMBRE "${user}" YA EXISTE EN FIREBASE.\n\nEl Admin borró los datos de la web, pero el sistema de seguridad recuerda tu contraseña anterior.\n\nSOLUCIONES:\n1. Pide al Admin que borre tu usuario en la consola de Firebase.\n2. O simplemente usa otro nombre (Ej: ${user}2).`);
+                } else {
+                    alert("Error: " + e.message);
+                }
                 btn.innerText = "Crear Cuenta"; btn.disabled = false;
             }
         }
     </script>
 </head>
 <body>
-
     <div class="hero">
         <span class="material-symbols-outlined logo-icon">celebration</span>
         <h1>Fiestas<br>Pantano</h1>
@@ -219,20 +190,16 @@
     <div id="login-modal">
         <div class="login-box">
             <button class="btn-close" onclick="cerrarLogin()">×</button>
-            
             <div class="tabs">
                 <div id="tab-login" class="tab active" onclick="switchTab('login')">Entrar</div>
                 <div id="tab-register" class="tab" onclick="switchTab('register')">Crear Cuenta</div>
             </div>
-
+            
             <div id="form-login">
                 <input type="text" id="log-user" placeholder="Nombre de Usuario">
                 <input type="password" id="log-pass" placeholder="Contraseña">
                 <button id="btn-login-action" class="btn-action" onclick="login()">Entrar</button>
-                
-                <p style="margin-top:15px; font-size:0.8rem; color:gray; cursor:pointer; text-decoration:underline;" onclick="alert('⚠️ RECUPERACIÓN DE CUENTA ⚠️\n\nContacta con un Festero/Admin.\n\nÉl reiniciará tu usuario desde el panel de control. Después podrás registrarte de nuevo con el mismo nombre y una contraseña nueva.')">
-                    ¿Olvidaste tu contraseña?
-                </p>
+                <p style="margin-top:15px; font-size:0.8rem; color:gray; cursor:pointer; text-decoration:underline;" onclick="alert('Contacta con un Admin para que resetee tu cuenta.')">¿Olvidaste tu contraseña?</p>
             </div>
 
             <div id="form-register" class="hidden">
@@ -246,6 +213,5 @@
             </div>
         </div>
     </div>
-
 </body>
 </html>
