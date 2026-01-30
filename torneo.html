@@ -179,51 +179,75 @@
 
       // --- LÓGICA DEL TORNEO (BRACKET) ---
       
+// VERSIÓN DE PRUEBA (DEBUG)
       window.generarBracket = async () => {
+          console.log("Iniciando generación de sorteo...");
+          
+          // 1. Comprobar datos
+          if (!activityData) { alert("Error: No se han cargado los datos de la actividad aún."); return; }
+          
           const inscritos = activityData.inscritos || [];
-          if(inscritos.length < 2) { alert("Necesitas al menos 2 equipos."); return; }
-          
-          if(!confirm("Esto borrará cualquier progreso anterior del torneo. ¿Generar nuevo sorteo?")) return;
+          console.log("Inscritos encontrados:", inscritos.length);
 
-          // 1. Mezclar equipos (Shuffle)
-          let equipos = [...inscritos].sort(() => Math.random() - 0.5);
-          
-          // 2. Ajustar a potencia de 2 (4, 8, 16...) añadiendo "BYE" (huecos vacíos)
-          // Esto simplifica el bracket. Si hay 5 equipos, ajustamos a 8. 3 pasan directo.
-          let power = 2;
-          while(power < equipos.length) power *= 2;
-          
-          while(equipos.length < power) {
-              equipos.push(null); // null significa "BYE" (Pase directo al rival)
+          if(inscritos.length < 2) { 
+              alert(`¡Alto ahí! Solo hay ${inscritos.length} participantes. Necesitas al menos 2 para hacer un torneo.`); 
+              return; 
           }
+          
+          if(!confirm("⚠️ ¿Seguro? Se borrará el cuadro actual y se creará uno nuevo.")) return;
 
-          // 3. Crear Ronda 1 (Partidos)
-          let ronda1 = [];
-          for(let i=0; i < equipos.length; i+=2) {
-              const teamA = equipos[i];
-              const teamB = equipos[i+1];
+          try {
+              // 2. Mezclar (Shuffle)
+              let equipos = [...inscritos].sort(() => Math.random() - 0.5);
+              console.log("Equipos mezclados:", equipos);
               
-              // Si uno es null, el otro gana automáticamente
-              let winner = null;
-              if(teamA && !teamB) winner = 0; // Gana el de la posición 0 (teamA)
-              if(!teamA && teamB) winner = 1; // Gana el de la posición 1 (teamB)
+              // 3. Ajustar a potencias de 2 (4, 8, 16...)
+              let power = 2;
+              while(power < equipos.length) power *= 2;
+              
+              // Rellenar con "null" (BYE) los huecos vacíos
+              while(equipos.length < power) {
+                  equipos.push(null);
+              }
+              console.log("Bracket ajustado a " + power + " posiciones");
 
-              ronda1.push({
-                  p1: teamA ? (teamA.nombre_equipo || teamA.capitan) : "PASE DIRECTO",
-                  p2: teamB ? (teamB.nombre_equipo || teamB.capitan) : "PASE DIRECTO",
-                  winner: winner // 0 para p1, 1 para p2, null si no se ha jugado
-              });
+              // 4. Crear Ronda 1
+              let ronda1 = [];
+              for(let i=0; i < equipos.length; i+=2) {
+                  const teamA = equipos[i];
+                  const teamB = equipos[i+1];
+                  
+                  // Recuperar nombres con seguridad (evita fallos si faltan datos)
+                  const nombreA = teamA ? (teamA.nombre_equipo || teamA.capitan || "Sin Nombre") : "PASE DIRECTO";
+                  const nombreB = teamB ? (teamB.nombre_equipo || teamB.capitan || "Sin Nombre") : "PASE DIRECTO";
+
+                  // Lógica de "Pase Directo" (BYE)
+                  let winner = null;
+                  if(nombreA !== "PASE DIRECTO" && nombreB === "PASE DIRECTO") winner = 0; // Pasa A
+                  if(nombreA === "PASE DIRECTO" && nombreB !== "PASE DIRECTO") winner = 1; // Pasa B
+
+                  ronda1.push({
+                      p1: nombreA,
+                      p2: nombreB,
+                      winner: winner 
+                  });
+              }
+
+              console.log("Ronda 1 generada:", ronda1);
+
+              // 5. Guardar en Firebase
+              const bracket = { rounds: [ronda1] };
+              
+              await updateDoc(doc(db, "actividades", activityId), { bracket: bracket });
+              
+              alert("✅ ¡Sorteo realizado con éxito!");
+              cargarDatos(); // Recargar la pantalla
+
+          } catch (e) {
+              console.error("ERROR GRAVE:", e);
+              alert("❌ Hubo un error: " + e.message + ". Mira la consola (F12) para más detalles.");
           }
-
-          // Estructura del bracket guardada en DB
-          // rounds: [ [match1, match2...], [match1...] ]
-          const bracket = { rounds: [ronda1] };
-          
-          // Guardar
-          await updateDoc(doc(db, "actividades", activityId), { bracket: bracket });
-          cargarDatos();
       }
-
       function renderBracket() {
           const container = document.getElementById("bracket-view");
           container.innerHTML = "";
