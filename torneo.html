@@ -21,20 +21,26 @@
         .tab.active { background: var(--accent); color: white; opacity: 1; }
 
         .list-item { background: var(--card); padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-group { display: flex; gap: 5px; }
         .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-edit { background: #2196f3; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
         .add-box { background: var(--card); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; }
         .add-box input { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
 
         .bracket-container { display: flex; overflow-x: auto; padding: 20px 0; gap: 40px; }
-        .round { display: flex; flex-direction: column; justify-content: space-around; min-width: 200px; }
+        .round { display: flex; flex-direction: column; justify-content: space-around; min-width: 220px; }
         .round-title { text-align: center; font-weight: bold; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; font-size: 0.9rem; }
         
         .match { background: var(--card); border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0; display: flex; flex-direction: column; gap: 5px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        .team { padding: 8px; cursor: pointer; border-radius: 4px; transition: background 0.2s; display: flex; justify-content: space-between; }
+        .team { padding: 8px; cursor: pointer; border-radius: 4px; transition: background 0.2s; display: flex; flex-direction: column; }
         .team:hover { background: rgba(0,0,0,0.05); }
         .team.winner { background: var(--win); color: white; font-weight: bold; }
-        
+        .team.winner .members { color: #e8f5e9; } /* Miembros en blanco clarito si ganan */
+
+        .members { font-size: 0.75rem; color: #666; margin-top: 2px; font-weight: normal; }
+
         .match::after { content: ''; position: absolute; right: -20px; top: 50%; width: 20px; height: 2px; background: #ccc; z-index: -1; }
         .round:last-child .match::after { display: none; }
 
@@ -99,14 +105,28 @@
           document.getElementById('section-'+tabName).classList.remove('hidden');
       }
 
+      // --- PARTICIPANTES (CON EDICIÓN) ---
       function renderParticipantes() {
           const lista = document.getElementById("lista-participantes");
           lista.innerHTML = "";
           const inscritos = activityData.inscritos || [];
+          
           inscritos.forEach((p, index) => {
               const nombreMostrado = p.nombre_equipo || p.capitan || "Sin nombre";
-              const miembrosStr = (p.miembros && p.miembros.length > 0) ? ` <small>(${p.miembros.map(m=>m.nombre).join(", ")})</small>` : "";
-              lista.innerHTML += `<div class="list-item"><div><strong>${nombreMostrado}</strong>${miembrosStr}</div><button class="btn-del" onclick="borrarParticipante(${index})">Eliminar</button></div>`;
+              const miembrosStr = (p.miembros && p.miembros.length > 0) ? 
+                  p.miembros.map(m=>m.nombre).join(", ") : "Sin miembros extra";
+
+              lista.innerHTML += `
+                <div class="list-item">
+                    <div>
+                        <strong>${nombreMostrado}</strong>
+                        <div style="font-size:0.8rem; color:gray;">${miembrosStr}</div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-edit" onclick="editarParticipante(${index})">✏️</button>
+                        <button class="btn-del" onclick="borrarParticipante(${index})">🗑️</button>
+                    </div>
+                </div>`;
           });
           document.getElementById("count-part").innerText = inscritos.length;
       }
@@ -127,8 +147,48 @@
           cargarDatos();
       }
 
-      // --- TORNEO CORREGIDO (SOLUCIÓN AL ERROR NESTED ARRAYS) ---
+      // NUEVA FUNCIÓN: EDITAR MIEMBROS
+      window.editarParticipante = async (index) => {
+          let inscritos = activityData.inscritos;
+          let equipo = inscritos[index];
+          
+          let nuevoNombre = prompt("Editar nombre del equipo/capitán:", equipo.nombre_equipo || equipo.capitan);
+          if(!nuevoNombre) return;
+
+          let miembrosActuales = (equipo.miembros || []).map(m => m.nombre).join(", ");
+          let nuevosMiembrosStr = prompt("Editar miembros (separados por coma):", miembrosActuales);
+          
+          if(nuevosMiembrosStr !== null) {
+              // Convertir string "Juan, Pepe" a array de objetos
+              let arrayNombres = nuevosMiembrosStr.split(",").map(s => s.trim()).filter(s => s !== "");
+              let arrayObjetos = arrayNombres.map(n => ({ nombre: n, vinculado: false })); // Manual, no vinculamos UID
+
+              // Actualizamos localmente y luego subimos TODO el array de inscritos
+              // (Firestore no deja editar un índice de array directo, hay que subir el array entero modificado)
+              inscritos[index].nombre_equipo = nuevoNombre;
+              inscritos[index].miembros = arrayObjetos;
+
+              await updateDoc(doc(db, "actividades", activityId), { inscritos: inscritos });
+              cargarDatos();
+          }
+      }
+
+      // --- TORNEO (BRACKET) ---
       
+      // Función auxiliar para buscar los miembros de un equipo por su nombre
+      function getMembersHTML(teamName) {
+          if (teamName === "PASE DIRECTO" || teamName === "Esperando...") return "";
+          
+          // Buscar en la lista de inscritos
+          const equipo = (activityData.inscritos || []).find(e => (e.nombre_equipo === teamName || e.capitan === teamName));
+          
+          if (equipo && equipo.miembros && equipo.miembros.length > 0) {
+              const nombres = equipo.miembros.map(m => m.nombre).join(", ");
+              return `<span class="members">${nombres}</span>`;
+          }
+          return "";
+      }
+
       window.generarBracket = async () => {
           const inscritos = activityData.inscritos || [];
           if(inscritos.length < 2) { alert(`Mínimo 2 equipos (tienes ${inscritos.length})`); return; }
@@ -136,7 +196,6 @@
 
           try {
               let equipos = [...inscritos].sort(() => Math.random() - 0.5);
-              
               let power = 2;
               while(power < equipos.length) power *= 2;
               while(equipos.length < power) equipos.push(null);
@@ -145,7 +204,6 @@
               for(let i=0; i < equipos.length; i+=2) {
                   const teamA = equipos[i];
                   const teamB = equipos[i+1];
-                  
                   const nombreA = teamA ? (teamA.nombre_equipo || teamA.capitan || "Sin Nombre") : "PASE DIRECTO";
                   const nombreB = teamB ? (teamB.nombre_equipo || teamB.capitan || "Sin Nombre") : "PASE DIRECTO";
 
@@ -156,47 +214,52 @@
                   ronda1.push({ p1: nombreA, p2: nombreB, winner: winner });
               }
 
-              // AQUÍ ESTABA EL ERROR: Envolvemos la ronda en un objeto {matches: ...}
               const bracket = { rounds: [{ matches: ronda1 }] };
-              
               await updateDoc(doc(db, "actividades", activityId), { bracket: bracket });
-              alert("✅ Sorteo listo");
               cargarDatos();
-
-          } catch (e) {
-              console.error(e);
-              alert("Error: " + e.message);
-          }
+          } catch (e) { console.error(e); alert("Error: " + e.message); }
       }
 
       function renderBracket() {
           const container = document.getElementById("bracket-view");
           container.innerHTML = "";
-          
-          const rounds = activityData.bracket.rounds; // Array de objetos {matches: []}
+          const rounds = activityData.bracket.rounds;
           
           rounds.forEach((roundObj, rIndex) => {
-              const matches = roundObj.matches; // Accedemos a matches
+              const matches = roundObj.matches;
               const roundDiv = document.createElement("div");
               roundDiv.className = "round";
               
               let title = `Ronda ${rIndex + 1}`;
               if(matches.length === 1) title = "🏆 FINAL";
               else if(matches.length === 2) title = "SEMIFINAL";
-              
               roundDiv.innerHTML = `<div class="round-title">${title}</div>`;
 
               matches.forEach((match, mIndex) => {
                   const matchDiv = document.createElement("div");
                   matchDiv.className = "match";
                   
+                  // Lógica visual del ganador
                   const class1 = (match.winner === 0) ? "team winner" : "team";
                   const click1 = (match.winner === null && match.p1 !== "PASE DIRECTO" && match.p2 !== "PASE DIRECTO") ? `onclick="declararGanador(${rIndex}, ${mIndex}, 0)"` : "";
                   
                   const class2 = (match.winner === 1) ? "team winner" : "team";
                   const click2 = (match.winner === null && match.p1 !== "PASE DIRECTO" && match.p2 !== "PASE DIRECTO") ? `onclick="declararGanador(${rIndex}, ${mIndex}, 1)"` : "";
 
-                  matchDiv.innerHTML = `<div class="${class1}" ${click1}>${match.p1}</div><div class="${class2}" ${click2}>${match.p2}</div>`;
+                  // AÑADIMOS LOS MIEMBROS DEBAJO DEL NOMBRE
+                  const members1 = getMembersHTML(match.p1);
+                  const members2 = getMembersHTML(match.p2);
+
+                  matchDiv.innerHTML = `
+                      <div class="${class1}" ${click1}>
+                          <span>${match.p1}</span>
+                          ${members1}
+                      </div>
+                      <div class="${class2}" ${click2}>
+                          <span>${match.p2}</span>
+                          ${members2}
+                      </div>
+                  `;
                   roundDiv.appendChild(matchDiv);
               });
               container.appendChild(roundDiv);
@@ -207,37 +270,25 @@
           if(!confirm("¿Confirmar ganador?")) return;
 
           let bracket = activityData.bracket;
-          let rounds = bracket.rounds; // Array de objetos
-          
-          // Accedemos usando .matches
+          let rounds = bracket.rounds;
           let currentMatches = rounds[rIndex].matches;
 
-          // 1. Marcar ganador
           currentMatches[mIndex].winner = winnerIdx;
           const nombreGanador = (winnerIdx === 0) ? currentMatches[mIndex].p1 : currentMatches[mIndex].p2;
 
-          // 2. Mover a siguiente ronda
           const nextRoundIdx = rIndex + 1;
-          
           if(!rounds[nextRoundIdx]) {
-              if(currentMatches.length > 1) {
-                  // Crear nueva ronda con estructura correcta
-                  rounds[nextRoundIdx] = { matches: [] }; 
-              } else {
+              if(currentMatches.length > 1) rounds[nextRoundIdx] = { matches: [] }; 
+              else {
                   alert(`¡${nombreGanador} HA GANADO! 🏆`);
                   await updateDoc(doc(db, "actividades", activityId), { bracket: bracket });
-                  cargarDatos();
-                  return;
+                  cargarDatos(); return;
               }
           }
 
           const nextMatchIdx = Math.floor(mIndex / 2);
           let nextMatches = rounds[nextRoundIdx].matches;
-          
-          // Asegurar hueco
-          if(!nextMatches[nextMatchIdx]) {
-              nextMatches[nextMatchIdx] = { p1: "Esperando...", p2: "Esperando...", winner: null };
-          }
+          if(!nextMatches[nextMatchIdx]) nextMatches[nextMatchIdx] = { p1: "Esperando...", p2: "Esperando...", winner: null };
 
           if (mIndex % 2 === 0) nextMatches[nextMatchIdx].p1 = nombreGanador;
           else nextMatches[nextMatchIdx].p2 = nombreGanador;
