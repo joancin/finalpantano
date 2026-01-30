@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificación en Vivo</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #4caf50; }
+        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        /* PODIO PÚBLICO (Más grande y espectacular) */
+        .podium-container { display: flex; gap: 15px; margin: 40px 0; justify-content: center; align-items: flex-end; height: 200px; }
+        .podium-slot { flex: 1; max-width: 120px; border-radius: 15px 15px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 15px 5px; color: white; text-align: center; position: relative; transition: height 0.5s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        
+        .slot-1 { background: linear-gradient(45deg, #ffd700, #ffc107); height: 100%; z-index: 2; transform: scale(1.1); } 
+        .slot-2 { background: linear-gradient(45deg, #e0e0e0, #bdbdbd); height: 75%; z-index: 1; } 
+        .slot-3 { background: linear-gradient(45deg, #cd7f32, #a1887f); height: 60%; z-index: 0; } 
+
+        .medal-icon { font-size: 2rem; margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .winner-name { font-weight: bold; font-size: 1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.3); line-height: 1.2; }
+        .empty-slot { opacity: 0.5; font-size: 0.8rem; font-style: italic; }
+
+        /* LISTA CLASIFICACIÓN */
+        .rank-list { list-style: none; padding: 0; margin-top: 40px; }
+        .rank-item { background: var(--card); padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        .rank-pos { font-weight: bold; font-size: 1.2rem; color: gray; width: 30px; text-align: center; }
+        .rank-name { font-weight: 500; font-size: 1.1rem; flex: 1; }
+        
+        .highlight-gold { border-left: 5px solid #ffd700; background: #fffde7; }
+        .highlight-silver { border-left: 5px solid #c0c0c0; background: #f5f5f5; }
+        .highlight-bronze { border-left: 5px solid #cd7f32; background: #fff3e0; }
+
+        .live-badge { background: #ff4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; animation: pulse 2s infinite; vertical-align: middle; margin-left: 10px; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+        authDomain: "fiestas-pantano.firebaseapp.com",
+        projectId: "fiestas-pantano",
+        storageBucket: "fiestas-pantano.firebasestorage.app",
+        messagingSenderId: "801380435613",
+        appId: "1:801380435613:web:a842572cf7cee93ac57674",
+        measurementId: "G-EG2MZGBT1B"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+      let activityId = "";
+
+      onAuthStateChanged(auth, (user) => {
+          if (!user) window.location.href = "index.html";
+          aplicarTema();
+          const params = new URLSearchParams(window.location.search);
+          activityId = params.get("id");
+          if(!activityId) { window.location.href = "actividades.html"; }
+          escucharDatos();
+      });
+
+      function escucharDatos() {
+          onSnapshot(doc(db, "actividades", activityId), (docSnap) => {
+              if(!docSnap.exists()) return;
+              const data = docSnap.data();
+              
+              document.getElementById("page-title").innerText = data.titulo;
+              renderPodio(data.podio);
+              renderLista(data.inscritos, data.podio);
+          });
+      }
+
+      function renderPodio(podio) {
+          const p = podio || { p1: null, p2: null, p3: null };
+          updateSlot("slot-1", p.p1);
+          updateSlot("slot-2", p.p2);
+          updateSlot("slot-3", p.p3);
+      }
+
+      function updateSlot(id, winner) {
+          const el = document.getElementById(id).querySelector(".winner-name");
+          if(winner) {
+              el.innerText = winner.nombre;
+              el.classList.remove("empty-slot");
+          } else {
+              el.innerText = "Esperando...";
+              el.classList.add("empty-slot");
+          }
+      }
+
+      function renderLista(inscritos, podio) {
+          const lista = document.getElementById("rank-list");
+          lista.innerHTML = "";
+          
+          if(!inscritos) return;
+          const p = podio || {};
+
+          // Crear un Set para identificar rápido a los ganadores
+          const winners = new Set();
+          if(p.p1) winners.add(p.p1.nombre);
+          if(p.p2) winners.add(p.p2.nombre);
+          if(p.p3) winners.add(p.p3.nombre);
+
+          // Filtrar: Los que NO han ganado (para ponerlos abajo)
+          const resto = inscritos.filter(i => {
+              const name = i.nombre_equipo || i.capitan;
+              return !winners.has(name);
+          });
+
+          // Renderizar 1º, 2º, 3º si existen
+          if(p.p1) renderItem(lista, 1, p.p1.nombre, "highlight-gold", "🥇");
+          if(p.p2) renderItem(lista, 2, p.p2.nombre, "highlight-silver", "🥈");
+          if(p.p3) renderItem(lista, 3, p.p3.nombre, "highlight-bronze", "🥉");
+
+          // Renderizar el resto sin posición numérica específica
+          resto.forEach(participant => {
+              const name = participant.nombre_equipo || participant.capitan;
+              renderItem(lista, "-", name, "", "");
+          });
+      }
+
+      function renderItem(container, pos, name, cssClass, icon) {
+          const li = document.createElement("li");
+          li.className = `rank-item ${cssClass}`;
+          li.innerHTML = `
+              <span class="rank-pos">${icon || pos}</span>
+              <span class="rank-name">${name}</span>
+          `;
+          container.appendChild(li);
+      }
+
+      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 style="display:inline; margin:0; font-size:1.5rem;" id="page-title">Cargando...</h1>
+                <span class="live-badge">EN VIVO</span>
+            </div>
+            <button class="btn-back" onclick="window.location.href='actividades.html'">Volver</button>
+        </div>
+
+        <div class="podium-container">
+            <div id="slot-2" class="podium-slot slot-2">
+                <span class="medal-icon">🥈</span>
+                <span class="winner-name empty-slot">Esperando...</span>
+            </div>
+            <div id="slot-1" class="podium-slot slot-1">
+                <span class="medal-icon">🥇</span>
+                <span class="winner-name empty-slot">Esperando...</span>
+            </div>
+            <div id="slot-3" class="podium-slot slot-3">
+                <span class="medal-icon">🥉</span>
+                <span class="winner-name empty-slot">Esperando...</span>
+            </div>
+        </div>
+
+        <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Clasificación General</h3>
+        <ul id="rank-list" class="rank-list">
+            </ul>
+    </div>
+</body>
+</html>
