@@ -28,18 +28,23 @@
         .scroll-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
         .list-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Estilos nuevos para actividades con foto */
         .activity-item { background: rgba(0,0,0,0.02); margin-bottom: 8px; padding: 10px; border-radius: 5px; border-left: 4px solid var(--accent); display: flex; gap: 10px; align-items: center; }
         .activity-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #ddd; }
         .activity-content { flex: 1; }
         
-        .activity-header { display: flex; justify-content: space-between; font-weight: bold; }
-        .activity-details { font-size: 13px; color: gray; margin-top: 5px; }
+        .activity-header { display: flex; justify-content: space-between; font-weight: bold; align-items: flex-start; }
+        .activity-details { font-size: 12px; color: gray; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; }
         .btn-del { background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; }
 
-        .tag { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .tag { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; display: inline-block; }
         .tag.free { background: #e8f5e9; color: green; }
         .tag.used { background: #ffebee; color: red; }
+        
+        /* Etiquetas nuevas */
+        .tag-cat-adulto { background: #333; color: white; }
+        .tag-cat-infantil { background: #ffeb3b; color: #333; }
+        .tag-cat-todos { background: #2196f3; color: white; }
+
         .msg { margin-top: 10px; font-weight: bold; display: none; }
         .success { color: green; } .error { color: red; }
         .hidden { display: none; }
@@ -50,7 +55,6 @@
       import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot, where, getDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      // --- CONFIGURACIÓN ---
       const firebaseConfig = {
         apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
         authDomain: "fiestas-pantano.firebaseapp.com",
@@ -124,9 +128,10 @@
           const titulo = document.getElementById("act-titulo").value;
           const fecha = document.getElementById("act-fecha").value;
           const genero = document.getElementById("act-genero").value;
+          const categoria = document.getElementById("act-categoria").value; // NUEVO
           const modalidad = document.getElementById("act-modalidad").value;
           const tamano = document.getElementById("act-tamano").value;
-          const imagen = document.getElementById("act-imagen").value.trim(); // NUEVO CAMPO
+          const imagen = document.getElementById("act-imagen").value.trim();
           const status = document.getElementById("status-act");
 
           if(!titulo || !fecha) { mostrarMsg(status, "Pon título y fecha", "error"); return; }
@@ -135,12 +140,13 @@
           if(modalidad === 'parejas') equipoSize = 2;
           if(modalidad === 'grupo') equipoSize = parseInt(tamano) || 3;
 
-          // Si no hay imagen, usamos una por defecto según el género
+          // Icono por defecto inteligente
           let imgFinal = imagen;
           if(!imgFinal) {
-              if(genero === 'torneo') imgFinal = 'https://cdn-icons-png.flaticon.com/512/1606/1606141.png'; // Copa
-              else if(genero === 'comida') imgFinal = 'https://cdn-icons-png.flaticon.com/512/1638/1638069.png'; // Paella/Comida
-              else imgFinal = 'https://cdn-icons-png.flaticon.com/512/3159/3159066.png'; // Fiesta
+              if(genero === 'carrera') imgFinal = 'https://cdn-icons-png.flaticon.com/512/2553/2553658.png';
+              else if(genero === 'torneo') imgFinal = 'https://cdn-icons-png.flaticon.com/512/1606/1606141.png';
+              else if(genero === 'comida') imgFinal = 'https://cdn-icons-png.flaticon.com/512/1638/1638069.png';
+              else imgFinal = 'https://cdn-icons-png.flaticon.com/512/3159/3159066.png';
           }
 
           try {
@@ -148,17 +154,17 @@
                   titulo: titulo,
                   fecha: new Date(fecha),
                   genero: genero,
+                  categoria: categoria, // GUARDAR CATEGORÍA
                   modalidad: modalidad,
                   tamano_equipo: equipoSize,
-                  imagen: imgFinal, // GUARDAMOS LA URL
+                  imagen: imgFinal,
                   creado_por: currentUser.uid,
-                  participantes: [] 
+                  participantes: [],
+                  inscritos: [] // Array importante para la nueva lógica
               });
 
               mostrarMsg(status, "✅ Actividad publicada", "success");
               document.getElementById("act-titulo").value = "";
-              document.getElementById("act-fecha").value = "";
-              document.getElementById("act-imagen").value = ""; // Limpiar imagen
           } catch (e) { console.error(e); mostrarMsg(status, "Error: " + e.message, "error"); }
       }
 
@@ -172,24 +178,33 @@
               snapshot.forEach((docSnap) => {
                   const act = docSnap.data();
                   const fechaLegible = act.fecha.toDate ? act.fecha.toDate().toLocaleString() : new Date(act.fecha).toLocaleString();
+                  const inscritosCount = act.inscritos ? act.inscritos.length : 0;
                   
-                    const html = `
+                  // Lógica del botón de gestión
+                  let botonGestion = "";
+                  
+                  if (act.genero === 'torneo') {
+                      botonGestion = `<button style="background:#2196f3; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" onclick="window.location.href='torneo.html?id=${docSnap.id}'">Gestionar Torneo</button>`;
+                  } else if (act.genero === 'carrera') {
+                      botonGestion = `<button style="background:#4caf50; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" onclick="alert('Próximamente: Gestionar Carrera (Podio)')">Gestionar Carrera</button>`;
+                  }
+
+                  const html = `
                     <div class="activity-item">
                         <img src="${act.imagen}" class="activity-img" alt="img" onerror="this.src='https://placehold.co/50'">
                         <div class="activity-content">
                             <div class="activity-header">
                                 <span>${act.titulo}</span>
                                 <div>
-                                    <button style="background:#2196f3; color:white; border:none; border-radius:3px; cursor:pointer; padding:4px 8px; font-size:11px; margin-right:5px;" 
-                                            onclick="window.location.href='torneo.html?id=${docSnap.id}'">
-                                        Gestionar
-                                    </button>
-                                    
+                                    ${botonGestion}
                                     <button class="btn-del" onclick="borrarActividad('${docSnap.id}', '${act.titulo}')">X</button>
                                 </div>
                             </div>
                             <div class="activity-details">
-                                📅 ${fechaLegible} | 🏷️ ${act.genero} | ${act.inscritos ? act.inscritos.length : 0} inscritos
+                                <span>📅 ${fechaLegible}</span>
+                                <span class="tag tag-cat-${act.categoria || 'todos'}">${(act.categoria || 'Todos').toUpperCase()}</span>
+                                <span style="background:#eee; padding:2px 5px; border-radius:4px; font-size:10px;">${act.genero.toUpperCase()}</span>
+                                <span>👥 ${inscritosCount} apuntados</span>
                             </div>
                         </div>
                     </div>
@@ -226,30 +241,37 @@
             <div class="card">
                 <h2>📅 Crear Actividad</h2>
                 
-                <input type="text" id="act-titulo" placeholder="Título (ej: Torneo de Mus)">
+                <input type="text" id="act-titulo" placeholder="Título (ej: Carrera de Sacos)">
                 <input type="datetime-local" id="act-fecha">
-                
                 <input type="url" id="act-imagen" placeholder="Enlace de imagen (Opcional)">
-                <p style="font-size: 11px; color: gray; margin-top: -5px;">Pega aquí un enlace de Google Drive, Imgur o web.</p>
                 
                 <div style="display:flex; gap:10px;">
                     <div style="flex:1;">
-                        <label style="font-size:12px;">Género</label>
+                        <label style="font-size:12px;">Tipo</label>
                         <select id="act-genero">
-                            <option value="torneo">🏆 Torneo</option>
-                            <option value="comida">🥘 Comida</option>
-                            <option value="fiesta">🪩 Fiesta</option>
-                            <option value="otro">📢 Otro</option>
+                            <option value="torneo">🏆 Torneo (Bracket)</option>
+                            <option value="carrera">🏃 Carrera (Podio)</option>
+                            <option value="comida">🥘 Comida/Cena</option>
+                            <option value="fiesta">🪩 Fiesta/Evento</option>
                         </select>
                     </div>
                     <div style="flex:1;">
-                        <label style="font-size:12px;">Modalidad</label>
-                        <select id="act-modalidad" onchange="checkModalidad()">
-                            <option value="individual">👤 Individual</option>
-                            <option value="parejas">👥 Parejas</option>
-                            <option value="grupo">👨‍👩‍👧‍👦 Grupo</option>
+                        <label style="font-size:12px;">Categoría</label>
+                        <select id="act-categoria">
+                            <option value="todos">🌍 Todos</option>
+                            <option value="infantil">👶 Infantil</option>
+                            <option value="adulto">🍺 Adultos</option>
                         </select>
                     </div>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <label style="font-size:12px;">Modalidad de Inscripción</label>
+                    <select id="act-modalidad" onchange="checkModalidad()">
+                        <option value="individual">👤 Individual</option>
+                        <option value="parejas">👥 Parejas</option>
+                        <option value="grupo">👨‍👩‍👧‍👦 Grupo</option>
+                    </select>
                 </div>
 
                 <div id="div-grupo-size" class="hidden">
