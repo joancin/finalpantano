@@ -7,38 +7,29 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; }
-        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; }
+        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 80px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; }
         .container { max-width: 600px; margin: 0 auto; }
         
-        .header { display: flex; align-items: center; margin-bottom: 30px; gap: 10px; }
-        .btn-back { background: transparent; border: none; color: var(--text); cursor: pointer; }
-
-        /* TARJETA PERFIL */
-        .profile-card { background: var(--card); border-radius: 20px; padding: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; position: relative; overflow: hidden; }
-        
-        .avatar-circle { width: 100px; height: 100px; background: var(--accent); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 40px; margin: 0 auto 15px auto; font-weight: bold; box-shadow: 0 4px 10px rgba(255, 87, 34, 0.4); }
-        
-        .role-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 10px; }
-        .role-admin { background: #e91e63; }
-        .role-festero { background: #9c27b0; }
+        .profile-card { background: var(--card); border-radius: 20px; padding: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .avatar-circle { width: 100px; height: 100px; background: var(--accent); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 40px; margin: 0 auto 15px auto; font-weight: bold; }
+        .role-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px; display: inline-block; }
+        .role-admin { background: #e91e63; } .role-festero { background: #9c27b0; }
 
         .input-group { text-align: left; margin-top: 20px; }
-        .input-group label { display: block; font-size: 0.85rem; color: gray; margin-bottom: 5px; margin-left: 5px; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 1rem; }
-        
-        .btn-save { background: var(--accent); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; font-size: 1rem; margin-top: 20px; cursor: pointer; display: none; } /* Oculto hasta que edites */
+        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; }
+        .btn-save { background: var(--accent); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; display: none; }
 
-        /* OPCIONES EXTRA */
-        .menu-list { list-style: none; padding: 0; margin-top: 20px; }
-        .menu-item { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .menu-item span { display: flex; align-items: center; gap: 10px; }
-
+        .menu-item { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
         .btn-logout { width: 100%; padding: 15px; background: #ffebee; color: #d32f2f; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-        .msg { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.3s; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+        .nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 2px; }
+        .msg { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; }
     </style>
 
     <script type="module">
@@ -46,16 +37,7 @@
       import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
-        authDomain: "fiestas-pantano.firebaseapp.com",
-        projectId: "fiestas-pantano",
-        storageBucket: "fiestas-pantano.firebasestorage.app",
-        messagingSenderId: "801380435613",
-        appId: "1:801380435613:web:a842572cf7cee93ac57674",
-        measurementId: "G-EG2MZGBT1B"
-      };
-
+      const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
@@ -65,13 +47,11 @@
           if (!user) window.location.href = "index.html";
           currentUser = user;
           aplicarTema();
-          
           const uDoc = await getDoc(doc(db, "usuarios", user.uid));
           if(uDoc.exists()) {
               const data = uDoc.data();
               document.getElementById("user-alias").value = data.username;
               document.getElementById("avatar-initial").innerText = data.username.charAt(0).toUpperCase();
-              
               const rolEl = document.getElementById("user-role");
               rolEl.innerText = data.rol.toUpperCase();
               if(data.rol === 'admin') rolEl.classList.add('role-admin');
@@ -79,88 +59,73 @@
           }
       });
 
-      // Detectar cambios en el input para mostrar el botón Guardar
-      window.detectarCambio = () => {
-          document.getElementById("btn-guardar").style.display = "block";
-      }
-
+      window.detectarCambio = () => { document.getElementById("btn-guardar").style.display = "block"; }
       window.guardarCambios = async () => {
-          const nuevoAlias = document.getElementById("user-alias").value.trim();
-          if(!nuevoAlias) return alert("El nombre no puede estar vacío");
-          
-          const btn = document.getElementById("btn-guardar");
-          btn.innerText = "Guardando...";
-          
+          const alias = document.getElementById("user-alias").value.trim();
+          if(!alias) return alert("Nombre vacío");
           try {
-              await updateDoc(doc(db, "usuarios", currentUser.uid), { username: nuevoAlias });
-              document.getElementById("avatar-initial").innerText = nuevoAlias.charAt(0).toUpperCase();
-              
-              const msg = document.getElementById("toast");
-              msg.style.display = "block"; msg.innerText = "✅ Perfil actualizado";
-              setTimeout(()=>msg.style.display="none", 3000);
-              
-              btn.style.display = "none";
-              btn.innerText = "Guardar Cambios";
-          } catch(e) {
-              alert("Error: " + e.message);
-          }
+              await updateDoc(doc(db, "usuarios", currentUser.uid), { username: alias });
+              document.getElementById("avatar-initial").innerText = alias.charAt(0).toUpperCase();
+              const msg = document.getElementById("toast"); msg.style.display="block"; msg.innerText="✅ Guardado"; setTimeout(()=>msg.style.display="none", 3000);
+              document.getElementById("btn-guardar").style.display="none";
+          } catch(e) { alert("Error: " + e.message); }
       }
-
       window.cambiarTema = () => {
           document.body.classList.toggle('dark-mode');
-          const isDark = document.body.classList.contains('dark-mode');
-          localStorage.setItem('theme', isDark ? 'dark' : 'light');
-          document.getElementById("theme-text").innerText = isDark ? "Modo Claro" : "Modo Oscuro";
-          document.getElementById("theme-icon").innerText = isDark ? "light_mode" : "dark_mode";
+          localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+          actualizarIconoTema();
       }
-      
       window.cerrarSesion = () => { signOut(auth).then(() => window.location.href = "index.html"); }
       
       function aplicarTema() { 
-          if(localStorage.getItem('theme') === 'dark') {
-              document.body.classList.add('dark-mode');
-              document.getElementById("theme-text").innerText = "Modo Claro";
-              document.getElementById("theme-icon").innerText = "light_mode";
-          }
+          if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); 
+          actualizarIconoTema();
+      }
+      function actualizarIconoTema() {
+          const isDark = document.body.classList.contains('dark-mode');
+          document.getElementById("theme-text").innerText = isDark ? "Modo Claro" : "Modo Oscuro";
+          document.getElementById("theme-icon").innerText = isDark ? "light_mode" : "dark_mode";
       }
     </script>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <button class="btn-back" onclick="window.location.href='panel.html'">
-                <span class="material-symbols-outlined">arrow_back</span>
-            </button>
-            <h1 style="margin:0; font-size:1.5rem;">Perfil</h1>
-        </div>
-
+        <h1>Perfil</h1>
         <div class="profile-card">
-            <span id="user-role" class="role-badge">USUARIO</span>
+            <span id="user-role" class="role-badge">CARGANDO</span>
             <div id="avatar-initial" class="avatar-circle">?</div>
-            
             <div class="input-group">
-                <label>Tu Alias (Nombre público)</label>
                 <input type="text" id="user-alias" oninput="detectarCambio()">
             </div>
-
             <button id="btn-guardar" class="btn-save" onclick="guardarCambios()">Guardar Cambios</button>
         </div>
 
-        <ul class="menu-list">
-            <li class="menu-item" onclick="cambiarTema()">
-                <span>
-                    <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
-                    <span id="theme-text">Modo Oscuro</span>
-                </span>
-                <span class="material-symbols-outlined">chevron_right</span>
-            </li>
-            </ul>
+        <div class="menu-item" onclick="cambiarTema()">
+            <span style="display:flex; align-items:center; gap:10px;">
+                <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+                <span id="theme-text">Modo Oscuro</span>
+            </span>
+            <span class="material-symbols-outlined">chevron_right</span>
+        </div>
 
         <button class="btn-logout" onclick="cerrarSesion()">
             <span class="material-symbols-outlined">logout</span> Cerrar Sesión
         </button>
-
         <div id="toast" class="msg"></div>
     </div>
+
+    <nav class="bottom-nav">
+        <a href="panel.html" class="nav-item">
+            <span class="material-symbols-outlined">home</span>Inicio
+        </a>
+        <a href="actividades.html" class="nav-item">
+            <span class="material-symbols-outlined">event</span>Fiestas
+        </a>
+        <a href="mis_inscripciones.html" class="nav-item">
+            <span class="material-symbols-outlined">confirmation_number</span>Tickets
+        </a>
+        <a href="#" class="nav-item active"> <span class="material-symbols-outlined">person</span>Perfil
+        </a>
+    </nav>
 </body>
 </html>
