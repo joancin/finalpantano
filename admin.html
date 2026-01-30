@@ -3,65 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración</title>
+    <title>Panel Admin Pro</title>
+    
     <script>
         if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
     </script>
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #e91e63; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        :root { --bg: #f8f9fa; --text: #2d3436; --card: white; --accent: #6c5ce7; --danger: #ff7675; }
+        html.dark-mode { --bg: #18191a; --text: #dfe6e9; --card: #242526; --accent: #a29bfe; }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; transition: background 0.3s; padding-bottom: 80px; }
+        .container { max-width: 900px; margin: 0 auto; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        /* HEADER CON STATS */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
+        .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); display: block; }
+        .stat-label { font-size: 0.8rem; color: gray; font-weight: 600; text-transform: uppercase; }
 
-        .card { background: var(--card); padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        /* TARJETAS PRINCIPALES */
+        .admin-card { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 30px; position: relative; overflow: hidden; }
+        .card-title { margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
         
         /* FORMULARIOS */
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: var(--bg); color: var(--text); box-sizing: border-box; }
-        
-        button.action { width: 100%; background: var(--accent); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; margin-top: 10px; }
-        button.action:hover { opacity: 0.9; }
+        .input-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        input, select { flex: 1; padding: 14px; border: 1px solid #ddd; border-radius: 10px; background: var(--bg); color: var(--text); outline: none; font-family: inherit; }
+        button.action-btn { background: var(--accent); color: white; border: none; padding: 14px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); transition: transform 0.2s; }
+        button.action-btn:active { transform: scale(0.95); }
 
         /* LISTAS */
-        .list-container { max-height: 300px; overflow-y: auto; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
-        .item-info { display: flex; flex-direction: column; }
-        .item-role { font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; display: inline-block; width: fit-content; margin-top: 4px; font-weight: bold; }
+        .scroll-box { max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        .user-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s; }
+        .user-item:hover { background: rgba(0,0,0,0.02); }
         
-        .role-admin { background: #fce4ec; color: #c2185b; }
-        .role-festero { background: #f3e5f5; color: #7b1fa2; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-weight: bold; font-size: 1rem; }
+        .user-role { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; display: inline-block; width: fit-content; margin-top: 4px; font-weight: 600; text-transform: uppercase; }
+        
+        .role-admin { background: #ffebee; color: #c62828; }
+        .role-festero { background: #e1bee7; color: #6a1b9a; }
         .role-usuario { background: #e0f2f1; color: #00695c; }
 
-        .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .btn-reset { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+        .btn-reset:hover { background: var(--danger); color: white; }
+
+        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; }
         
-        .msg { padding: 10px; border-radius: 5px; margin-top: 10px; display: none; text-align: center; }
-        .success { background: #e8f5e9; color: green; }
-        .error { background: #ffebee; color: red; }
+        .msg { padding: 10px; border-radius: 8px; margin-top: 15px; text-align: center; font-weight: bold; display: none; }
     </style>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot, where, getDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, addDoc, getDocs, query, onSnapshot, where, getDoc, doc, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
-        authDomain: "fiestas-pantano.firebaseapp.com",
-        projectId: "fiestas-pantano",
-        storageBucket: "fiestas-pantano.firebasestorage.app",
-        messagingSenderId: "801380435613",
-        appId: "1:801380435613:web:a842572cf7cee93ac57674",
-        measurementId: "G-EG2MZGBT1B"
-      };
-
+      const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
@@ -70,159 +71,161 @@
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
           const docSnap = await getDoc(doc(db, "usuarios", user.uid));
-          
-          if (!docSnap.exists() || docSnap.data().rol !== 'admin') {
-              alert("Acceso denegado. Solo para Jefes.");
-              window.location.href = "panel.html";
-          }
-          
+          if (!docSnap.exists() || docSnap.data().rol !== 'admin') window.location.href = "panel.html";
           currentUser = user;
-          aplicarTema();
-          escucharUsuarios();
-          escucharCodigosVIP();
+          escucharTodo();
       });
 
-      // --- GENERAR CÓDIGO VIP (Festero/Admin) ---
-      window.crearCodigoVIP = async () => {
-          const codigo = document.getElementById("vip-code").value.trim().toUpperCase();
-          const rol = document.getElementById("vip-role").value;
-          const status = document.getElementById("status-vip");
-
-          if(codigo.length < 3) return mostrarMsg(status, "Código muy corto", "error");
-
-          try {
-              // Verificar si existe
-              const q = query(collection(db, "invitaciones"), where("codigo", "==", codigo));
-              const snap = await getDocs(q);
-              if(!snap.empty) return mostrarMsg(status, "Ese código ya existe", "error");
-
-              await addDoc(collection(db, "invitaciones"), {
-                  codigo: codigo,
-                  rol: rol,
-                  usado: false,
-                  creado_por: currentUser.uid,
-                  fecha_creacion: new Date()
-              });
-
-              mostrarMsg(status, `✅ Código ${rol.toUpperCase()} creado`, "success");
-              document.getElementById("vip-code").value = "";
-          } catch(e) {
-              console.error(e);
-              mostrarMsg(status, "Error: " + e.message, "error");
-          }
-      }
-
-      function escucharCodigosVIP() {
-          // CONSULTA SIMPLIFICADA PARA EVITAR ERRORES DE ÍNDICE EN FIREBASE
-          const q = query(collection(db, "invitaciones"), orderBy("fecha_creacion", "desc"));
-          
-          onSnapshot(q, (snapshot) => {
-              const lista = document.getElementById("lista-codigos-vip");
+      function escucharTodo() {
+          // 1. USUARIOS
+          onSnapshot(query(collection(db, "usuarios"), orderBy("rol")), (snap) => {
+              const lista = document.getElementById("user-list");
               lista.innerHTML = "";
-              let count = 0;
+              let total = 0, festeros = 0;
               
-              snapshot.forEach((doc) => {
-                  const d = doc.data();
+              snap.forEach(d => {
+                  const u = d.data();
+                  total++;
+                  if(u.rol === 'festero' || u.rol === 'admin') festeros++;
                   
-                  // FILTRAMOS AQUÍ CON JAVASCRIPT:
-                  // 1. Que NO esté usado
-                  // 2. Que sea rol ADMIN o FESTERO (para que no salgan los de usuario normal)
-                  if(!d.usado && (d.rol === 'admin' || d.rol === 'festero')) {
-                      count++;
+                  // Renderizar usuario
+                  lista.innerHTML += `
+                    <div class="user-item" data-name="${u.username.toLowerCase()}">
+                        <div class="user-info">
+                            <span class="user-name">${u.username}</span>
+                            <span class="user-role role-${u.rol}">${u.rol}</span>
+                        </div>
+                        ${u.rol !== 'admin' ? 
+                          `<button class="btn-reset" onclick="resetearUsuario('${d.id}', '${u.username}')">
+                             <span class="material-symbols-outlined" style="font-size:16px">restart_alt</span> REINICIAR
+                           </button>` : ''}
+                    </div>`;
+              });
+              
+              document.getElementById("stat-total").innerText = total;
+              document.getElementById("stat-festeros").innerText = festeros;
+          });
+
+          // 2. CÓDIGOS VIP
+          onSnapshot(query(collection(db, "invitaciones")), (snap) => {
+              const lista = document.getElementById("vip-list");
+              lista.innerHTML = "";
+              let hayCodigos = false;
+              
+              snap.forEach(d => {
+                  const data = d.data();
+                  if(!data.usado && (data.rol === 'admin' || data.rol === 'festero')) {
+                      hayCodigos = true;
                       lista.innerHTML += `
-                        <div class="item-row">
-                            <div class="item-info">
-                                <strong style="font-size:1.2rem; letter-spacing:1px;">${d.codigo}</strong>
-                                <span class="item-role role-${d.rol}">Rol: ${d.rol.toUpperCase()}</span>
+                        <div class="user-item">
+                            <div class="user-info">
+                                <span class="user-name" style="letter-spacing:1px; font-family:monospace; font-size:1.1rem;">${data.codigo}</span>
+                                <span class="user-role role-${data.rol}">PARA ${data.rol.toUpperCase()}</span>
                             </div>
-                            <button class="btn-del" onclick="borrarDoc('invitaciones', '${doc.id}')">🗑️</button>
+                            <button class="btn-reset" style="border-color:#ccc; color:gray;" onclick="borrarCodigo('${d.id}')">🗑️</button>
                         </div>`;
                   }
               });
-              
-              if(count === 0) lista.innerHTML = "<p style='text-align:center; color:gray'>No hay invitaciones VIP activas.</p>";
+              if(!hayCodigos) lista.innerHTML = "<p style='text-align:center; color:gray; font-size:0.9rem;'>No hay códigos pendientes.</p>";
           });
       }
 
-      // --- LISTADO DE USUARIOS (Para control) ---
-      function escucharUsuarios() {
-          const q = query(collection(db, "usuarios"), orderBy("rol", "asc"));
-          onSnapshot(q, (snapshot) => {
-              const lista = document.getElementById("lista-usuarios");
-              lista.innerHTML = "";
-              
-              snapshot.forEach((docSnap) => {
-                  const u = docSnap.data();
-                  lista.innerHTML += `
-                    <div class="item-row">
-                        <div class="item-info">
-                            <strong>${u.username}</strong>
-                            <span class="item-role role-${u.rol}">${u.rol.toUpperCase()}</span>
-                        </div>
-                        ${u.rol !== 'admin' ? `<button class="btn-del" onclick="borrarUsuario('${docSnap.id}', '${u.username}')">Expulsar</button>` : ''}
-                    </div>`;
+      window.crearVIP = async () => {
+          const code = document.getElementById("vip-code").value.trim().toUpperCase();
+          const role = document.getElementById("vip-role").value;
+          if(code.length < 3) return alert("Código muy corto");
+          
+          try {
+              // Comprobar duplicado
+              const q = query(collection(db, "invitaciones"), where("codigo", "==", code));
+              const snap = await getDocs(q);
+              if(!snap.empty) return alert("¡Ese código ya existe!");
+
+              await addDoc(collection(db, "invitaciones"), {
+                  codigo: code, rol: role, usado: false, fecha_creacion: new Date()
               });
-          });
+              document.getElementById("vip-code").value = "";
+              mostrarNoti("Código Creado", "#e8f5e9", "green");
+          } catch(e) { alert("Error: " + e.message); }
       }
 
-      window.borrarDoc = async (col, id) => {
-          if(confirm("¿Eliminar este código?")) await deleteDoc(doc(db, col, id));
-      }
-
-      window.borrarUsuario = async (id, nombre) => {
-          if(confirm(`¿Estás seguro de que quieres echar a ${nombre}? No podrá volver a entrar.`)) {
+      window.resetearUsuario = async (id, nombre) => {
+          if(confirm(`⚠️ ATENCIÓN ⚠️\n\nVas a ELIMINAR la cuenta de "${nombre}".\n\nEsto sirve para que se pueda volver a registrar si olvidó la contraseña.\n\n¿Confirmar?`)) {
               await deleteDoc(doc(db, "usuarios", id));
+              mostrarNoti("Usuario eliminado. Ya puede registrarse de nuevo.", "#fff3e0", "#e65100");
           }
       }
 
-      function mostrarMsg(el, txt, tipo) { 
-          el.innerText = txt; el.className = "msg " + tipo; el.style.display = "block"; 
-          setTimeout(()=>el.style.display='none', 3000); 
+      window.borrarCodigo = async (id) => { if(confirm("¿Borrar este código?")) await deleteDoc(doc(db, "invitaciones", id)); }
+
+      window.filtrarUsuarios = () => {
+          const texto = document.getElementById("search-user").value.toLowerCase();
+          document.querySelectorAll(".user-item").forEach(item => {
+              const nombre = item.getAttribute("data-name");
+              item.style.display = nombre.includes(texto) ? "flex" : "none";
+          });
       }
-      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+
+      function mostrarNoti(txt, bg, col) {
+          const el = document.getElementById("noti");
+          el.innerText = txt; el.style.background = bg; el.style.color = col; el.style.display = "block";
+          setTimeout(() => el.style.display="none", 3000);
+      }
     </script>
 </head>
-
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🛡️ Zona de Jefes (Admin)</h1>
-            <button class="btn-back" onclick="window.location.href='panel.html'">Volver</button>
-        </div>
 
-        <div class="card" style="border-left: 5px solid #e91e63;">
-            <h2>👑 Generar Invitación VIP</h2>
-            <p style="color:gray; font-size:0.9rem;">Crea un código para que tus compañeros se registren ellos mismos.</p>
-            
-            <div class="form-group">
-                <label>Código de Invitación</label>
-                <input type="text" id="vip-code" placeholder="Ej: FESTERO25" style="text-transform:uppercase; letter-spacing:2px; font-weight:bold;">
-            </div>
-            
-            <div class="form-group">
-                <label>Permisos (Rol)</label>
-                <select id="vip-role">
-                    <option value="festero" selected>🟣 Festero (Puede crear actividades)</option>
-                    <option value="admin">🔴 Admin (Poder absoluto)</option>
-                </select>
-            </div>
-
-            <button class="action" onclick="crearCodigoVIP()">Crear Invitación VIP</button>
-            <div id="status-vip" class="msg"></div>
-
-            <h4 style="margin-bottom:10px;">Códigos VIP activos (sin usar)</h4>
-            <div id="lista-codigos-vip" class="list-container" style="background:#f9f9f9; border-radius:8px; height:150px;">
-                </div>
-        </div>
-
-        <div class="card">
-            <h2>👥 Censo de Usuarios</h2>
-            <p style="color:gray; font-size:0.9rem;">Aquí están todos los registrados en la App.</p>
-            <div id="lista-usuarios" class="list-container">
-                Cargando...
-            </div>
-        </div>
-
+    <div class="dashboard-header">
+        <h1 style="margin:0;">🎛️ Panel de Mando</h1>
     </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <span id="stat-total" class="stat-num">...</span>
+            <span class="stat-label">Usuarios Totales</span>
+        </div>
+        <div class="stat-card">
+            <span id="stat-festeros" class="stat-num">...</span>
+            <span class="stat-label">Equipo Festero</span>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <h3 class="card-title">
+            <span class="material-symbols-outlined" style="color:var(--accent)">stars</span>
+            Generar Invitación VIP
+        </h3>
+        <div class="input-row">
+            <input type="text" id="vip-code" placeholder="CÓDIGO (Ej: PEPE25)" style="text-transform:uppercase; font-weight:bold;">
+            <select id="vip-role" style="flex:0.6;">
+                <option value="festero">Festero</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button class="action-btn" onclick="crearVIP()">Crear</button>
+        </div>
+        <div style="margin-top:20px;">
+            <strong style="font-size:0.8rem; color:gray;">CÓDIGOS PENDIENTES DE USO:</strong>
+            <div id="vip-list" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <h3 class="card-title">
+            <span class="material-symbols-outlined" style="color:#00b894;">group</span>
+            Censo de Usuarios
+        </h3>
+        <input type="text" id="search-user" placeholder="🔍 Buscar usuario..." onkeyup="filtrarUsuarios()" style="margin-bottom:15px; background:#f0f2f5;">
+        
+        <div id="user-list" class="scroll-box">
+            Cargando lista...
+        </div>
+    </div>
+
+    <div id="noti" class="msg"></div>
+
+    <button class="btn-back-float" onclick="window.location.href='panel.html'">
+        <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+
 </body>
 </html>
