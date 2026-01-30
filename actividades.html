@@ -89,11 +89,9 @@
                   const actId = docSnap.id;
                   const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString();
                   
-                  // Verificar si estoy dentro (buscamos mi UID en cualquier parte del equipo)
-                  const inscritos = act.inscritos || []; // Nueva estructura
+                  // Verificar si estoy dentro
+                  const inscritos = act.inscritos || []; 
                   let estoyDentro = false;
-                  
-                  // Recorremos todos los equipos inscritos
                   inscritos.forEach(equipo => {
                       if (equipo.capitan_uid === currentUser.uid) estoyDentro = true;
                       if (equipo.miembros && equipo.miembros.some(m => m.uid === currentUser.uid)) estoyDentro = true;
@@ -104,6 +102,8 @@
 
                   const div = document.createElement("div");
                   div.className = "act-card";
+                  
+                  // --- AQUÍ ESTÁ EL CAMBIO PRINCIPAL EN EL HTML ---
                   div.innerHTML = `
                       <img src="${imgUrl}" class="act-img" onerror="this.src='https://placehold.co/600x200?text=Fiesta'">
                       <div class="act-body">
@@ -114,11 +114,24 @@
                           </div>
                           
                           <div class="act-footer">
-                              <div>${estoyDentro ? '<span style="color:green; font-weight:bold;">✅ Inscrito</span>' : `<span style="color:gray">${inscritos.length} equipos/personas</span>`}</div>
-                              ${estoyDentro
-                                  ? `<button class="btn-leave" onclick="alert('Para borrarte contacta a un Festero (Próximamente editar)')">Ya estás dentro</button>`
-                                  : `<button class="btn-join" onclick="abrirModal('${actId}', '${act.modalidad}', ${act.tamano_equipo || 1})">¡Apuntarme!</button>`
-                              }
+                              <div>
+                                  ${estoyDentro 
+                                    ? '<span style="color:green; font-weight:bold;">✅ Inscrito</span>' 
+                                    : `<span style="color:gray">${inscritos.length} inscritos</span>`
+                                  }
+                              </div>
+                              
+                              <div style="display:flex; gap:5px;">
+                                  ${act.bracket 
+                                      ? `<button class="btn-join" style="background:#ff9800; padding:8px 15px;" onclick="window.location.href='ver_torneo.html?id=${actId}'">🏆 Ver Cuadro</button>` 
+                                      : ''
+                                  }
+
+                                  ${estoyDentro
+                                      ? `<button class="btn-leave" onclick="alert('Contacta a un organizador para borrarte.')">Ya estás dentro</button>`
+                                      : `<button class="btn-join" onclick="abrirModal('${actId}', '${act.modalidad}', ${act.tamano_equipo || 1})">¡Apuntarme!</button>`
+                                  }
+                              </div>
                           </div>
                       </div>
                   `;
@@ -137,17 +150,15 @@
           const container = document.getElementById("modal-inputs");
           const tituloModal = document.getElementById("modal-titulo");
           
-          container.innerHTML = ""; // Limpiar
+          container.innerHTML = ""; 
           
           if (modalidad === 'individual') {
               tituloModal.innerText = "Confirmar Inscripción";
               container.innerHTML = "<p>¿Te apuntas a esta actividad?</p>";
           } else {
               tituloModal.innerText = `Inscripción ${modalidad}`;
-              // Input nombre de equipo
               container.innerHTML += `<label>Nombre del Equipo:</label><input type="text" id="team-name" placeholder="Ej: Los Invencibles">`;
               
-              // Inputs para compañeros (Size - 1 porque yo soy el primero)
               const numCompaneros = (modalidad === 'parejas') ? 1 : (size - 1);
               container.innerHTML += `<p style="font-size:12px; margin-top:10px;">Añade los usuarios de tus compañeros (si tienen cuenta se vincularán):</p>`;
               
@@ -158,7 +169,6 @@
                     </div>`;
               }
           }
-          
           modal.style.display = "flex";
       }
 
@@ -173,7 +183,7 @@
                   capitan: myUsername,
                   capitan_uid: currentUser.uid,
                   fecha_registro: new Date(),
-                  miembros: [] // Aquí guardaremos {nombre: "...", uid: "..." (opcional)}
+                  miembros: [] 
               };
 
               if (currentModalidad !== 'individual') {
@@ -181,40 +191,28 @@
                   if (!nombreEquipo) throw new Error("Debes poner un nombre de equipo");
                   datosEquipo.nombre_equipo = nombreEquipo;
 
-                  // RECOLECTAR Y BUSCAR COMPAÑEROS
                   const inputs = document.querySelectorAll(".mate-input");
-                  
-                  // Promesas para buscar todos los usuarios en paralelo
                   const promesasBusqueda = Array.from(inputs).map(async (input) => {
-                      const nombre = input.value.trim().toLowerCase(); // Buscar en minúsculas
-                      if (!nombre) return null; // Campo vacío
+                      const nombre = input.value.trim().toLowerCase(); 
+                      if (!nombre) return null; 
 
-                      // Buscar en DB
                       const q = query(collection(db, "usuarios"), where("username", "==", nombre));
                       const querySnapshot = await getDocs(q);
 
                       if (!querySnapshot.empty) {
-                          // ¡Usuario encontrado!
                           const userDoc = querySnapshot.docs[0];
                           return { nombre: userDoc.data().username, uid: userDoc.id, vinculado: true };
                       } else {
-                          // No existe, guardamos solo el nombre
                           return { nombre: input.value.trim(), vinculado: false };
                       }
                   });
 
-                  // Esperar a que se busquen todos
                   const resultados = await Promise.all(promesasBusqueda);
                   datosEquipo.miembros = resultados.filter(r => r !== null);
               }
 
-              // GUARDAR EN BASE DE DATOS
               const actRef = doc(db, "actividades", currentActId);
-              
-              // Usamos arrayUnion para añadir el objeto completo a la lista "inscritos"
-              await updateDoc(actRef, {
-                  inscritos: arrayUnion(datosEquipo)
-              });
+              await updateDoc(actRef, { inscritos: arrayUnion(datosEquipo) });
 
               mostrarToat("✅ ¡Inscripción completada con éxito!");
               cerrarModal();
