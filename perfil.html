@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil</title>
+    
     <script>
         if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
     </script>
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
         :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; }
+        
+        /* MODO OSCURO EN HTML */
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; transition: background 0.3s; }
         .container { max-width: 600px; margin: 0 auto; }
         
         .profile-card { background: var(--card); border-radius: 20px; padding: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
@@ -49,7 +53,7 @@
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
           currentUser = user;
-          aplicarTema();
+          actualizarIconoTema();
           const uDoc = await getDoc(doc(db, "usuarios", user.uid));
           if(uDoc.exists()) {
               const data = uDoc.data();
@@ -74,18 +78,15 @@
           } catch(e) { alert("Error: " + e.message); }
       }
       window.cambiarTema = () => {
-          document.body.classList.toggle('dark-mode');
-          localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+          document.body.classList.toggle('dark-mode'); // Cambia body por si acaso
+          document.documentElement.classList.toggle('dark-mode'); // Cambia HTML (lo importante)
+          localStorage.setItem('theme', document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light');
           actualizarIconoTema();
       }
       window.cerrarSesion = () => { signOut(auth).then(() => window.location.href = "index.html"); }
       
-      function aplicarTema() { 
-          if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); 
-          actualizarIconoTema();
-      }
       function actualizarIconoTema() {
-          const isDark = document.body.classList.contains('dark-mode');
+          const isDark = document.documentElement.classList.contains('dark-mode');
           document.getElementById("theme-text").innerText = isDark ? "Modo Claro" : "Modo Oscuro";
           document.getElementById("theme-icon").innerText = isDark ? "light_mode" : "dark_mode";
       }
