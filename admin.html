@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración - Fiestas</title>
+    <title>Panel de Administración</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
@@ -13,33 +13,41 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
         .container { max-width: 800px; margin: 0 auto; }
         
-        /* Header simple con botón volver */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        
-        /* Tarjetas */
-        .card { background: var(--card); padding: 25px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 25px; }
+
+        .card { background: var(--card); padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
         h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid #ddd; padding-bottom: 10px; }
         
-        /* Formularios */
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
-        button.action { width: 100%; background: var(--accent); color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        /* FORMULARIOS */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: var(--bg); color: var(--text); box-sizing: border-box; }
+        
+        button.action { width: 100%; background: var(--accent); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; margin-top: 10px; }
         button.action:hover { opacity: 0.9; }
 
-        /* Tabla de usuarios */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #ddd; }
-        th { color: var(--accent); }
-        .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; }
+        /* LISTAS */
+        .list-container { max-height: 300px; overflow-y: auto; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+        .item-info { display: flex; flex-direction: column; }
+        .item-role { font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; display: inline-block; width: fit-content; margin-top: 4px; font-weight: bold; }
         
-        .msg { margin-top: 10px; font-weight: bold; display: none; }
-        .success { color: green; } .error { color: red; }
+        .role-admin { background: #fce4ec; color: #c2185b; }
+        .role-festero { background: #f3e5f5; color: #7b1fa2; }
+        .role-usuario { background: #e0f2f1; color: #00695c; }
+
+        .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        
+        .msg { padding: 10px; border-radius: 5px; margin-top: 10px; display: none; text-align: center; }
+        .success { background: #e8f5e9; color: green; }
+        .error { background: #ffebee; color: red; }
     </style>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot, where, getDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
@@ -54,155 +62,160 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
+      let currentUser = null;
 
-      // 1. SEGURIDAD: Solo Admin puede ver esto
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
-          
           const docSnap = await getDoc(doc(db, "usuarios", user.uid));
+          
+          // SEGURIDAD: Solo entra si es ADMIN
           if (!docSnap.exists() || docSnap.data().rol !== 'admin') {
-              alert("Acceso denegado. Solo administradores.");
+              alert("Acceso denegado. Solo para Jefes.");
               window.location.href = "panel.html";
-          } else {
-              cargarUsuarios(); // Si es admin, cargamos la lista
-              aplicarTema();
           }
+          
+          currentUser = user;
+          aplicarTema();
+          escucharUsuarios();
+          escucharCodigosVIP();
       });
 
-      // 2. CREAR FESTERO (Sin cerrar sesión del admin)
-      window.crearFestero = async () => {
-          const userNew = document.getElementById("f-user").value.trim().toLowerCase();
-          const passNew = document.getElementById("f-pass").value;
-          const status = document.getElementById("status-create");
+      // --- GENERAR CÓDIGO VIP (Festero/Admin) ---
+      window.crearCodigoVIP = async () => {
+          const codigo = document.getElementById("vip-code").value.trim().toUpperCase();
+          const rol = document.getElementById("vip-role").value;
+          const status = document.getElementById("status-vip");
 
-          if(!userNew || passNew.length < 6) {
-              mostrarMsg(status, "Rellena usuario y contraseña (min 6 chars)", "error");
-              return;
-          }
-
-          status.innerText = "Creando..."; status.style.display = "block";
+          if(codigo.length < 3) return mostrarMsg(status, "Código muy corto", "error");
 
           try {
-              // TRUCO: Creamos una 'App Secundaria' para crear el usuario sin desloguear al Admin
-              const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
-              const secondaryAuth = getAuth(secondaryApp);
-              
-              const fakeEmail = userNew + "@fiestaspueblo.com";
-              const userCred = await createUserWithEmailAndPassword(secondaryAuth, fakeEmail, passNew);
-              
-              // Guardar en base de datos con rol 'festero'
-              await setDoc(doc(db, "usuarios", userCred.user.uid), {
-                  username: userNew,
-                  rol: "festero",
-                  creado_por_admin: true,
-                  fecha: new Date()
+              // Verificar si existe
+              const q = query(collection(db, "invitaciones"), where("codigo", "==", codigo));
+              const snap = await getDocs(q);
+              if(!snap.empty) return mostrarMsg(status, "Ese código ya existe", "error");
+
+              await addDoc(collection(db, "invitaciones"), {
+                  codigo: codigo,
+                  rol: rol, // Aquí está la magia: 'festero' o 'admin'
+                  usado: false,
+                  creado_por: currentUser.uid,
+                  fecha_creacion: new Date()
               });
 
-              // Limpiar y cerrar app secundaria
-              await secondaryAuth.signOut(); // logout de la secundaria
-              
-              mostrarMsg(status, `¡Festero '${userNew}' creado con éxito!`, "success");
-              document.getElementById("f-user").value = "";
-              document.getElementById("f-pass").value = "";
-              cargarUsuarios(); // Actualizar tabla
-
-          } catch (e) {
+              mostrarMsg(status, `✅ Código ${rol.toUpperCase()} creado`, "success");
+              document.getElementById("vip-code").value = "";
+          } catch(e) {
               console.error(e);
-              let errorTxt = e.message;
-              if(errorTxt.includes("email-already-in-use")) errorTxt = "Ese usuario ya existe.";
-              mostrarMsg(status, "Error: " + errorTxt, "error");
+              mostrarMsg(status, "Error: " + e.message, "error");
           }
       }
 
-      // 3. LISTAR USUARIOS
-      async function cargarUsuarios() {
-          const tbody = document.getElementById("tabla-body");
-          tbody.innerHTML = "<tr><td colspan='3'>Cargando...</td></tr>";
-          
-          const querySnapshot = await getDocs(collection(db, "usuarios"));
-          tbody.innerHTML = ""; // Limpiar
-
-          querySnapshot.forEach((docSnap) => {
-              const u = docSnap.data();
-              const row = `
-                <tr>
-                    <td><b>${u.username}</b></td>
-                    <td>${u.rol.toUpperCase()}</td>
-                    <td>
-                        ${u.rol !== 'admin' ? `<button class="btn-del" onclick="borrarUsuario('${docSnap.id}', '${u.username}')">Eliminar</button>` : '-'}
-                    </td>
-                </tr>
-              `;
-              tbody.innerHTML += row;
+      function escucharCodigosVIP() {
+          // Solo escuchamos códigos NO usados
+          const q = query(collection(db, "invitaciones"), where("usado", "==", false), orderBy("fecha_creacion", "desc"));
+          onSnapshot(q, (snapshot) => {
+              const lista = document.getElementById("lista-codigos-vip");
+              lista.innerHTML = "";
+              
+              snapshot.forEach((doc) => {
+                  const d = doc.data();
+                  // Solo mostramos códigos de Admin o Festero aquí
+                  if(d.rol === 'admin' || d.rol === 'festero') {
+                      lista.innerHTML += `
+                        <div class="item-row">
+                            <div class="item-info">
+                                <strong style="font-size:1.2rem; letter-spacing:1px;">${d.codigo}</strong>
+                                <span class="item-role role-${d.rol}">Rol: ${d.rol.toUpperCase()}</span>
+                            </div>
+                            <button class="btn-del" onclick="borrarDoc('invitaciones', '${doc.id}')">🗑️</button>
+                        </div>`;
+                  }
+              });
+              if(lista.innerHTML === "") lista.innerHTML = "<p style='text-align:center; color:gray'>No hay invitaciones VIP activas.</p>";
           });
       }
 
-      // 4. BORRAR USUARIO (Solo de la DB visual, no de Auth por seguridad del cliente)
+      // --- LISTADO DE USUARIOS (Para control) ---
+      function escucharUsuarios() {
+          const q = query(collection(db, "usuarios"), orderBy("rol", "asc")); // Ordenar por rol suele poner admins primero alfabéticamente
+          onSnapshot(q, (snapshot) => {
+              const lista = document.getElementById("lista-usuarios");
+              lista.innerHTML = "";
+              
+              snapshot.forEach((docSnap) => {
+                  const u = docSnap.data();
+                  lista.innerHTML += `
+                    <div class="item-row">
+                        <div class="item-info">
+                            <strong>${u.username}</strong>
+                            <span class="item-role role-${u.rol}">${u.rol.toUpperCase()}</span>
+                        </div>
+                        ${u.rol !== 'admin' ? `<button class="btn-del" onclick="borrarUsuario('${docSnap.id}', '${u.username}')">Expulsar</button>` : ''}
+                    </div>`;
+              });
+          });
+      }
+
+      window.borrarDoc = async (col, id) => {
+          if(confirm("¿Eliminar este código?")) await deleteDoc(doc(db, col, id));
+      }
+
       window.borrarUsuario = async (id, nombre) => {
-          if(!confirm(`¿Seguro que quieres borrar a ${nombre}? El usuario no podrá entrar al panel, pero su cuenta de acceso seguirá existiendo (Firebase limitation).`)) return;
-          
-          await deleteDoc(doc(db, "usuarios", id));
-          alert("Usuario eliminado de la base de datos.");
-          cargarUsuarios();
+          if(confirm(`¿Estás seguro de que quieres echar a ${nombre}? No podrá volver a entrar.`)) {
+              // Nota: Esto borra el dato de la base de datos, pero el login de Auth sigue existiendo.
+              // Para bloquearlo 100% real se necesitaría Cloud Functions, pero para esta app sencilla,
+              // al borrarlo de 'usuarios', el panel.html le echará automáticamente.
+              await deleteDoc(doc(db, "usuarios", id));
+          }
       }
 
-      function mostrarMsg(el, txt, tipo) {
-          el.innerText = txt;
-          el.className = "msg " + tipo;
-          el.style.display = "block";
+      function mostrarMsg(el, txt, tipo) { 
+          el.innerText = txt; el.className = "msg " + tipo; el.style.display = "block"; 
+          setTimeout(()=>el.style.display='none', 3000); 
       }
-
-      function aplicarTema() {
-        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
-      }
+      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
     </script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🛠️ Zona Admin</h1>
-            <button class="btn-back" onclick="window.location.href='panel.html'">
-                <span class="material-symbols-outlined">arrow_back</span> Volver
-            </button>
+            <h1>🛡️ Zona de Jefes (Admin)</h1>
+            <button class="btn-back" onclick="window.location.href='panel.html'">Volver</button>
+        </div>
+
+        <div class="card" style="border-left: 5px solid #e91e63;">
+            <h2>👑 Generar Invitación VIP</h2>
+            <p style="color:gray; font-size:0.9rem;">Crea un código para que tus compañeros se registren ellos mismos.</p>
+            
+            <div class="form-group">
+                <label>Código de Invitación</label>
+                <input type="text" id="vip-code" placeholder="Ej: FESTEROS2025" style="text-transform:uppercase; letter-spacing:2px; font-weight:bold;">
+            </div>
+            
+            <div class="form-group">
+                <label>Permisos (Rol)</label>
+                <select id="vip-role">
+                    <option value="festero" selected>🟣 Festero (Puede crear actividades)</option>
+                    <option value="admin">🔴 Admin (Poder absoluto)</option>
+                </select>
+            </div>
+
+            <button class="action" onclick="crearCodigoVIP()">Crear Invitación VIP</button>
+            <div id="status-vip" class="msg"></div>
+
+            <h4 style="margin-bottom:10px;">Códigos VIP activos (sin usar)</h4>
+            <div id="lista-codigos-vip" class="list-container" style="background:#f9f9f9; border-radius:8px; height:150px;">
+                </div>
         </div>
 
         <div class="card">
-            <h2>Crear Nuevo Festero</h2>
-            <p>Da de alta a un organizador directamente.</p>
-            <input type="text" id="f-user" placeholder="Nombre de usuario (ej: comision2026)">
-            <input type="text" id="f-pass" placeholder="Contraseña (mínimo 6 caracteres)">
-            <button class="action" onclick="crearFestero()">Crear Festero</button>
-            <p id="status-create" class="msg"></p>
+            <h2>👥 Censo de Usuarios</h2>
+            <p style="color:gray; font-size:0.9rem;">Aquí están todos los registrados en la App.</p>
+            <div id="lista-usuarios" class="list-container">
+                Cargando...
+            </div>
         </div>
 
-        <div class="card">
-            <h2>Lista de Usuarios</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Rol</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-body">
-                    </tbody>
-            </table>
-        </div>
     </div>
-    <nav style="position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom));" class="bottom-nav">
-        <a href="panel.html" style="border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1;">
-            <span class="material-symbols-outlined" style="font-size: 24px;">home</span>Inicio
-        </a>
-        <a href="actividades.html" style="border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1;">
-            <span class="material-symbols-outlined" style="font-size: 24px;">event</span>Fiestas
-        </a>
-        <a href="mis_inscripciones.html" style="border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1;">
-            <span class="material-symbols-outlined" style="font-size: 24px;">confirmation_number</span>Tickets
-        </a>
-        <a href="perfil.html" style="border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1;">
-            <span class="material-symbols-outlined" style="font-size: 24px;">person</span>Perfil
-        </a>
-    </nav>
 </body>
 </html>
