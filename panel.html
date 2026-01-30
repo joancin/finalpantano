@@ -3,117 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Principal - Fiestas</title>
+    <title>Fiestas Pantano</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        /* --- VARIABLES DE COLORES (SISTEMA DE TEMAS) --- */
-        :root {
-            --bg-color: #f0f2f5;
-            --text-color: #333;
-            --card-bg: white;
-            --header-bg: white;
-            --shadow: rgba(0,0,0,0.1);
-            --accent: #ff5722;
-            --accent-hover: #e64a19;
-            --border: #ddd;
-        }
-
-        /* CLASE MODO OSCURO */
-        body.dark-mode {
-            --bg-color: #18191a;
-            --text-color: #e4e6eb;
-            --card-bg: #242526;
-            --header-bg: #242526;
-            --shadow: rgba(0,0,0,0.5);
-            --border: #3e4042;
-        }
-
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-color);
-            margin: 0; 
-            transition: background 0.3s, color 0.3s;
-        }
-
-        /* HEADER / BARRA DE NAVEGACIÓN */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--header-bg);
-            padding: 10px 30px;
-            box-shadow: 0 2px 5px var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --nav-bg: white; --accent: #ff5722; --nav-active: #ff5722; --border: #eee; }
+        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --nav-bg: #242526; --nav-active: #ff5722; --border: #3e4042; }
         
-        .nav-controls { display: flex; align-items: center; gap: 15px; }
-
-        /* BOTONES DEL HEADER */
-        .btn-nav {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-color);
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        .btn-nav:hover { background-color: var(--bg-color); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px 20px 90px 20px; /* Padding extra abajo para el menú */ }
         
-        .btn-admin { border-color: #e91e63; color: #e91e63; font-weight: bold; display: none; } /* Oculto por defecto */
-        .btn-festero { border-color: #9c27b0; color: #9c27b0; font-weight: bold; display: none; } /* Oculto por defecto */
+        /* HEADER SIMPLE */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--accent); }
+        .user-greet { font-size: 0.9rem; color: gray; }
+
+        /* ZONA ADMIN (Solo visible para admins/festeros) */
+        #admin-panel { display: none; background: linear-gradient(135deg, #673ab7, #512da8); color: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(103, 58, 183, 0.3); }
+        .admin-header { font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; font-size: 1.1rem; }
+        .admin-actions { display: flex; gap: 10px; }
+        .btn-admin { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px; border-radius: 8px; flex: 1; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.8rem; transition: background 0.2s; }
+        .btn-admin:hover { background: rgba(255,255,255,0.3); }
+
+        /* GRID PRINCIPAL */
+        .grid-home { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card-home { background: var(--card); padding: 20px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 120px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; border: 1px solid var(--border); }
+        .card-home:hover { transform: translateY(-3px); }
+        .card-icon { font-size: 2.5rem; color: var(--accent); margin-bottom: 10px; }
+        .card-title { font-weight: bold; font-size: 0.9rem; }
+
+        /* BARRA DE NAVEGACIÓN INFERIOR (ESTILO APP) */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; gap: 3px; flex: 1; }
+        .nav-item.active { color: var(--nav-active); font-weight: bold; }
+        .nav-item .material-symbols-outlined { font-size: 24px; }
         
-        .btn-logout { background: #ff4444; color: white; border: none; }
-        .btn-logout:hover { background: #cc0000; }
-
-        /* CONTENIDO PRINCIPAL */
-        .main-container { padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
-        
-        h2 { border-bottom: 2px solid var(--accent); display: inline-block; padding-bottom: 5px; margin-bottom: 30px; }
-
-        .grid-actividades {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        /* TARJETAS */
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px var(--shadow);
-            transition: transform 0.2s;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        .card:hover { transform: translateY(-5px); }
-        
-        .icon-large { font-size: 40px; color: var(--accent); margin-bottom: 15px; }
-        .card h3 { margin: 0 0 10px 0; }
-        .card p { font-size: 14px; opacity: 0.8; }
-
+        /* Notificaciones */
+        .notif-badge { position: absolute; top: 15px; right: 20px; background: red; width: 10px; height: 10px; border-radius: 50%; display: none; }
     </style>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
       import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      // --- TU CONFIGURACIÓN ---
       const firebaseConfig = {
         apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
         authDomain: "fiestas-pantano.firebaseapp.com",
@@ -128,120 +60,95 @@
       const db = getFirestore(app);
       const auth = getAuth(app);
 
-      // --- LÓGICA DE USUARIO Y ROL ---
       onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            const docRef = doc(db, "usuarios", user.uid);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                const rol = data.rol;
-                document.getElementById("username-display").innerText = data.username;
-
-                // MOSTRAR BOTONES DE GESTIÓN EN LA ESQUINA (HEADER)
-                if (rol === 'admin') {
-                    document.getElementById('btn-admin-zone').style.display = 'flex';
-                    document.getElementById('btn-festero-zone').style.display = 'flex';
-                } else if (rol === 'festero') {
-                    document.getElementById('btn-festero-zone').style.display = 'flex';
-                }
+        if (!user) window.location.href = "index.html";
+        aplicarTema();
+        
+        const uDoc = await getDoc(doc(db, "usuarios", user.uid));
+        if (uDoc.exists()) {
+            const data = uDoc.data();
+            document.getElementById("username").innerText = data.username;
+            
+            // MOSTRAR PANEL DE GESTIÓN SI ES ADMIN/FESTERO
+            if (data.rol === 'admin' || data.rol === 'festero') {
+                document.getElementById('admin-panel').style.display = 'block';
+                if(data.rol === 'admin') document.getElementById('btn-admin-users').style.display = 'flex';
             }
-        } else {
-            window.location.href = "index.html";
         }
       });
 
-      // --- CERRAR SESIÓN ---
-      window.cerrarSesion = () => {
-          signOut(auth).then(() => window.location.href = "index.html");
-      }
+      // Función de navegación simple
+      window.irA = (url) => window.location.href = url;
 
-      // --- MODO OSCURO ---
-      window.toggleTheme = () => {
-          document.body.classList.toggle('dark-mode');
-          const isDark = document.body.classList.contains('dark-mode');
-          localStorage.setItem('theme', isDark ? 'dark' : 'light');
-          
-          const icon = document.getElementById('theme-icon');
-          icon.innerText = isDark ? 'light_mode' : 'dark_mode';
-      }
-
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-          document.body.classList.add('dark-mode');
-          document.getElementById('theme-icon').innerText = 'light_mode';
-      }
-
-      // --- NAVEGACIÓN CORREGIDA ---
-      window.irA = (lugar) => {
-          if (lugar === 'zona_admin') {
-              window.location.href = "admin.html"; 
-          } else if (lugar === 'zona_festero') {
-              window.location.href = "gestion.html";
-          } else if (lugar === 'ver_actividades') {
-              window.location.href = "actividades.html";
-          } else if (lugar === 'mis_inscripciones') {
-              window.location.href = "mis_inscripciones.html";
-          } else {
-              alert("Sección en construcción: " + lugar);
-          }
-      }
+      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
     </script>
 </head>
 <body>
 
-    <div class="navbar">
+    <div class="header">
         <div class="logo">
-            <span class="material-symbols-outlined" style="color: var(--accent);">celebration</span>
-            <span>Fiestas Pantano</span>
-            <small style="font-weight: normal; margin-left: 10px; font-size: 12px;">Hola, <span id="username-display">...</span></small>
+            <span class="material-symbols-outlined">celebration</span>
+            Fiestas Pantano
         </div>
+        <div class="user-greet">Hola, <span id="username">...</span></div>
+    </div>
 
-        <div class="nav-controls">
-            <button id="btn-admin-zone" class="btn-nav btn-admin" onclick="irA('zona_admin')">
-                <span class="material-symbols-outlined">admin_panel_settings</span>
-                Admin
-            </button>
-            
-            <button id="btn-festero-zone" class="btn-nav btn-festero" onclick="irA('zona_festero')">
+    <div id="admin-panel">
+        <div class="admin-header">
+            <span class="material-symbols-outlined">security</span> Zona de Gestión
+        </div>
+        <div class="admin-actions">
+            <button class="btn-admin" onclick="irA('gestion.html')">
                 <span class="material-symbols-outlined">edit_calendar</span>
-                Gestión
+                Actividades
             </button>
-
-            <button class="btn-nav" onclick="toggleTheme()" title="Cambiar Tema">
-                <span id="theme-icon" class="material-symbols-outlined">dark_mode</span>
-            </button>
-
-            <button class="btn-nav btn-logout" onclick="cerrarSesion()">
-                <span class="material-symbols-outlined">logout</span>
+            <button id="btn-admin-users" class="btn-admin" onclick="irA('admin.html')" style="display:none;">
+                <span class="material-symbols-outlined">group</span>
+                Usuarios
             </button>
         </div>
     </div>
 
-    <div class="main-container">
-        <h2>📅 Actividades y Fiestas</h2>
+    <h3 style="margin-top:0">¿Qué quieres hacer?</h3>
+    <div class="grid-home">
+        <div class="card-home" onclick="irA('actividades.html')">
+            <span class="material-symbols-outlined card-icon">calendar_month</span>
+            <span class="card-title">Ver Calendario</span>
+        </div>
         
-        <div class="grid-actividades">
-            <div class="card" onclick="irA('ver_actividades')">
-                <span class="material-symbols-outlined icon-large">event_list</span>
-                <h3>Ver Todo</h3>
-                <p>Consulta el calendario completo de eventos.</p>
-            </div>
+        <div class="card-home" onclick="irA('mis_inscripciones.html')">
+            <span class="material-symbols-outlined card-icon">confirmation_number</span>
+            <span class="card-title">Mis Eventos</span>
+        </div>
 
-            <div class="card" onclick="irA('mis_inscripciones')">
-                <span class="material-symbols-outlined icon-large">confirmation_number</span>
-                <h3>Mis Inscripciones</h3>
-                <p>Gestiona los eventos a los que te has apuntado.</p>
-            </div>
+        <div class="card-home" onclick="irA('foro')"> <span class="material-symbols-outlined card-icon" style="color:#2196f3">forum</span>
+            <span class="card-title">Foro Popular</span>
+        </div>
 
-            <div class="card" onclick="irA('foro')">
-                <span class="material-symbols-outlined icon-large">forum</span>
-                <h3>Foro Popular</h3>
-                <p>Noticias, rumores y comentarios.</p>
-            </div>
+        <div class="card-home" onclick="irA('perfil.html')">
+            <span class="material-symbols-outlined card-icon" style="color:#9c27b0">account_circle</span>
+            <span class="card-title">Mi Perfil</span>
         </div>
     </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active">
+            <span class="material-symbols-outlined">home</span>
+            Inicio
+        </button>
+        <button class="nav-item" onclick="irA('actividades.html')">
+            <span class="material-symbols-outlined">event</span>
+            Fiestas
+        </button>
+        <button class="nav-item" onclick="irA('mis_inscripciones.html')">
+            <span class="material-symbols-outlined">confirmation_number</span>
+            Mis Tickets
+        </button>
+        <button class="nav-item" onclick="irA('perfil.html')">
+            <span class="material-symbols-outlined">person</span>
+            Perfil
+        </button>
+    </nav>
 
 </body>
 </html>
