@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; }
-        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; }
+        body.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 80px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; /* Espacio para la barra */ }
         .container { max-width: 800px; margin: 0 auto; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -26,17 +26,21 @@
         .act-footer { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         
         .btn-join { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
-        .btn-join:hover { background: #e64a19; }
         .btn-leave { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; }
         
-        /* Modal de Inscripción */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 200; }
+        /* BARRA DE NAVEGACIÓN APP */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.3s; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+        .nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 2px; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal { background: var(--card); padding: 25px; border-radius: 10px; width: 90%; max-width: 400px; color: var(--text); }
         .modal input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         .teammate-row { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
-        .status-icon { font-size: 18px; }
-
-        .msg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; z-index: 1000; }
+        
+        .msg { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; z-index: 3000; }
     </style>
 
     <script type="module">
@@ -44,27 +48,13 @@
       import { getFirestore, collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      // --- CONFIGURACIÓN ---
-      const firebaseConfig = {
-        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
-        authDomain: "fiestas-pantano.firebaseapp.com",
-        projectId: "fiestas-pantano",
-        storageBucket: "fiestas-pantano.firebasestorage.app",
-        messagingSenderId: "801380435613",
-        appId: "1:801380435613:web:a842572cf7cee93ac57674",
-        measurementId: "G-EG2MZGBT1B"
-      };
-
+      const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
       let currentUser = null;
       let myUsername = "";
-      
-      // Variables para el modal
-      let currentActId = "";
-      let currentModalidad = "";
-      let currentTeamSize = 1;
+      let currentActId = "", currentModalidad = "", currentTeamSize = 1;
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
@@ -77,19 +67,15 @@
 
       function cargarActividades() {
           const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
-          
           onSnapshot(q, (snapshot) => {
               const container = document.getElementById("activities-container");
               container.innerHTML = "";
-
               if (snapshot.empty) { container.innerHTML = "<p style='text-align:center'>No hay actividades.</p>"; return; }
 
               snapshot.forEach((docSnap) => {
                   const act = docSnap.data();
                   const actId = docSnap.id;
                   const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString();
-                  
-                  // Verificar si estoy dentro
                   const inscritos = act.inscritos || []; 
                   let estoyDentro = false;
                   inscritos.forEach(equipo => {
@@ -97,7 +83,6 @@
                       if (equipo.miembros && equipo.miembros.some(m => m.uid === currentUser.uid)) estoyDentro = true;
                   });
 
-                  // Imagen
                   let imgUrl = act.imagen;
                   if(!imgUrl) {
                       if(act.genero === 'carrera') imgUrl = 'https://cdn-icons-png.flaticon.com/512/2553/2553658.png';
@@ -107,65 +92,31 @@
 
                   const div = document.createElement("div");
                   div.className = "act-card";
-                  
                   div.innerHTML = `
                       <img src="${imgUrl}" class="act-img" onerror="this.src='https://placehold.co/600x200?text=Fiesta'">
                       <div class="act-body">
                           <h3 class="act-title">${act.titulo}</h3>
-                          <div class="act-meta">
-                              <span>📅 ${fechaStr}</span>
-                              <span class="badge">${act.modalidad}</span>
-                          </div>
-                          
+                          <div class="act-meta"><span>📅 ${fechaStr}</span><span class="badge">${act.modalidad}</span></div>
                           <div class="act-footer">
-                              <div>
-                                  ${estoyDentro 
-                                    ? '<span style="color:green; font-weight:bold;">✅ Inscrito</span>' 
-                                    : `<span style="color:gray">${inscritos.length} inscritos</span>`
-                                  }
-                              </div>
-                              
-
-
+                              <div>${estoyDentro ? '<span style="color:green; font-weight:bold;">✅ Inscrito</span>' : `<span style="color:gray">${inscritos.length} inscritos</span>`}</div>
                               <div style="display:flex; gap:5px;">
-                                  
-                                  <button class="btn-join" style="background:#607d8b; padding:8px 12px;" onclick="window.location.href='chat.html?id=${actId}'" title="Chat del Grupo">
-                                      <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle;">chat</span>
-                                  </button>
-
-                                  ${act.genero === 'torneo' && act.bracket 
-                                      ? `<button class="btn-join" style="background:#ff9800; padding:8px 15px;" onclick="window.location.href='ver_torneo.html?id=${actId}'">🏆 Ver Cuadro</button>` 
-                                      : ''
-                                  }
-                                  
-                                  ${act.genero === 'carrera' 
-                                      ? `<button class="btn-join" style="background:#4caf50; padding:8px 15px;" onclick="window.location.href='ver_carrera.html?id=${actId}'">📊 Ver Podio</button>` 
-                                      : ''
-                                  }
-
-                                  ${estoyDentro
-                                      ? `<button class="btn-leave" onclick="alert('Contacta a un organizador para borrarte.')">Ya estás dentro</button>`
-                                      : `<button class="btn-join" onclick="abrirModal('${actId}', '${act.modalidad}', ${act.tamano_equipo || 1})">¡Apuntarme!</button>`
-                                  }
+                                  <button class="btn-join" style="background:#607d8b; padding:8px 12px;" onclick="window.location.href='chat.html?id=${actId}'"><span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle;">chat</span></button>
+                                  ${act.genero === 'torneo' && act.bracket ? `<button class="btn-join" style="background:#ff9800; padding:8px 15px;" onclick="window.location.href='ver_torneo.html?id=${actId}'">🏆 Cuadro</button>` : ''}
+                                  ${act.genero === 'carrera' ? `<button class="btn-join" style="background:#4caf50; padding:8px 15px;" onclick="window.location.href='ver_carrera.html?id=${actId}'">📊 Podio</button>` : ''}
+                                  ${estoyDentro ? `<button class="btn-leave" onclick="alert('Contacta a un organizador.')">Salir</button>` : `<button class="btn-join" onclick="abrirModal('${actId}', '${act.modalidad}', ${act.tamano_equipo || 1})">¡Apuntar!</button>`}
                               </div>
                           </div>
-                      </div>
-                  `;
+                      </div>`;
                   container.appendChild(div);
               });
           });
       }
 
-      // --- SISTEMA DE INSCRIPCIÓN INTELIGENTE ---
       window.abrirModal = (id, modalidad, size) => {
-          currentActId = id;
-          currentModalidad = modalidad;
-          currentTeamSize = size;
-          
+          currentActId = id; currentModalidad = modalidad; currentTeamSize = size;
           const modal = document.getElementById("modal-inscripcion");
           const container = document.getElementById("modal-inputs");
           const tituloModal = document.getElementById("modal-titulo");
-          
           container.innerHTML = ""; 
           
           if (modalidad === 'individual') {
@@ -174,15 +125,9 @@
           } else {
               tituloModal.innerText = `Inscripción ${modalidad}`;
               container.innerHTML += `<label>Nombre del Equipo:</label><input type="text" id="team-name" placeholder="Ej: Los Invencibles">`;
-              
               const numCompaneros = (modalidad === 'parejas') ? 1 : (size - 1);
-              container.innerHTML += `<p style="font-size:12px; margin-top:10px;">Añade los usuarios de tus compañeros (si tienen cuenta se vincularán):</p>`;
-              
               for(let i=0; i < numCompaneros; i++) {
-                  container.innerHTML += `
-                    <div class="teammate-row">
-                        <input type="text" class="mate-input" placeholder="Usuario o Nombre del compañero ${i+1}">
-                    </div>`;
+                  container.innerHTML += `<div class="teammate-row"><input type="text" class="mate-input" placeholder="Usuario compañero ${i+1}"></div>`;
               }
           }
           modal.style.display = "flex";
@@ -193,58 +138,30 @@
       window.confirmarInscripcion = async () => {
           const btn = document.getElementById("btn-confirmar");
           btn.innerText = "Procesando..."; btn.disabled = true;
-
           try {
-              let datosEquipo = {
-                  capitan: myUsername,
-                  capitan_uid: currentUser.uid,
-                  fecha_registro: new Date(),
-                  miembros: [] 
-              };
-
+              let datosEquipo = { capitan: myUsername, capitan_uid: currentUser.uid, fecha_registro: new Date(), miembros: [] };
               if (currentModalidad !== 'individual') {
                   const nombreEquipo = document.getElementById("team-name").value;
-                  if (!nombreEquipo) throw new Error("Debes poner un nombre de equipo");
+                  if (!nombreEquipo) throw new Error("Pon nombre de equipo");
                   datosEquipo.nombre_equipo = nombreEquipo;
-
                   const inputs = document.querySelectorAll(".mate-input");
-                  const promesasBusqueda = Array.from(inputs).map(async (input) => {
+                  const promesas = Array.from(inputs).map(async (input) => {
                       const nombre = input.value.trim().toLowerCase(); 
                       if (!nombre) return null; 
-
                       const q = query(collection(db, "usuarios"), where("username", "==", nombre));
-                      const querySnapshot = await getDocs(q);
-
-                      if (!querySnapshot.empty) {
-                          const userDoc = querySnapshot.docs[0];
-                          return { nombre: userDoc.data().username, uid: userDoc.id, vinculado: true };
-                      } else {
-                          return { nombre: input.value.trim(), vinculado: false };
-                      }
+                      const snap = await getDocs(q);
+                      return !snap.empty ? { nombre: snap.docs[0].data().username, uid: snap.docs[0].id, vinculado: true } : { nombre: input.value.trim(), vinculado: false };
                   });
-
-                  const resultados = await Promise.all(promesasBusqueda);
-                  datosEquipo.miembros = resultados.filter(r => r !== null);
+                  const res = await Promise.all(promesas);
+                  datosEquipo.miembros = res.filter(r => r !== null);
               }
-
-              const actRef = doc(db, "actividades", currentActId);
-              await updateDoc(actRef, { inscritos: arrayUnion(datosEquipo) });
-
-              mostrarToat("✅ ¡Inscripción completada con éxito!");
+              await updateDoc(doc(db, "actividades", currentActId), { inscritos: arrayUnion(datosEquipo) });
+              mostrarToat("✅ ¡Inscripción completada!");
               cerrarModal();
-
-          } catch (e) {
-              console.error(e);
-              alert("Error: " + e.message);
-          } finally {
-              btn.innerText = "Confirmar Inscripción"; btn.disabled = false;
-          }
+          } catch (e) { alert("Error: " + e.message); } finally { btn.innerText = "Confirmar"; btn.disabled = false; }
       }
 
-      function mostrarToat(txt) {
-          const t = document.getElementById("toast"); t.innerText = txt; t.style.display = "block";
-          setTimeout(() => t.style.display = "none", 3000);
-      }
+      function mostrarToat(txt) { const t = document.getElementById("toast"); t.innerText = txt; t.style.display = "block"; setTimeout(() => t.style.display = "none", 3000); }
       function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
     </script>
 </head>
@@ -252,9 +169,7 @@
     <div class="container">
         <div class="header">
             <h1>📅 Calendario</h1>
-            <button class="btn-back" onclick="window.location.href='panel.html'"><span class="material-symbols-outlined">arrow_back</span> Volver</button>
         </div>
-
         <div id="activities-container">Cargando...</div>
         <div id="toast" class="msg"></div>
     </div>
@@ -269,18 +184,18 @@
             </div>
         </div>
     </div>
-    <nav style="position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom));" class="bottom-nav">
-        <a href="panel.html" style="border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1;">
-            <span class="material-symbols-outlined" style="font-size: 24px;">home</span>Inicio
+
+    <nav class="bottom-nav">
+        <a href="panel.html" class="nav-item">
+            <span class="material-symbols-outlined">home</span>Inicio
         </a>
-        <a href="actividades.html" style="border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1;">
-            <span class="material-symbols-outlined" style="font-size: 24px;">event</span>Fiestas
+        <a href="#" class="nav-item active"> <span class="material-symbols-outlined">event</span>Fiestas
         </a>
-        <a href="mis_inscripciones.html" style="border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1;">
-            <span class="material-symbols-outlined" style="font-size: 24px;">confirmation_number</span>Tickets
+        <a href="mis_inscripciones.html" class="nav-item">
+            <span class="material-symbols-outlined">confirmation_number</span>Tickets
         </a>
-        <a href="perfil.html" style="border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1;">
-            <span class="material-symbols-outlined" style="font-size: 24px;">person</span>Perfil
+        <a href="perfil.html" class="nav-item">
+            <span class="material-symbols-outlined">person</span>Perfil
         </a>
     </nav>
 </body>
