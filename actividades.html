@@ -9,19 +9,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; --success: #4caf50; }
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
         
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; padding-bottom: 90px; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; padding-bottom: 90px; }
         .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-top: 150px; }
         
         /* HEADER FIJO */
-        .fixed-header { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg); z-index: 900; padding: 15px 20px 10px 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); transition: background 0.3s; }
-        
+        .fixed-header { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg); z-index: 900; padding: 15px 20px 10px 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         .search-box { position: relative; margin-bottom: 15px; }
         .search-box input { width: 100%; padding: 12px 12px 12px 45px; border-radius: 12px; border: none; background: var(--card); color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
         .search-box .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: gray; }
-
         .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .chip { background: var(--card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; white-space: nowrap; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: gray; }
         .chip.active { background: var(--accent); color: white; border-color: var(--accent); }
@@ -37,14 +35,19 @@
         .act-title { margin: 0; font-size: 1.2rem; margin-bottom: 5px; }
         .act-meta { font-size: 0.85rem; color: gray; display: flex; align-items: center; gap: 5px; margin-bottom: 15px; }
         .act-footer { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 15px; margin-top: 5px; }
-        
         .btn-join { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; }
         .btn-icon { background: rgba(0,0,0,0.05); border: none; width: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
         .modal { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; color: var(--text); }
-        .modal input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; }
+        
+        .input-mate-container { position: relative; margin-bottom: 8px; }
+        .modal input { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; transition: border-color 0.3s; }
+        
+        /* ESTILOS DE VINCULACIÓN */
+        .mate-found { border-color: var(--success) !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234caf50' width='18px' height='18px'%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+        .helper-text { font-size: 0.7rem; color: gray; margin-bottom: 15px; margin-top: -5px; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
         .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
@@ -54,7 +57,7 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
@@ -98,7 +101,7 @@
               if (currentFilter === 'todos') matchesFilter = true;
               else if (currentFilter === 'infantil') matchesFilter = (audiencia === 'infantil');
               else if (currentFilter === 'adultos') matchesFilter = (audiencia === 'adultos');
-              else matchesFilter = (genero === currentFilter); // Para deporte, concurso, torneo...
+              else matchesFilter = (genero === currentFilter);
 
               return matchesSearch && matchesFilter;
           });
@@ -109,15 +112,14 @@
               const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString([], {day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit'});
               const inscritos = act.inscritos || [];
               
-              // COMPROBACIÓN ROBUSTA DE INSCRIPCIÓN
-              let estoyDentro = inscritos.some(e => e.capitan_uid === currentUser.uid); // Si soy capitán
-              if(!estoyDentro) {
-                 estoyDentro = inscritos.some(e => e.miembros && e.miembros.some(m => m.uid === currentUser.uid)); // Si soy miembro
-              }
+              // Verificamos si estoy dentro (por UID capitán o UID miembro)
+              let estoyDentro = inscritos.some(e => 
+                  e.capitan_uid === currentUser.uid || 
+                  (e.miembros && e.miembros.some(m => m.uid === currentUser.uid))
+              );
               
               let badgeColor = 'tag-otro';
               let imgUrl = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600';
-              
               if(act.genero === 'deporte') { badgeColor = 'tag-deporte'; imgUrl = 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=600'; }
               if(act.genero === 'concurso') { badgeColor = 'tag-concurso'; imgUrl = 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=600'; }
               if(act.genero === 'torneo') { badgeColor = 'tag-torneo'; imgUrl = 'https://images.unsplash.com/photo-1551098888-c17562f02f9e?auto=format&fit=crop&q=80&w=600'; }
@@ -139,7 +141,7 @@
                               ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-icon" onclick="window.location.href='ver_carrera.html?id=${act.id}'" style="color:#fbc02d"><span class="material-symbols-outlined">podium</span></button>` : ''}
 
                               ${estoyDentro ? 
-                                `<button class="btn-join" style="background:#e0e0e0; color:#333;" onclick="alert('✅ Ya estás dentro.')">Apuntado</button>` : 
+                                `<button class="btn-join" style="background:#e0e0e0; color:#333;" onclick="window.location.href='mis_inscripciones.html'">✅ Ver Ticket</button>` : 
                                 `<button class="btn-join" onclick="abrirModal('${act.id}', '${act.modalidad}', ${act.tamano_equipo || 1})">Inscribirse</button>`}
                           </div>
                       </div>
@@ -155,6 +157,7 @@
       }
 
       let currentActId="", currentModalidad="", currentTeamSize=1;
+      
       window.abrirModal = (id, mod, size) => {
           currentActId = id; currentModalidad = mod; currentTeamSize = size;
           const m = document.getElementById("modal-inscripcion");
@@ -164,12 +167,14 @@
           let html = "";
           if(mod === 'individual') html = "<p>¿Confirmar asistencia?</p>";
           else {
-              // NO PEDIMOS NOMBRE DE EQUIPO. Usamos el nombre del usuario.
-              html = `<p style="font-size:0.9rem; color:gray">Tu equipo se llamará: <strong>${myUsername}</strong></p>`;
-              html += `<p style="font-size:0.8rem">Añade a tus compañeros:</p>`;
+              html = `<p style="font-size:0.9rem; color:gray">Capitán: <strong>${myUsername}</strong></p>`;
+              html += `<div class="helper-text">Escribe el nombre de usuario exacto para vincularlo (se pondrá verde).</div>`;
               const numCompis = mod === 'parejas' ? 1 : (size - 1);
               for(let i=0; i<numCompis; i++) {
-                  html += `<input type="text" class="mate-input" placeholder="Nombre compañero ${i+1}">`;
+                  // INPUT CON EVENTO DE BÚSQUEDA (onblur para comprobar al salir)
+                  html += `<div class="input-mate-container">
+                             <input type="text" class="mate-input" placeholder="Usuario compañero ${i+1}" onkeyup="verificarUsuario(this)">
+                           </div>`;
               }
           }
           c.innerHTML = html;
@@ -177,19 +182,52 @@
       }
       window.cerrarModal = () => document.getElementById("modal-inscripcion").style.display="none";
       
+      // FUNCIÓN MÁGICA: VERIFICAR USUARIO
+      window.verificarUsuario = async (input) => {
+          const val = input.value.trim();
+          if(val.length < 2) { 
+              input.classList.remove('mate-found'); 
+              input.removeAttribute('data-uid');
+              return; 
+          }
+
+          // Consultamos a Firestore si existe el usuario
+          const q = query(collection(db, "usuarios"), where("username", "==", val));
+          const snap = await getDocs(q);
+
+          if(!snap.empty) {
+              const uData = snap.docs[0];
+              input.classList.add('mate-found');
+              input.setAttribute('data-uid', uData.id); // Guardamos el UID secreto
+          } else {
+              input.classList.remove('mate-found');
+              input.removeAttribute('data-uid');
+          }
+      }
+      
       window.confirmarInscripcion = async () => {
           const btn = document.getElementById("btn-confirmar"); btn.innerText="..."; btn.disabled=true;
           try {
               let data = { capitan: myUsername, capitan_uid: currentUser.uid, fecha: new Date(), miembros: [] };
               
-              // SI ES EQUIPO, PONEMOS EL NOMBRE DEL CAPITÁN COMO NOMBRE DE EQUIPO
               if(currentModalidad !== 'individual') {
-                  data.nombre_equipo = myUsername; // <-- CAMBIO CLAVE
-                  const mates = document.querySelectorAll(".mate-input");
-                  for(let input of mates) { if(input.value) data.miembros.push({nombre: input.value, vinculado: false}); }
+                  data.nombre_equipo = myUsername; 
+                  const inputs = document.querySelectorAll(".mate-input");
+                  
+                  inputs.forEach(input => {
+                      if(input.value.trim()) {
+                          // AQUÍ ESTÁ LA MAGIA DE LA VINCULACIÓN
+                          data.miembros.push({
+                              nombre: input.value.trim(), 
+                              uid: input.getAttribute('data-uid') || null, // Si se encontró, guardamos UID
+                              vinculado: !!input.getAttribute('data-uid')
+                          });
+                      }
+                  });
               }
               await updateDoc(doc(db, "actividades", currentActId), { inscritos: arrayUnion(data) });
-              alert("✅ ¡Inscrito correctamente!"); cerrarModal(); cargarActividades();
+              alert("✅ ¡Inscrito! Tus compañeros vinculados recibirán su ticket."); 
+              cerrarModal(); cargarActividades();
           } catch(e) { alert(e.message); }
           btn.innerText="Confirmar"; btn.disabled=false;
       }
