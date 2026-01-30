@@ -20,33 +20,39 @@
         .tab { padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; opacity: 0.6; }
         .tab.active { background: var(--accent); color: white; opacity: 1; }
 
+        /* Lista de Participantes */
         .list-item { background: var(--card); padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-group { display: flex; gap: 5px; }
         .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .btn-edit { background: #2196f3; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        
+        /* Botón Grande de Añadir */
+        .btn-add-big { width: 100%; padding: 15px; background: var(--card); border: 2px dashed #ccc; border-radius: 10px; color: gray; font-weight: bold; cursor: pointer; margin-bottom: 20px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-add-big:hover { border-color: var(--accent); color: var(--accent); background: rgba(103, 58, 183, 0.05); }
 
-        .add-box { background: var(--card); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; }
-        .add-box input { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
-
+        /* Bracket Styles */
         .bracket-container { display: flex; overflow-x: auto; padding: 20px 0; gap: 40px; }
         .round { display: flex; flex-direction: column; justify-content: space-around; min-width: 220px; }
         .round-title { text-align: center; font-weight: bold; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; font-size: 0.9rem; }
-        
         .match { background: var(--card); border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0; display: flex; flex-direction: column; gap: 5px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        
         .team { padding: 8px; cursor: pointer; border-radius: 4px; transition: background 0.2s; display: flex; flex-direction: column; }
         .team:hover { background: rgba(0,0,0,0.05); }
         .team.winner { background: var(--win); color: white; font-weight: bold; }
-        .team.winner .members { color: #e8f5e9; } /* Miembros en blanco clarito si ganan */
-
+        .team.winner .members { color: #e8f5e9; }
         .members { font-size: 0.75rem; color: #666; margin-top: 2px; font-weight: normal; }
-
         .match::after { content: ''; position: absolute; right: -20px; top: 50%; width: 20px; height: 2px; background: #ccc; z-index: -1; }
         .round:last-child .match::after { display: none; }
 
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 200; }
+        .modal { background: var(--card); padding: 25px; border-radius: 10px; width: 90%; max-width: 400px; color: var(--text); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .modal h2 { margin-top: 0; color: var(--accent); }
+        .modal input { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; background: var(--bg); color: var(--text); }
+        .member-row { display: flex; gap: 5px; }
+        
         .msg { margin-top: 10px; font-weight: bold; display: none; }
         .hidden { display: none !important; }
-        button.action { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button.action { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
+        button.secondary { background: transparent; border: 1px solid #ccc; color: var(--text); padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
     </style>
 
     <script type="module">
@@ -105,7 +111,7 @@
           document.getElementById('section-'+tabName).classList.remove('hidden');
       }
 
-      // --- PARTICIPANTES (CON EDICIÓN) ---
+      // --- PARTICIPANTES ---
       function renderParticipantes() {
           const lista = document.getElementById("lista-participantes");
           lista.innerHTML = "";
@@ -123,21 +129,11 @@
                         <div style="font-size:0.8rem; color:gray;">${miembrosStr}</div>
                     </div>
                     <div class="btn-group">
-                        <button class="btn-edit" onclick="editarParticipante(${index})">✏️</button>
                         <button class="btn-del" onclick="borrarParticipante(${index})">🗑️</button>
                     </div>
                 </div>`;
           });
           document.getElementById("count-part").innerText = inscritos.length;
-      }
-
-      window.agregarManual = async () => {
-          const input = document.getElementById("nuevo-nombre");
-          const nombre = input.value.trim();
-          if(!nombre) return;
-          const nuevo = { capitan: "Admin", nombre_equipo: nombre, miembros: [], fecha_registro: new Date(), es_manual: true };
-          await updateDoc(doc(db, "actividades", activityId), { inscritos: arrayUnion(nuevo) });
-          input.value = ""; cargarDatos();
       }
 
       window.borrarParticipante = async (index) => {
@@ -147,41 +143,58 @@
           cargarDatos();
       }
 
-      // NUEVA FUNCIÓN: EDITAR MIEMBROS
-      window.editarParticipante = async (index) => {
-          let inscritos = activityData.inscritos;
-          let equipo = inscritos[index];
+      // --- MODAL AÑADIR MANUALMENTE ---
+      window.abrirModalAdd = () => {
+          const container = document.getElementById("modal-miembros-list");
+          container.innerHTML = "";
+          document.getElementById("modal-team-name").value = "";
           
-          let nuevoNombre = prompt("Editar nombre del equipo/capitán:", equipo.nombre_equipo || equipo.capitan);
-          if(!nuevoNombre) return;
-
-          let miembrosActuales = (equipo.miembros || []).map(m => m.nombre).join(", ");
-          let nuevosMiembrosStr = prompt("Editar miembros (separados por coma):", miembrosActuales);
+          // Por defecto ponemos 1 input de miembro
+          addMemberInput();
           
-          if(nuevosMiembrosStr !== null) {
-              // Convertir string "Juan, Pepe" a array de objetos
-              let arrayNombres = nuevosMiembrosStr.split(",").map(s => s.trim()).filter(s => s !== "");
-              let arrayObjetos = arrayNombres.map(n => ({ nombre: n, vinculado: false })); // Manual, no vinculamos UID
+          document.getElementById("modal-add").style.display = "flex";
+      }
 
-              // Actualizamos localmente y luego subimos TODO el array de inscritos
-              // (Firestore no deja editar un índice de array directo, hay que subir el array entero modificado)
-              inscritos[index].nombre_equipo = nuevoNombre;
-              inscritos[index].miembros = arrayObjetos;
+      window.cerrarModalAdd = () => {
+          document.getElementById("modal-add").style.display = "none";
+      }
 
-              await updateDoc(doc(db, "actividades", activityId), { inscritos: inscritos });
-              cargarDatos();
-          }
+      window.addMemberInput = () => {
+          const container = document.getElementById("modal-miembros-list");
+          const div = document.createElement("div");
+          div.className = "member-row";
+          div.innerHTML = `<input type="text" class="member-input" placeholder="Nombre del jugador">`;
+          container.appendChild(div);
+      }
+
+      window.guardarManual = async () => {
+          const nombreEquipo = document.getElementById("modal-team-name").value.trim();
+          if(!nombreEquipo) { alert("Pon un nombre al equipo/pareja"); return; }
+
+          // Recoger miembros
+          const inputs = document.querySelectorAll(".member-input");
+          let miembros = [];
+          inputs.forEach(inp => {
+              if(inp.value.trim()) miembros.push({ nombre: inp.value.trim(), vinculado: false });
+          });
+
+          const nuevo = { 
+              capitan: "Admin", 
+              nombre_equipo: nombreEquipo, 
+              miembros: miembros, 
+              fecha_registro: new Date(), 
+              es_manual: true 
+          };
+          
+          await updateDoc(doc(db, "actividades", activityId), { inscritos: arrayUnion(nuevo) });
+          cerrarModalAdd();
+          cargarDatos();
       }
 
       // --- TORNEO (BRACKET) ---
-      
-      // Función auxiliar para buscar los miembros de un equipo por su nombre
       function getMembersHTML(teamName) {
           if (teamName === "PASE DIRECTO" || teamName === "Esperando...") return "";
-          
-          // Buscar en la lista de inscritos
           const equipo = (activityData.inscritos || []).find(e => (e.nombre_equipo === teamName || e.capitan === teamName));
-          
           if (equipo && equipo.miembros && equipo.miembros.length > 0) {
               const nombres = equipo.miembros.map(m => m.nombre).join(", ");
               return `<span class="members">${nombres}</span>`;
@@ -238,28 +251,15 @@
               matches.forEach((match, mIndex) => {
                   const matchDiv = document.createElement("div");
                   matchDiv.className = "match";
-                  
-                  // Lógica visual del ganador
                   const class1 = (match.winner === 0) ? "team winner" : "team";
                   const click1 = (match.winner === null && match.p1 !== "PASE DIRECTO" && match.p2 !== "PASE DIRECTO") ? `onclick="declararGanador(${rIndex}, ${mIndex}, 0)"` : "";
-                  
                   const class2 = (match.winner === 1) ? "team winner" : "team";
                   const click2 = (match.winner === null && match.p1 !== "PASE DIRECTO" && match.p2 !== "PASE DIRECTO") ? `onclick="declararGanador(${rIndex}, ${mIndex}, 1)"` : "";
 
-                  // AÑADIMOS LOS MIEMBROS DEBAJO DEL NOMBRE
                   const members1 = getMembersHTML(match.p1);
                   const members2 = getMembersHTML(match.p2);
 
-                  matchDiv.innerHTML = `
-                      <div class="${class1}" ${click1}>
-                          <span>${match.p1}</span>
-                          ${members1}
-                      </div>
-                      <div class="${class2}" ${click2}>
-                          <span>${match.p2}</span>
-                          ${members2}
-                      </div>
-                  `;
+                  matchDiv.innerHTML = `<div class="${class1}" ${click1}><span>${match.p1}</span>${members1}</div><div class="${class2}" ${click2}><span>${match.p2}</span>${members2}</div>`;
                   roundDiv.appendChild(matchDiv);
               });
               container.appendChild(roundDiv);
@@ -268,15 +268,13 @@
 
       window.declararGanador = async (rIndex, mIndex, winnerIdx) => {
           if(!confirm("¿Confirmar ganador?")) return;
-
           let bracket = activityData.bracket;
           let rounds = bracket.rounds;
           let currentMatches = rounds[rIndex].matches;
-
           currentMatches[mIndex].winner = winnerIdx;
           const nombreGanador = (winnerIdx === 0) ? currentMatches[mIndex].p1 : currentMatches[mIndex].p2;
-
           const nextRoundIdx = rIndex + 1;
+          
           if(!rounds[nextRoundIdx]) {
               if(currentMatches.length > 1) rounds[nextRoundIdx] = { matches: [] }; 
               else {
@@ -285,14 +283,11 @@
                   cargarDatos(); return;
               }
           }
-
           const nextMatchIdx = Math.floor(mIndex / 2);
           let nextMatches = rounds[nextRoundIdx].matches;
           if(!nextMatches[nextMatchIdx]) nextMatches[nextMatchIdx] = { p1: "Esperando...", p2: "Esperando...", winner: null };
-
           if (mIndex % 2 === 0) nextMatches[nextMatchIdx].p1 = nombreGanador;
           else nextMatches[nextMatchIdx].p2 = nombreGanador;
-
           await updateDoc(doc(db, "actividades", activityId), { bracket: bracket });
           cargarDatos();
       }
@@ -313,16 +308,34 @@
         </div>
 
         <div id="section-participantes">
-            <div class="add-box">
-                <input type="text" id="nuevo-nombre" placeholder="Añadir equipo manualmente">
-                <button class="action" onclick="agregarManual()">Añadir</button>
-            </div>
+            <button class="btn-add-big" onclick="abrirModalAdd()">
+                <span class="material-symbols-outlined">add_circle</span>
+                Añadir Participante Manualmente
+            </button>
             <div id="lista-participantes"></div>
         </div>
 
         <div id="section-bracket" class="hidden">
             <p style="font-size: 0.9rem; color: gray;">Haz clic en un equipo para declararlo ganador.</p>
             <div id="bracket-view" class="bracket-container"></div>
+        </div>
+    </div>
+
+    <div id="modal-add" class="modal-overlay">
+        <div class="modal">
+            <h2>Añadir Participante</h2>
+            <label style="font-size: 12px; font-weight: bold;">Nombre del Equipo / Pareja</label>
+            <input type="text" id="modal-team-name" placeholder="Ej: Los Primos">
+            
+            <label style="font-size: 12px; font-weight: bold;">Miembros</label>
+            <div id="modal-miembros-list"></div>
+            
+            <button onclick="addMemberInput()" style="background:transparent; color:var(--accent); border:none; cursor:pointer; font-size:12px; margin-bottom:15px; display:flex; align-items:center; gap:5px;">
+                <span class="material-symbols-outlined" style="font-size:16px;">add</span> Añadir otro miembro
+            </button>
+
+            <button class="action" onclick="guardarManual()">Guardar</button>
+            <button class="secondary" onclick="cerrarModalAdd()">Cancelar</button>
         </div>
     </div>
 </body>
