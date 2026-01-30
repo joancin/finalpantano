@@ -68,7 +68,6 @@
           if (!user) window.location.href = "index.html";
           const docSnap = await getDoc(doc(db, "usuarios", user.uid));
           
-          // SEGURIDAD: Solo entra si es ADMIN
           if (!docSnap.exists() || docSnap.data().rol !== 'admin') {
               alert("Acceso denegado. Solo para Jefes.");
               window.location.href = "panel.html";
@@ -96,7 +95,7 @@
 
               await addDoc(collection(db, "invitaciones"), {
                   codigo: codigo,
-                  rol: rol, // Aquí está la magia: 'festero' o 'admin'
+                  rol: rol,
                   usado: false,
                   creado_por: currentUser.uid,
                   fecha_creacion: new Date()
@@ -111,16 +110,22 @@
       }
 
       function escucharCodigosVIP() {
-          // Solo escuchamos códigos NO usados
-          const q = query(collection(db, "invitaciones"), where("usado", "==", false), orderBy("fecha_creacion", "desc"));
+          // CONSULTA SIMPLIFICADA PARA EVITAR ERRORES DE ÍNDICE EN FIREBASE
+          const q = query(collection(db, "invitaciones"), orderBy("fecha_creacion", "desc"));
+          
           onSnapshot(q, (snapshot) => {
               const lista = document.getElementById("lista-codigos-vip");
               lista.innerHTML = "";
+              let count = 0;
               
               snapshot.forEach((doc) => {
                   const d = doc.data();
-                  // Solo mostramos códigos de Admin o Festero aquí
-                  if(d.rol === 'admin' || d.rol === 'festero') {
+                  
+                  // FILTRAMOS AQUÍ CON JAVASCRIPT:
+                  // 1. Que NO esté usado
+                  // 2. Que sea rol ADMIN o FESTERO (para que no salgan los de usuario normal)
+                  if(!d.usado && (d.rol === 'admin' || d.rol === 'festero')) {
+                      count++;
                       lista.innerHTML += `
                         <div class="item-row">
                             <div class="item-info">
@@ -131,13 +136,14 @@
                         </div>`;
                   }
               });
-              if(lista.innerHTML === "") lista.innerHTML = "<p style='text-align:center; color:gray'>No hay invitaciones VIP activas.</p>";
+              
+              if(count === 0) lista.innerHTML = "<p style='text-align:center; color:gray'>No hay invitaciones VIP activas.</p>";
           });
       }
 
       // --- LISTADO DE USUARIOS (Para control) ---
       function escucharUsuarios() {
-          const q = query(collection(db, "usuarios"), orderBy("rol", "asc")); // Ordenar por rol suele poner admins primero alfabéticamente
+          const q = query(collection(db, "usuarios"), orderBy("rol", "asc"));
           onSnapshot(q, (snapshot) => {
               const lista = document.getElementById("lista-usuarios");
               lista.innerHTML = "";
@@ -162,9 +168,6 @@
 
       window.borrarUsuario = async (id, nombre) => {
           if(confirm(`¿Estás seguro de que quieres echar a ${nombre}? No podrá volver a entrar.`)) {
-              // Nota: Esto borra el dato de la base de datos, pero el login de Auth sigue existiendo.
-              // Para bloquearlo 100% real se necesitaría Cloud Functions, pero para esta app sencilla,
-              // al borrarlo de 'usuarios', el panel.html le echará automáticamente.
               await deleteDoc(doc(db, "usuarios", id));
           }
       }
@@ -189,7 +192,7 @@
             
             <div class="form-group">
                 <label>Código de Invitación</label>
-                <input type="text" id="vip-code" placeholder="Ej: FESTEROS2025" style="text-transform:uppercase; letter-spacing:2px; font-weight:bold;">
+                <input type="text" id="vip-code" placeholder="Ej: FESTERO25" style="text-transform:uppercase; letter-spacing:2px; font-weight:bold;">
             </div>
             
             <div class="form-group">
