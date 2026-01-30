@@ -38,20 +38,27 @@
         .btn-login-toggle:active { transform: scale(0.95); }
 
         #login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         
         .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
         .tab { flex: 1; padding: 10px; cursor: pointer; color: gray; font-weight: bold; transition: color 0.3s; }
         .tab.active { color: var(--accent); border-bottom: 3px solid var(--accent); margin-bottom: -2px; }
         
-        input { width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 1rem; transition: border 0.3s; }
+        /* ESTILOS DE INPUT Y CONTRASEÑA */
+        .input-group { position: relative; margin-bottom: 10px; }
+        input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 1rem; transition: border 0.3s; }
         input:focus { border-color: var(--accent); outline: none; }
         
-        .btn-action { background: var(--accent); color: white; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1rem; transition: background 0.3s; }
+        .toggle-pass { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray; user-select: none; }
+
+        .btn-action { background: var(--accent); color: white; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; transition: background 0.3s; }
         .btn-action:hover { background: #e64a19; }
         
         .btn-close { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
         .hidden { display: none; }
+
+        /* AVISO IMPORTANTE */
+        .danger-note { background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; font-size: 0.8rem; margin-top: 15px; border: 1px solid #ef9a9a; font-weight: bold; line-height: 1.4; }
     </style>
     
     <script type="module">
@@ -85,6 +92,22 @@
             }
         }
 
+        // FUNCIÓN PARA VER CONTRASEÑA
+        window.togglePass = () => {
+            const passInputs = document.querySelectorAll(".pass-input");
+            const icon = document.getElementById("eye-icon");
+            
+            passInputs.forEach(input => {
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.innerText = "visibility_off"; // Ojo cerrado
+                } else {
+                    input.type = "password";
+                    icon.innerText = "visibility"; // Ojo abierto
+                }
+            });
+        }
+
         window.login = async () => {
             const user = document.getElementById("log-user").value.trim();
             const pass = document.getElementById("log-pass").value;
@@ -96,13 +119,17 @@
             catch (e) { console.error(e); alert("Usuario o contraseña incorrectos"); btn.innerText = "Entrar"; btn.disabled = false; }
         }
 
-        // --- REGISTRO INTELIGENTE ---
         window.registro = async () => {
             const user = document.getElementById("reg-user").value.trim();
             const pass = document.getElementById("reg-pass").value;
+            const passConf = document.getElementById("reg-pass-conf").value;
             const code = document.getElementById("reg-code").value.trim().toUpperCase();
 
-            if (!user || !pass || !code) return alert("¡Todo es obligatorio!");
+            if (!user || !pass || !code || !passConf) return alert("¡Todo es obligatorio!");
+            
+            // VALIDACIÓN DE CONTRASEÑA
+            if (pass !== passConf) return alert("❌ LAS CONTRASEÑAS NO COINCIDEN");
+            if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres");
 
             const btn = document.getElementById("btn-reg-action");
             btn.innerText = "Procesando..."; btn.disabled = true;
@@ -133,7 +160,6 @@
                 }
 
                 const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
-
                 await setDoc(doc(db, "usuarios", cred.user.uid), {
                     username: user, email: fakeEmail, rol: rolAsignado, codigo_usado: code, fecha_registro: new Date()
                 });
@@ -146,16 +172,10 @@
                 alert("¡Bienvenido/a! 🎉"); window.location.href = "panel.html";
 
             } catch (e) { 
-                console.error(e);
-                isRegistering = false;
+                console.error(e); isRegistering = false;
                 if (auth.currentUser) await signOut(auth);
-
-                // --- DETECTOR DE USUARIO FANTASMA ---
-                if(e.code === 'auth/email-already-in-use') {
-                    alert(`⚠️ EL NOMBRE "${user}" YA EXISTE EN FIREBASE.\n\nEl Admin borró los datos de la web, pero el sistema de seguridad recuerda tu contraseña anterior.\n\nSOLUCIONES:\n1. Pide al Admin que borre tu usuario en la consola de Firebase.\n2. O simplemente usa otro nombre (Ej: ${user}2).`);
-                } else {
-                    alert("Error: " + e.message);
-                }
+                if(e.code === 'auth/email-already-in-use') alert("Ese usuario ya existe.");
+                else alert("Error: " + e.message);
                 btn.innerText = "Crear Cuenta"; btn.disabled = false;
             }
         }
@@ -196,19 +216,43 @@
             </div>
             
             <div id="form-login">
-                <input type="text" id="log-user" placeholder="Nombre de Usuario">
-                <input type="password" id="log-pass" placeholder="Contraseña">
+                <div class="input-group">
+                    <input type="text" id="log-user" placeholder="Nombre de Usuario">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="log-pass" placeholder="Contraseña">
+                </div>
                 <button id="btn-login-action" class="btn-action" onclick="login()">Entrar</button>
-                <p style="margin-top:15px; font-size:0.8rem; color:gray; cursor:pointer; text-decoration:underline;" onclick="alert('Contacta con un Admin para que resetee tu cuenta.')">¿Olvidaste tu contraseña?</p>
+                <p style="margin-top:15px; font-size:0.8rem; color:gray; cursor:pointer; text-decoration:underline;" onclick="alert('Contacta con un Festero/Admin para resetear tu cuenta.')">¿Olvidaste tu contraseña?</p>
             </div>
 
             <div id="form-register" class="hidden">
                 <div style="background:#fff3e0; padding:10px; border-radius:8px; font-size:0.8rem; color:#e65100; margin-bottom:10px;">
-                    ⚠️ Necesitas un código de invitación para crear cuenta.
+                    ⚠️ Necesitas un código de invitación.
                 </div>
-                <input type="text" id="reg-user" placeholder="Elige tu Nombre de Usuario">
-                <input type="password" id="reg-pass" placeholder="Contraseña">
-                <input type="text" id="reg-code" placeholder="CÓDIGO (Ej: VECINO24)" style="text-transform:uppercase; letter-spacing:1px; font-weight:bold;">
+                
+                <div class="input-group">
+                    <input type="text" id="reg-user" placeholder="Elige tu Nombre de Usuario">
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="reg-pass" class="pass-input" placeholder="Contraseña">
+                    <span id="eye-icon" class="material-symbols-outlined toggle-pass" onclick="togglePass()">visibility</span>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="reg-pass-conf" class="pass-input" placeholder="Repite la Contraseña">
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="reg-code" placeholder="CÓDIGO (Ej: VECINO24)" style="text-transform:uppercase; letter-spacing:1px; font-weight:bold;">
+                </div>
+
+                <div class="danger-note">
+                    🚨 IMPORTANTE 🚨<br>
+                    Si pierdes u olvidas tu contraseña, NO PODRÁS RECUPERAR LA CUENTA tú mismo. Tendrás que pedir a un admin que la borre y empezar de cero.
+                </div>
+
                 <button id="btn-reg-action" class="btn-action" style="background:#4caf50" onclick="registro()">Crear Cuenta</button>
             </div>
         </div>
