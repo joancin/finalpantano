@@ -44,7 +44,7 @@
         .tag-deporte { background: #2196f3; }
         .tag-comida { background: #ff9800; }
         .tag-fiesta { background: #9c27b0; }
-        .tag-competicion { background: #fbc02d; color: #333 !important; } /* Color Dorado */
+        .tag-concurso { background: #fbc02d; color: #333 !important; } /* Color Dorado para Concursos */
         .tag-otro { background: #607d8b; }
 
         .act-body { padding: 15px; }
@@ -126,8 +126,7 @@
               if(act.genero === 'deporte') { badgeColor = 'tag-deporte'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=600'; }
               if(act.genero === 'comida') { badgeColor = 'tag-comida'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=600'; }
               if(act.genero === 'fiesta') { badgeColor = 'tag-fiesta'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1514525253440-b39345208668?auto=format&fit=crop&q=80&w=600'; }
-              // NUEVA CATEGORÍA
-              if(act.genero === 'competicion') { badgeColor = 'tag-competicion'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=600'; }
+              if(act.genero === 'concurso') { badgeColor = 'tag-concurso'; imgUrl = act.imagen || 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=600'; }
 
               container.innerHTML += `
                   <div class="act-card">
@@ -145,7 +144,7 @@
                               
                               ${act.genero === 'torneo' && act.bracket ? `<button class="btn-icon" onclick="window.location.href='ver_torneo.html?id=${act.id}'" style="color:#ff9800"><span class="material-symbols-outlined">trophy</span></button>` : ''}
                               
-                              ${(act.genero === 'carrera' || act.genero === 'competicion') ? `<button class="btn-icon" onclick="window.location.href='ver_carrera.html?id=${act.id}'" style="color:#4caf50"><span class="material-symbols-outlined">podium</span></button>` : ''}
+                              ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-icon" onclick="window.location.href='ver_carrera.html?id=${act.id}'" style="color:#4caf50"><span class="material-symbols-outlined">podium</span></button>` : ''}
 
                               ${estoyDentro ? 
                                 `<button class="btn-join" style="background:#e0e0e0; color:#333;" onclick="alert('Ya estás apuntado')">✅ Apuntado</button>` : 
@@ -203,7 +202,7 @@
         
         <div class="filter-scroll">
             <div id="chip-todos" class="chip active" onclick="setFilter('todos')">Todos</div>
-            <div id="chip-competicion" class="chip" onclick="setFilter('competicion')">🏆 Competi</div>
+            <div id="chip-concurso" class="chip" onclick="setFilter('concurso')">🏆 Concurso</div>
             <div id="chip-deporte" class="chip" onclick="setFilter('deporte')">⚽ Deportes</div>
             <div id="chip-comida" class="chip" onclick="setFilter('comida')">🥘 Comidas</div>
             <div id="chip-fiesta" class="chip" onclick="setFilter('fiesta')">🎉 Fiesta</div>
