@@ -3,95 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Podio</title>
+    <title>Gestión</title>
     <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff9800; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .card { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; background: var(--bg); color: var(--text); font-size: 1rem; }
-        h1 { margin-top: 0; text-align: center; }
-        .btn-save { width: 100%; background: var(--accent); color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #009688; --border: #ddd; }
+        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { border-bottom: 4px solid var(--accent); display: inline-block; padding-bottom: 5px; }
+        .card { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
+        
+        .btn-create { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); }
+        .item-info { flex: 1; }
+        .item-actions { display: flex; gap: 8px; }
+        
+        .btn-del { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-manage { background: #ff9800; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+        .material-symbols-outlined { font-size: 24px; }
     </style>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+      const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
 
-        const params = new URLSearchParams(window.location.search);
-        const actId = params.get("id");
+      onAuthStateChanged(auth, async (user) => {
+          if (!user) window.location.href = "index.html";
+          const uDoc = await getDoc(doc(db, "usuarios", user.uid));
+          if (!uDoc.exists() || (uDoc.data().rol !== 'festero' && uDoc.data().rol !== 'admin')) window.location.href = "panel.html";
+          escucharActividades();
+      });
 
-        onAuthStateChanged(auth, async (user) => {
-            if(!user) window.location.href="index.html";
-            cargarDatos();
-        });
+      window.crearActividad = async () => {
+          const titulo = document.getElementById("act-title").value;
+          const fecha = document.getElementById("act-date").value;
+          const lugar = document.getElementById("act-place").value;
+          const genero = document.getElementById("act-genre").value;
+          const audiencia = document.getElementById("act-audience").value;
+          const modalidad = document.getElementById("act-modality").value;
+          const tamano = document.getElementById("act-size").value;
 
-        async function cargarDatos() {
-            const docRef = doc(db, "actividades", actId);
-            const snap = await getDoc(docRef);
-            if(!snap.exists()) return alert("Error");
-            
-            const data = snap.data();
-            document.getElementById("titulo").innerText = "Podio: " + data.titulo;
-            
-            const inscritos = data.inscritos || [];
-            let options = '<option value="">-- Seleccionar --</option>';
-            inscritos.forEach(i => {
-                options += `<option value="${i.nombre_equipo}">${i.nombre_equipo}</option>`;
-            });
+          if(!titulo || !fecha) return alert("Faltan datos");
 
-            // Rellenar selects
-            ['oro', 'plata', 'bronce'].forEach(tipo => {
-                document.getElementById(tipo).innerHTML = options;
-                // Si ya hay ganadores guardados, seleccionarlos
-                if(data.ganadores && data.ganadores[tipo]) {
-                    document.getElementById(tipo).value = data.ganadores[tipo];
-                }
-            });
-        }
+          try {
+              await addDoc(collection(db, "actividades"), {
+                  titulo, fecha: new Date(fecha), lugar, genero, audiencia, modalidad, 
+                  tamano_equipo: parseInt(tamano), inscritos: []
+              });
+              alert("✅ Actividad Creada");
+              document.getElementById("act-title").value = "";
+          } catch(e) { alert("Error: " + e.message); }
+      }
 
-        window.guardarPodio = async () => {
-            const ganadores = {
-                oro: document.getElementById("oro").value,
-                plata: document.getElementById("plata").value,
-                bronce: document.getElementById("bronce").value
-            };
-            try {
-                await updateDoc(doc(db, "actividades", actId), { ganadores: ganadores });
-                alert("✅ Ganadores guardados");
-                window.location.href = "gestion.html";
-            } catch(e) { alert(e.message); }
-        }
+      function escucharActividades() {
+          const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
+          onSnapshot(q, (snapshot) => {
+              const lista = document.getElementById("admin-list");
+              lista.innerHTML = "";
+              snapshot.forEach((d) => {
+                  const act = d.data();
+                  const fecha = act.fecha.toDate ? act.fecha.toDate().toLocaleDateString() : '';
+                  
+                  // LÓGICA DEL BOTÓN GESTIONAR
+                  let btnGestion = "";
+                  if (act.genero === 'torneo') {
+                      btnGestion = `<button class="btn-manage" onclick="window.location.href='gestionar_bracket.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">emoji_events</span> Torneo</button>`;
+                  } else if (act.genero === 'carrera' || act.genero === 'concurso') {
+                      btnGestion = `<button class="btn-manage" onclick="window.location.href='gestionar_podio.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">podium</span> Podio</button>`;
+                  }
+
+                  lista.innerHTML += `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <strong>${act.titulo}</strong><br>
+                            <small>${fecha} - ${act.genero}</small>
+                        </div>
+                        <div class="item-actions">
+                            ${btnGestion}
+                            <button class="btn-del" onclick="borrar('${d.id}')">🗑️</button>
+                        </div>
+                    </div>`;
+              });
+          });
+      }
+      window.borrar = async (id) => { if(confirm("¿Borrar evento?")) await deleteDoc(doc(db, "actividades", id)); }
     </script>
 </head>
 <body>
     <div class="container">
-        <button onclick="window.history.back()" style="background:transparent; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">← Volver</button>
+        <h1>🛠️ Gestión</h1>
         <div class="card">
-            <h1 id="titulo">Cargando...</h1>
-            <p style="text-align:center; color:gray; margin-bottom:20px;">Elige a los ganadores de la lista de inscritos.</p>
-
-            <label>🥇 PRIMER PUESTO (ORO)</label>
-            <select id="oro"></select>
-
-            <label>🥈 SEGUNDO PUESTO (PLATA)</label>
-            <select id="plata"></select>
-
-            <label>🥉 TERCER PUESTO (BRONCE)</label>
-            <select id="bronce"></select>
-
-            <button class="btn-save" onclick="guardarPodio()">Guardar Resultados</button>
+            <h2>Crear Actividad</h2>
+            <div class="form-group"><label>Título</label><input type="text" id="act-title"></div>
+            <div class="form-group"><label>Fecha</label><input type="datetime-local" id="act-date"></div>
+            <div class="form-group"><label>Lugar</label><input type="text" id="act-place"></div>
+            <div class="form-group">
+                <label>Tipo</label>
+                <select id="act-genre">
+                    <option value="concurso">🏆 Concurso</option>
+                    <option value="deporte">⚽ Deporte</option>
+                    <option value="comida">🥘 Comida</option>
+                    <option value="fiesta">🎉 Fiesta</option>
+                    <option value="carrera">🏃 Carrera</option>
+                    <option value="torneo">🎾 Torneo (Bracket)</option>
+                    <option value="otro">🎲 Otro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Público</label>
+                <select id="act-audience">
+                    <option value="todos">Para Todos</option>
+                    <option value="infantil">👶 Infantil</option>
+                    <option value="adultos">🔞 Adultos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Modalidad</label>
+                <select id="act-modality" onchange="document.getElementById('size-group').style.display = this.value==='equipos' ? 'block' : 'none'">
+                    <option value="individual">Individual</option>
+                    <option value="parejas">Parejas</option>
+                    <option value="equipos">Equipos</option>
+                </select>
+            </div>
+            <div class="form-group" id="size-group" style="display:none;">
+                <label>Miembros por Equipo</label>
+                <input type="number" id="act-size" value="5">
+            </div>
+            <button class="btn-create" onclick="crearActividad()">Publicar</button>
+        </div>
+        <div class="card">
+            <h2>Actividades Activas</h2>
+            <div id="admin-list">Cargando...</div>
         </div>
     </div>
+    <nav class="bottom-nav">
+        <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
+        <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
+        <a href="admin.html" class="nav-item active"><span class="material-symbols-outlined">settings</span>Gestión</a>
+    </nav>
 </body>
 </html>
