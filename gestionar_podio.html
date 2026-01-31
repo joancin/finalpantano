@@ -10,87 +10,84 @@
     <style>
         :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff9800; }
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 500px; margin: 0 auto; }
         .card { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; background: var(--bg); color: var(--text); font-size: 1rem; }
-        h1 { margin-top: 0; text-align: center; }
-        .btn-save { width: 100%; background: var(--accent); color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        h1 { text-align: center; margin-top: 0; }
+        
+        select { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 10px; border: 1px solid #ccc; background: var(--bg); color: var(--text); font-size: 1rem; }
+        .btn-save { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; }
     </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
+        
+        enableIndexedDbPersistence(db).catch(console.log);
 
+        const auth = getAuth(app);
         const params = new URLSearchParams(window.location.search);
         const actId = params.get("id");
 
         onAuthStateChanged(auth, async (user) => {
-            if(!user) window.location.href="index.html";
+            if(!user || !actId) window.location.href="index.html";
             cargarDatos();
         });
 
         async function cargarDatos() {
-            const docRef = doc(db, "actividades", actId);
-            const snap = await getDoc(docRef);
-            if(!snap.exists()) return alert("Error");
-            
+            const snap = await getDoc(doc(db, "actividades", actId));
+            if(!snap.exists()) return;
             const data = snap.data();
-            document.getElementById("titulo").innerText = "Podio: " + data.titulo;
             
+            document.getElementById("titulo").innerText = data.titulo;
             const inscritos = data.inscritos || [];
-            let options = '<option value="">-- Seleccionar --</option>';
-            inscritos.forEach(i => {
-                options += `<option value="${i.nombre_equipo}">${i.nombre_equipo}</option>`;
-            });
+            
+            // FIX UNDEFINED
+            const options = inscritos.map(i => `<option value="${i.nombre_equipo || i.capitan || 'Anónimo'}">${i.nombre_equipo || i.capitan || 'Anónimo'}</option>`).join("");
+            const defaultOpt = '<option value="">-- Desierto --</option>';
 
-            // Rellenar selects
-            ['oro', 'plata', 'bronce'].forEach(tipo => {
-                document.getElementById(tipo).innerHTML = options;
-                // Si ya hay ganadores guardados, seleccionarlos
-                if(data.ganadores && data.ganadores[tipo]) {
-                    document.getElementById(tipo).value = data.ganadores[tipo];
-                }
+            ["oro", "plata", "bronce"].forEach(m => {
+                document.getElementById(m).innerHTML = defaultOpt + options;
+                if(data.ganadores && data.ganadores[m]) document.getElementById(m).value = data.ganadores[m];
             });
         }
 
-        window.guardarPodio = async () => {
+        window.guardar = async () => {
             const ganadores = {
                 oro: document.getElementById("oro").value,
                 plata: document.getElementById("plata").value,
                 bronce: document.getElementById("bronce").value
             };
             try {
-                await updateDoc(doc(db, "actividades", actId), { ganadores: ganadores });
-                alert("✅ Ganadores guardados");
-                window.location.href = "gestion.html";
+                await updateDoc(doc(db, "actividades", actId), { ganadores });
+                alert("✅ Guardado");
+                window.history.back();
             } catch(e) { alert(e.message); }
         }
     </script>
 </head>
 <body>
     <div class="container">
-        <button onclick="window.history.back()" style="background:transparent; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">← Volver</button>
+        <button onclick="window.history.back()" style="border:none; background:none; cursor:pointer; margin-bottom:10px;">⬅ Volver</button>
         <div class="card">
-            <h1 id="titulo">Cargando...</h1>
-            <p style="text-align:center; color:gray; margin-bottom:20px;">Elige a los ganadores de la lista de inscritos.</p>
-
-            <label>🥇 PRIMER PUESTO (ORO)</label>
+            <h1 id="titulo">...</h1>
+            
+            <label>🥇 Ganador (ORO)</label>
             <select id="oro"></select>
-
-            <label>🥈 SEGUNDO PUESTO (PLATA)</label>
+            
+            <label>🥈 Segundo (PLATA)</label>
             <select id="plata"></select>
-
-            <label>🥉 TERCER PUESTO (BRONCE)</label>
+            
+            <label>🥉 Tercero (BRONCE)</label>
             <select id="bronce"></select>
-
-            <button class="btn-save" onclick="guardarPodio()">Guardar Resultados</button>
+            
+            <button class="btn-save" onclick="guardar()">GUARDAR RESULTADOS</button>
         </div>
     </div>
 </body>
