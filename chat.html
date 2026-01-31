@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+    <title>Chat Fiestas</title>
     
     <script>
         if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
@@ -13,39 +13,51 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     
     <style>
+        /* RESET BÁSICO */
+        * { box-sizing: border-box; }
+
         :root { --bg: #e5ddd5; --text: #333; --card: white; --accent: #00897b; --bubble-me: #dcf8c6; --bubble-other: white; }
         html.dark-mode { --bg: #0f0f0f; --text: #e0e0e0; --card: #1f1f1f; --bubble-me: #005c4b; --bubble-other: #202c33; }
         
-        /* USO DE 100dvh PARA MÓVILES */
-        body { 
+        /* CUERPO FIJO SIN SCROLL GLOBAL */
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
             font-family: 'Poppins', sans-serif; 
             background: var(--bg); 
             color: var(--text); 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100dvh; /* Altura dinámica real del móvil */
-            overflow: hidden; 
+            overflow: hidden; /* Evita rebote en iOS */
+            position: fixed; /* Fija la pantalla completa */
+            width: 100%;
         }
-        
-        /* CABECERA */
+
+        /* CABECERA FIJA ARRIBA */
         .chat-header { 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
             background: var(--accent); 
             color: white; 
-            padding: 15px; 
+            padding: 0 15px; 
             display: flex; 
             align-items: center; 
             gap: 10px; 
             box-shadow: 0 1px 3px rgba(0,0,0,0.2); 
-            z-index: 10;
-            flex-shrink: 0; 
+            z-index: 1000;
         }
-        .back-btn { background: none; border: none; color: white; cursor: pointer; display: flex; align-items: center; }
+        .back-btn { background: none; border: none; color: white; cursor: pointer; display: flex; align-items: center; padding: 5px; }
         .chat-title { font-weight: 600; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* ZONA DE MENSAJES */
+        /* ZONA DE MENSAJES (SCROLL INTERNO) */
         #chat-box { 
-            flex: 1; 
+            position: absolute;
+            top: 60px; /* Debajo de la cabecera */
+            bottom: 70px; /* Encima del input */
+            left: 0;
+            width: 100%;
             overflow-y: auto; 
             padding: 15px; 
             display: flex; 
@@ -53,38 +65,46 @@
             gap: 8px; 
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); 
             background-blend-mode: soft-light;
-            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
         }
         html.dark-mode #chat-box { background-blend-mode: overlay; opacity: 0.9; }
 
-        .msg { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 0.95rem; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-wrap: break-word; }
+        /* BURBUJAS DE CHAT */
+        .msg { max-width: 85%; padding: 8px 12px; border-radius: 10px; font-size: 0.95rem; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-wrap: break-word; }
         .msg-me { align-self: flex-end; background: var(--bubble-me); border-top-right-radius: 0; }
         .msg-other { align-self: flex-start; background: var(--bubble-other); border-top-left-radius: 0; }
         
         .msg-author { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin-bottom: 2px; }
         .msg-time { font-size: 0.65rem; color: gray; text-align: right; margin-top: 4px; display: block; }
 
-        /* ÁREA DE INPUT (SOLUCIÓN MÓVIL) */
+        /* INPUT AREA FIJA ABAJO (LA SOLUCIÓN) */
         .input-area { 
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px; /* Altura fija */
             background: var(--card); 
             padding: 10px; 
             display: flex; 
             gap: 10px; 
             align-items: center; 
             border-top: 1px solid rgba(0,0,0,0.1); 
-            flex-shrink: 0; /* Evita que se aplaste */
-            padding-bottom: max(10px, env(safe-area-inset-bottom)); /* Espacio para barra iPhone */
+            z-index: 1000;
+            /* Soporte para iPhone sin botón home */
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
         }
         
         .input-area input { 
             flex: 1; 
             padding: 12px; 
-            border-radius: 20px; 
+            border-radius: 25px; 
             border: 1px solid #ddd; 
             background: var(--bg); 
             color: var(--text); 
             outline: none; 
-            font-size: 16px; /* Evita zoom automático en iPhone */
+            font-size: 16px; /* Evita zoom al escribir en iPhone */
+            height: 45px;
         }
         
         .send-btn { 
@@ -98,14 +118,13 @@
             align-items: center; 
             justify-content: center; 
             cursor: pointer; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             flex-shrink: 0;
         }
     </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // IMPORTAMOS LIMIT Y PERSISTENCIA
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, limit, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -113,7 +132,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // 1. ACTIVAR PERSISTENCIA
         enableIndexedDbPersistence(db).catch(() => {});
 
         const auth = getAuth(app);
@@ -138,24 +156,18 @@
         });
 
         function cargarChat() {
-            // 2. OPTIMIZACIÓN LÍMITE 50
-            // Ordenamos por fecha descendente (lo más nuevo primero) y cogemos 50.
+            // LÍMITE DE 50 MENSAJES (Optimizado)
             const q = query(
                 collection(db, "actividades", actId, "chat"), 
                 orderBy("fecha", "desc"), 
-                limit(50) 
+                limit(50)
             );
 
             onSnapshot(q, (snapshot) => {
                 const box = document.getElementById("chat-box");
                 const msgs = [];
-                
                 snapshot.forEach(d => msgs.push(d.data()));
-                
-                // 3. INVERTIR ORDEN
-                // Como los bajamos "descendente" para coger los últimos, 
-                // ahora los invertimos para pintarlos en orden cronológico (antiguo arriba, nuevo abajo)
-                msgs.reverse(); 
+                msgs.reverse(); // Invertir para mostrar cronológicamente
 
                 box.innerHTML = "";
                 msgs.forEach(m => {
@@ -171,18 +183,21 @@
                         </div>`;
                 });
                 
-                // Scroll automático al final
+                // Scroll al fondo automático
                 setTimeout(() => box.scrollTop = box.scrollHeight, 100);
             });
         }
 
-        // 4. FUNCIÓN GLOBAL PARA EL BOTÓN (FIX MÓVIL)
+        // FUNCIÓN GLOBAL SEGURA PARA BOTONES
         window.enviarMensaje = async () => {
             const input = document.getElementById("msg-input");
             const text = input.value.trim();
             if(!text) return;
             
             input.value = ""; 
+            // Foco de nuevo al input para seguir escribiendo (importante en PC)
+            input.focus(); 
+
             try {
                 await addDoc(collection(db, "actividades", actId, "chat"), {
                     texto: text,
@@ -190,10 +205,10 @@
                     uid: currentUser.uid,
                     fecha: new Date()
                 });
-            } catch(e) { console.error("Error al enviar", e); }
+            } catch(e) { console.error("Error envío:", e); }
         }
 
-        // Enviar con Enter
+        // ENVIAR CON ENTER
         document.getElementById("msg-input").addEventListener("keypress", (e) => {
             if(e.key === "Enter") window.enviarMensaje();
         });
@@ -211,7 +226,7 @@
         </div>
 
     <div class="input-area">
-        <input type="text" id="msg-input" placeholder="Escribe un mensaje...">
+        <input type="text" id="msg-input" placeholder="Mensaje..." autocomplete="off">
         <button class="send-btn" onclick="enviarMensaje()">
             <span class="material-symbols-outlined">send</span>
         </button>
