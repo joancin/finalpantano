@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cuadro Torneo</title>
+    <title>Cuadro del Torneo</title>
     <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f4f7f6; --text: #333; --card: white; --accent: #e91e63; --win-bg: #e8f5e9; --win-text: #2e7d32; }
+        :root { --bg: #f4f7f6; --text: #333; --card: white; --win-bg: #e8f5e9; --win-text: #2e7d32; --accent: #e91e63; }
         html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --win-bg: #1b5e20; --win-text: #a5d6a7; }
         
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 100%; overflow-x: auto; }
         
-        h1 { text-align: center; margin-bottom: 5px; font-size: 1.5rem; font-weight: 800; }
-        .subtitle { text-align: center; color: gray; margin-bottom: 30px; font-size: 0.9rem; }
+        h1 { text-align: center; margin-bottom: 30px; font-weight: 800; font-size: 1.8rem; }
+        
+        /* ESTILOS DEL CUADRO VISUAL */
+        .bracket-container { display: flex; padding: 20px; gap: 40px; justify-content: flex-start; }
+        .round { display: flex; flex-direction: column; justify-content: space-around; gap: 20px; min-width: 180px; }
+        .round-title { text-align: center; font-weight: bold; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; font-size: 0.9rem; }
 
-        .bracket-container { display: flex; flex-direction: column; gap: 15px; }
-        
-        .match-card { background: var(--card); border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid rgba(0,0,0,0.1); }
-        
-        .team { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .team:last-child { border-bottom: none; }
-        .team-name { font-weight: 600; font-size: 1rem; }
-        
-        .winner { background: var(--win-bg); color: var(--win-text); }
-        .winner .team-name::after { content: '👑'; margin-left: 8px; }
-        
-        .bye-card { border: 2px dashed #ccc; background: transparent; box-shadow: none; opacity: 0.7; }
-        .bye-badge { background: #eee; color: #555; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; }
+        .match { background: var(--card); border-radius: 10px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 5px; position: relative; border: 1px solid rgba(0,0,0,0.05); }
+        .team { padding: 8px 12px; background: rgba(0,0,0,0.03); border-radius: 6px; font-weight: 600; text-align: center; font-size: 0.9rem; }
+        .team.winner { background: var(--win-bg); color: var(--win-text); font-weight: 800; }
+        .team.bye { opacity: 0.6; font-style: italic; }
+
+        /* LÍNEAS CONECTORAS */
+        .round:not(:last-child) .match::after {
+            content: ''; position: absolute; right: -40px; top: 50%; width: 40px; height: 2px; background: #ccc; z-index: -1;
+        }
 
         .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; }
         .loading { text-align: center; margin-top: 50px; color: gray; }
@@ -43,66 +43,61 @@
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        // PERSISTENCIA
-        enableIndexedDbPersistence(db).catch(err => console.log(err));
+        enableIndexedDbPersistence(db).catch(() => {});
 
         const params = new URLSearchParams(window.location.search);
         const actId = params.get("id");
-
         if(!actId) window.location.href = "actividades.html";
 
         onSnapshot(doc(db, "actividades", actId), (docSnap) => {
             if(!docSnap.exists()) return;
             const data = docSnap.data();
-            
             document.getElementById("titulo").innerText = data.titulo;
             renderBracket(data.bracket || []);
         });
 
-        function renderBracket(bracket) {
-            const container = document.getElementById("bracket");
+        function renderBracket(bracketData) {
+            const container = document.getElementById("bracket-view");
             container.innerHTML = "";
 
-            if(bracket.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align:center; padding:40px; background:rgba(0,0,0,0.03); border-radius:20px;">
-                        <span class="material-symbols-outlined" style="font-size:48px; color:gray; opacity:0.5">emoji_events</span>
-                        <p style="color:gray;">Sorteo pendiente.</p>
-                    </div>`;
+            if(!bracketData || bracketData.length === 0) {
+                container.innerHTML = "<p class='loading'>Cuadro no disponible aún.</p>";
+                container.style.display = "block"; container.style.textAlign = "center";
                 return;
             }
+            container.style.display = "flex";
 
-            bracket.forEach((match) => {
-                if(match.bye) {
-                    container.innerHTML += `
-                        <div class="match-card bye-card">
-                            <div class="team">
-                                <span class="team-name">${match.team1}</span>
-                                <span class="bye-badge">PASA DIRECTO ➜</span>
-                            </div>
-                        </div>`;
-                } else {
-                    container.innerHTML += `
-                        <div class="match-card">
-                            <div class="team ${match.winner === match.team1 ? 'winner' : ''}">
-                                <span class="team-name">${match.team1}</span>
-                            </div>
-                            <div class="team ${match.winner === match.team2 ? 'winner' : ''}">
-                                <span class="team-name">${match.team2}</span>
-                            </div>
-                        </div>`;
-                }
+            bracketData.forEach((round, roundIndex) => {
+                let roundTitle = `Ronda ${roundIndex + 1}`;
+                if (round.length === 1) roundTitle = "🏆 FINAL";
+                else if (round.length === 2) roundTitle = "SEMIFINAL";
+
+                let roundHtml = `<div class="round"><div class="round-title">${roundTitle}</div>`;
+                round.forEach(match => {
+                    if(match.bye) {
+                         roundHtml += `
+                            <div class="match">
+                                <div class="team winner bye">${match.team1} (Pasa)</div>
+                            </div>`;
+                    } else {
+                        roundHtml += `
+                            <div class="match">
+                                <div class="team ${match.winner === match.team1 ? 'winner' : ''}">${match.team1}</div>
+                                <div class="team ${match.winner === match.team2 ? 'winner' : ''}">${match.team2}</div>
+                            </div>`;
+                    }
+                });
+                roundHtml += "</div>";
+                container.innerHTML += roundHtml;
             });
         }
     </script>
 </head>
 <body>
     <div class="container">
-        <h1 id="titulo">Cargando...</h1>
-        <p class="subtitle">Cuadro de Enfrentamientos</p>
-        <div id="bracket" class="bracket-container">
-            <div class="loading">Cargando cruces...</div>
+        <h1 id="titulo">...</h1>
+        <div id="bracket-view" class="bracket-container">
+            <div class="loading">Cargando cuadro...</div>
         </div>
     </div>
     <button class="btn-back-float" onclick="window.history.back()">
