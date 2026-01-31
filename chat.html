@@ -14,12 +14,10 @@
         
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* HEADER */
         .chat-header { background: var(--accent); color: white; padding: 15px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 10; }
         .back-btn { background: none; border: none; color: white; cursor: pointer; display: flex; align-items: center; }
         .chat-title { font-weight: 600; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* AREA MENSAJES */
         #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: soft-light; }
         html.dark-mode #chat-box { background-blend-mode: overlay; opacity: 0.9; }
 
@@ -30,7 +28,6 @@
         .msg-author { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin-bottom: 2px; }
         .msg-time { font-size: 0.65rem; color: gray; text-align: right; margin-top: 4px; display: block; }
 
-        /* INPUT AREA */
         .input-area { background: var(--card); padding: 10px; display: flex; gap: 10px; align-items: center; border-top: 1px solid rgba(0,0,0,0.1); }
         .input-area input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ddd; background: var(--bg); color: var(--text); outline: none; }
         .send-btn { background: var(--accent); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
@@ -38,18 +35,16 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // IMPORTAMOS LIMIT Y PERSISTENCIA
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, limit, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
-        // Persistencia
-        enableIndexedDbPersistence(db).catch(err => console.log("Persistencia error:", err.code));
-
         const auth = getAuth(app);
+        
+        enableIndexedDbPersistence(db).catch(() => {});
+
         const params = new URLSearchParams(window.location.search);
         const actId = params.get("id");
         let currentUser = null;
@@ -61,11 +56,9 @@
             if(!user) window.location.href="index.html";
             currentUser = user;
             
-            // Obtener nombre usuario
             const uDoc = await getDoc(doc(db, "usuarios", user.uid));
             if(uDoc.exists()) myName = uDoc.data().username;
             
-            // Obtener título actividad
             const actDoc = await getDoc(doc(db, "actividades", actId));
             if(actDoc.exists()) document.getElementById("title").innerText = actDoc.data().titulo;
 
@@ -73,22 +66,15 @@
         });
 
         function cargarChat() {
-            // AQUI ESTA LA MAGIA: limit(50)
-            const q = query(
-                collection(db, "actividades", actId, "chat"), 
-                orderBy("fecha", "desc"), 
-                limit(50) 
-            );
+            const q = query(collection(db, "actividades", actId, "chat"), orderBy("fecha", "desc"), limit(50));
 
             onSnapshot(q, (snapshot) => {
                 const box = document.getElementById("chat-box");
-                box.innerHTML = "";
-                
-                // Como vienen del revés (desc) por el límite, los invertimos para pintar
                 const msgs = [];
                 snapshot.forEach(d => msgs.push(d.data()));
                 msgs.reverse(); 
 
+                box.innerHTML = "";
                 msgs.forEach(m => {
                     const isMe = m.uid === currentUser.uid;
                     const date = m.fecha ? new Date(m.fecha.seconds * 1000) : new Date();
@@ -101,18 +87,17 @@
                             <span class="msg-time">${timeStr}</span>
                         </div>`;
                 });
-                
-                // Scroll abajo
                 box.scrollTop = box.scrollHeight;
             });
         }
 
+        // ✅ FIX: Hacer la función global para que el botón HTML la encuentre
         window.enviarMensaje = async () => {
             const input = document.getElementById("msg-input");
             const text = input.value.trim();
             if(!text) return;
             
-            input.value = ""; // Limpiar rápido
+            input.value = ""; 
             try {
                 await addDoc(collection(db, "actividades", actId, "chat"), {
                     texto: text,
@@ -120,7 +105,7 @@
                     uid: currentUser.uid,
                     fecha: new Date()
                 });
-            } catch(e) { alert("Error al enviar"); }
+            } catch(e) { console.error("Error envío:", e); alert("Error al enviar mensaje"); }
         }
 
         // Enviar con Enter
@@ -137,8 +122,7 @@
         <span id="title" class="chat-title">Cargando...</span>
     </div>
 
-    <div id="chat-box">
-        </div>
+    <div id="chat-box"></div>
 
     <div class="input-area">
         <input type="text" id="msg-input" placeholder="Escribe un mensaje...">
