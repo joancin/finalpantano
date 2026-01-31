@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Actividades</title>
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
+    
+    <script>
+        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
+    </script>
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -27,6 +31,7 @@
         /* TARJETAS */
         .act-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; cursor: pointer; transition: transform 0.2s; }
         .act-card:active { transform: scale(0.98); }
+        
         .act-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
         .card-badge { position: absolute; top: 15px; right: 15px; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: white; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
@@ -36,6 +41,8 @@
         .act-body { padding: 15px; }
         .act-title { margin: 0; font-size: 1.2rem; margin-bottom: 5px; }
         .act-meta { font-size: 0.85rem; color: gray; display: flex; align-items: center; gap: 5px; margin-bottom: 15px; }
+        
+        /* ESTADO EN TARJETA */
         .act-actions { display: flex; gap: 10px; margin-top: 10px; }
         .btn-mini { padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; }
         .btn-status-ok { background: #e8f5e9; color: #2e7d32; }
@@ -44,15 +51,19 @@
         /* MODALES */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: flex-end; z-index: 2000; backdrop-filter: blur(3px); }
         .modal { background: var(--card); padding: 25px; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px; color: var(--text); max-height: 90vh; overflow-y: auto; position: relative; animation: slideUp 0.3s; }
+        
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
+        /* DETALLES */
         .detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
         .detail-title { font-size: 1.5rem; margin: 0 0 10px 0; line-height: 1.2; }
         .detail-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: gray; }
-        .detail-desc { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; }
         
+        .detail-desc { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; }
+
         .detail-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); }
         .detail-header { font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
+
         .participants-list { background: var(--bg); border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; }
         .p-group { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .p-group:last-child { border: none; margin: 0; padding: 0; }
@@ -60,9 +71,11 @@
         .p-members { font-size: 0.85rem; color: gray; margin-left: 10px; }
 
         .btn-close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.1); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; }
+        
         .btn-full { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; }
         .btn-join-lg { background: var(--accent); color: white; }
         .btn-leave-lg { background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
+
         .modal input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; }
         .mate-found { border-color: #4caf50 !important; }
 
@@ -113,11 +126,13 @@
               const matchesSearch = act.titulo.toLowerCase().includes(searchVal);
               const genero = act.genero || 'otro';
               const audiencia = act.audiencia || 'todos';
+              
               let matchesFilter = false;
               if (currentFilter === 'todos') matchesFilter = true;
               else if (currentFilter === 'infantil') matchesFilter = (audiencia === 'infantil');
               else if (currentFilter === 'adultos') matchesFilter = (audiencia === 'adultos');
               else matchesFilter = (genero === currentFilter);
+
               return matchesSearch && matchesFilter;
           });
 
@@ -129,15 +144,25 @@
               let estoyDentro = inscritos.some(e => e.capitan_uid === currentUser.uid || (e.miembros && e.miembros.some(m => m.uid === currentUser.uid)));
               
               let badgeColor = 'tag-otro';
-              let imgUrl = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600';
-              if(act.genero === 'deporte') { badgeColor = 'tag-deporte'; imgUrl = 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=600'; }
-              if(act.genero === 'concurso') { badgeColor = 'tag-concurso'; imgUrl = 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=600'; }
-              if(act.genero === 'torneo') { badgeColor = 'tag-torneo'; imgUrl = 'https://images.unsplash.com/photo-1551098888-c17562f02f9e?auto=format&fit=crop&q=80&w=600'; }
+              // --- IMAGEN (Prioridad: URL manual > Stock) ---
+              let imgUrl = act.imagen;
+              if (!imgUrl) {
+                  if(act.genero === 'deporte') imgUrl = 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=600';
+                  else if(act.genero === 'concurso') imgUrl = 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=600';
+                  else if(act.genero === 'torneo') imgUrl = 'https://images.unsplash.com/photo-1551098888-c17562f02f9e?auto=format&fit=crop&q=80&w=600';
+                  else if(act.genero === 'comida') imgUrl = 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=600';
+                  else if(act.genero === 'fiesta') imgUrl = 'https://images.unsplash.com/photo-1514525253440-b39345208668?auto=format&fit=crop&q=80&w=600';
+                  else imgUrl = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600';
+              }
+
+              if(act.genero === 'deporte') badgeColor = 'tag-deporte';
+              if(act.genero === 'concurso') badgeColor = 'tag-concurso';
+              if(act.genero === 'torneo') badgeColor = 'tag-torneo';
 
               container.innerHTML += `
                   <div class="act-card" onclick="verDetalles('${act.id}')">
                       <span class="card-badge ${badgeColor}">${act.genero}</span>
-                      <img src="${imgUrl}" class="act-img">
+                      <img src="${imgUrl}" class="act-img" onerror="this.src='https://via.placeholder.com/600x400?text=Sin+Imagen'">
                       <div class="act-body">
                           <h3 class="act-title">${act.titulo}</h3>
                           <div class="act-meta">
@@ -145,6 +170,7 @@
                               <span style="margin: 0 5px">•</span>
                               <span class="material-symbols-outlined" style="font-size:18px">group</span> ${act.audiencia ? act.audiencia.toUpperCase() : 'TODOS'}
                           </div>
+                          
                           <div class="act-actions">
                               ${estoyDentro ? 
                                 `<button class="btn-mini btn-status-ok"><span class="material-symbols-outlined" style="font-size:18px">check</span> Apuntado</button>` : 
@@ -163,6 +189,7 @@
           renderActivities();
       }
 
+      // --- VER DETALLES ---
       window.verDetalles = (id) => {
           const act = allActivities.find(a => a.id === id);
           if(!act) return;
@@ -181,6 +208,7 @@
           } else {
               inscritos.forEach(equipo => {
                   let membersNames = equipo.miembros ? equipo.miembros.map(m => m.nombre).join(", ") : "";
+                  // --- FIX UNDEFINED: Fallback al capitan ---
                   const nombreMostrar = equipo.nombre_equipo || equipo.capitan || "Usuario";
                   
                   participantsHTML += `
@@ -194,12 +222,15 @@
               });
           }
 
-          document.getElementById("d-img").src = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
+          // Imagen en modal
+          let imgUrl = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
+          document.getElementById("d-img").src = imgUrl;
+          
           document.getElementById("d-title").innerText = act.titulo;
           document.getElementById("d-date").innerHTML = `<span class="material-symbols-outlined">schedule</span> ${fechaStr}`;
           document.getElementById("d-place").innerHTML = `<span class="material-symbols-outlined">location_on</span> ${act.lugar || 'Ubicación por definir'}`;
           
-          // NUEVA SECCIÓN DE DESCRIPCIÓN
+          // Descripción
           const desc = act.descripcion ? `<div class="detail-desc">${act.descripcion}</div>` : "";
           document.getElementById("d-desc").innerHTML = desc;
 
@@ -224,6 +255,7 @@
 
       window.cerrarDetalles = () => document.getElementById("modal-detalles").style.display = "none";
 
+      // --- INSCRIPCIÓN ---
       let currentActId="", currentModalidad="";
       window.prepararInscripcion = (id, mod, size) => {
           document.getElementById("modal-detalles").style.display = "none"; 
@@ -259,7 +291,15 @@
       window.confirmarInscripcion = async () => {
           const btn = document.getElementById("btn-confirmar"); btn.innerText="..."; btn.disabled=true;
           try {
-              let data = { capitan: myUsername, capitan_uid: currentUser.uid, fecha: new Date(), nombre_equipo: myUsername, miembros: [] };
+              // --- FIX UNDEFINED: Forzar nombre_equipo = myUsername ---
+              let data = { 
+                  capitan: myUsername, 
+                  capitan_uid: currentUser.uid, 
+                  fecha: new Date(), 
+                  nombre_equipo: myUsername, // <-- IMPORTANTE
+                  miembros: [] 
+              };
+              
               if(currentModalidad !== 'individual') {
                   const inputs = document.querySelectorAll(".mate-input");
                   inputs.forEach(input => {
@@ -315,7 +355,7 @@
     <div id="modal-detalles" class="modal-overlay" onclick="if(event.target === this) cerrarDetalles()">
         <div class="modal">
             <button class="btn-close-modal" onclick="cerrarDetalles()">×</button>
-            <img id="d-img" class="detail-img" src="">
+            <img id="d-img" class="detail-img" src="" onerror="this.src='https://via.placeholder.com/600x400?text=Sin+Imagen'">
             <h2 id="d-title" class="detail-title">...</h2>
             <div id="d-date" class="detail-row"></div>
             <div id="d-place" class="detail-row"></div>
