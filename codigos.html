@@ -27,6 +27,7 @@
             transition: transform 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .big-btn:active { transform: scale(0.95); }
+        .big-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
         .code-list { display: flex; flex-direction: column; gap: 10px; }
         .code-item { 
@@ -46,7 +47,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         // TU CONFIG
@@ -68,35 +69,47 @@
 
         // GENERAR CÓDIGO ALEATORIO
         window.generarCodigo = async () => {
-            if(!currentUser) return;
+            if(!currentUser) {
+                alert("Error: No estás identificado.");
+                return;
+            }
+
             const btn = document.getElementById('btn-gen');
-            btn.disabled = true; btn.innerText = "Generando...";
+            btn.disabled = true; 
+            btn.innerText = "Creando...";
 
             // Crea un código tipo "FIESTA-XY12"
             const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
             const nuevoCodigo = `FIESTA-${randomStr}`;
 
             try {
+                // Usamos new Date() en vez de serverTimestamp para evitar problemas de reglas
                 await addDoc(collection(db, "invitaciones"), {
                     codigo: nuevoCodigo,
                     creado_por: currentUser.uid,
                     creado_email: currentUser.email,
-                    estado: "libre", // libre o usado
-                    fecha: serverTimestamp()
+                    estado: "libre", 
+                    fecha: new Date().toISOString() 
                 });
-                // No hace falta alert, se verá en la lista abajo
+                
+                // Feedback visual rápido
+                alert(`✅ Código creado: ${nuevoCodigo}`);
+
             } catch (e) {
-                alert("Error: " + e.message);
+                console.error(e);
+                alert("Error al guardar: " + e.message);
             }
+
             btn.disabled = false; 
             btn.innerHTML = '<span class="material-symbols-outlined">auto_fix_high</span> Generar Nuevo Código';
         }
 
         function cargarMisCodigos() {
+            // CORRECCIÓN: Quitamos el orderBy de la consulta a Firebase para evitar el error de Índice Compuesto.
+            // Ordenaremos en Javascript.
             const q = query(
                 collection(db, "invitaciones"), 
-                where("creado_por", "==", currentUser.uid),
-                orderBy("fecha", "desc")
+                where("creado_por", "==", currentUser.uid)
             );
 
             onSnapshot(q, (snapshot) => {
@@ -108,8 +121,17 @@
                     return;
                 }
 
+                let invitaciones = [];
                 snapshot.forEach(doc => {
-                    const data = doc.data();
+                    invitaciones.push(doc.data());
+                });
+
+                // Ordenamos aquí (el más nuevo primero)
+                invitaciones.sort((a, b) => {
+                    return (b.fecha || "").localeCompare(a.fecha || "");
+                });
+
+                invitaciones.forEach(data => {
                     const estadoClass = data.estado === 'libre' ? 'libre' : 'usado';
                     const estadoText = data.estado === 'libre' ? 'LIBRE' : 'USADO';
                     
@@ -132,7 +154,7 @@
 
         window.copiar = (texto) => {
             navigator.clipboard.writeText(texto).then(() => {
-                alert("¡Copiado! Pásaselo a tu amigo.");
+                alert("¡Copiado al portapapeles!");
             });
         }
     </script>
@@ -145,7 +167,7 @@
         </div>
 
         <div class="card-generator">
-            <p style="margin-bottom: 20px;">Genera un código único para que un usuario se pueda registrar.</p>
+            <p style="margin-bottom: 20px;">Genera un código único para invitar a alguien.</p>
             <button id="btn-gen" class="big-btn" onclick="generarCodigo()">
                 <span class="material-symbols-outlined">auto_fix_high</span>
                 Generar Nuevo Código
