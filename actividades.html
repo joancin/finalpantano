@@ -4,85 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Actividades</title>
-    
-    <script>
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
-    </script>
-
+    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; --danger: #d32f2f; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
+        :root { --bg: #f4f7f6; --text: #333; --card: white; --accent: #ff5722; --border: #e0e0e0; --shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --border: #333; --shadow: 0 4px 12px rgba(0,0,0,0.3); }
         
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; padding-bottom: 90px; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-top: 150px; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 90px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-top: 130px; }
         
-        /* HEADER FIJO */
-        .fixed-header { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg); z-index: 900; padding: 15px 20px 10px 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-        .search-box { position: relative; margin-bottom: 15px; }
-        .search-box input { width: 100%; padding: 12px 12px 12px 45px; border-radius: 12px; border: none; background: var(--card); color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
-        .search-box .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: gray; }
-        .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .chip { background: var(--card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; white-space: nowrap; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: gray; }
-        .chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+        /* DATE TABS (ESTILO LIBRO) */
+        .date-tabs-container { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg); z-index: 900; padding: 10px 0; border-bottom: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .date-tabs { display: flex; gap: 10px; overflow-x: auto; padding: 10px 20px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .date-tabs::-webkit-scrollbar { display: none; }
+        
+        .date-tab { background: var(--card); border: 1px solid var(--border); padding: 10px 18px; border-radius: 12px; text-align: center; min-width: 60px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .date-tab.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3); transform: scale(1.05); }
+        .tab-day { font-size: 0.8rem; text-transform: uppercase; font-weight: 600; opacity: 0.8; }
+        .tab-num { font-size: 1.4rem; font-weight: 800; line-height: 1; }
 
-        /* TARJETAS */
-        .act-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; cursor: pointer; transition: transform 0.2s; }
+        /* TARJETAS NUEVAS */
+        .act-card { background: var(--card); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 25px; position: relative; cursor: pointer; transition: transform 0.2s; border: 1px solid var(--border); }
         .act-card:active { transform: scale(0.98); }
         
-        .act-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
-        .card-badge { position: absolute; top: 15px; right: 15px; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: white; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .act-img { width: 100%; height: 180px; object-fit: cover; background: #eee; }
+        .badge-type { position: absolute; top: 15px; left: 15px; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; color: white; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.3); backdrop-filter: blur(4px); }
         
-        .tag-deporte { background: #2196f3; } .tag-comida { background: #ff9800; } .tag-fiesta { background: #9c27b0; }
-        .tag-concurso { background: #fbc02d; color: #333 !important; } .tag-torneo { background: #e91e63; } .tag-otro { background: #607d8b; }
-        
-        .act-body { padding: 15px; }
-        .act-title { margin: 0; font-size: 1.2rem; margin-bottom: 5px; }
-        .act-meta { font-size: 0.85rem; color: gray; display: flex; align-items: center; gap: 5px; margin-bottom: 15px; }
-        
-        /* ESTADO EN TARJETA */
-        .act-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-mini { padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .btn-status-ok { background: #e8f5e9; color: #2e7d32; }
-        .btn-status-in { background: var(--accent); color: white; }
+        .tag-deporte { background: rgba(33, 150, 243, 0.9); }
+        .tag-concurso { background: rgba(251, 192, 45, 0.95); color: #333; }
+        .tag-fiesta { background: rgba(156, 39, 176, 0.9); }
+        .tag-otro { background: rgba(96, 125, 139, 0.9); }
 
-        /* MODALES */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: flex-end; z-index: 2000; backdrop-filter: blur(3px); }
-        .modal { background: var(--card); padding: 25px; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px; color: var(--text); max-height: 90vh; overflow-y: auto; position: relative; animation: slideUp 0.3s; }
+        .act-body { padding: 20px; }
+        .act-title { margin: 0; font-size: 1.3rem; margin-bottom: 8px; line-height: 1.3; }
+        .act-meta { display: flex; align-items: center; gap: 15px; color: gray; font-size: 0.9rem; margin-bottom: 15px; }
+        .meta-item { display: flex; align-items: center; gap: 6px; }
+
+        /* MODAL PRECIOSO */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 2000; backdrop-filter: blur(5px); }
+        .modal { background: var(--card); padding: 0; border-radius: 25px 25px 0 0; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; animation: slideUp 0.3s; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
         
+        .modal-header-img { width: 100%; height: 250px; object-fit: cover; }
+        .modal-content { padding: 25px; padding-bottom: 40px; }
+        
+        .btn-close-float { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.3); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; backdrop-filter: blur(4px); }
+
+        .detail-title { font-size: 1.8rem; margin: 0 0 10px 0; line-height: 1.2; }
+        .detail-desc { font-size: 1rem; line-height: 1.6; color: var(--text); opacity: 0.9; margin: 20px 0; background: rgba(0,0,0,0.03); padding: 15px; border-radius: 12px; }
+
+        .btn-action-lg { width: 100%; padding: 16px; border-radius: 15px; font-weight: 800; font-size: 1.1rem; border: none; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform 0.2s; }
+        .btn-action-lg:active { transform: scale(0.98); }
+        
+        .btn-join { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4); }
+        .btn-leave { background: #ffebee; color: #d32f2f; border: 2px solid #ffcdd2; }
+        .badge-free { background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 15px; text-align: center; font-weight: bold; width: 100%; display: block; border: 1px dashed #4caf50; }
+
+        /* INPUTS MODAL INSCRIPCIÓN */
+        .modal-form { padding: 30px; }
+        .modal-form h2 { margin-top: 0; }
+        .modal-form input { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: var(--bg); color: var(--text); }
+        .mate-found { border-color: #4caf50 !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234caf50' width='24px'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        /* DETALLES */
-        .detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
-        .detail-title { font-size: 1.5rem; margin: 0 0 10px 0; line-height: 1.2; }
-        .detail-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: gray; }
-        
-        .detail-desc { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; }
-
-        .detail-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); }
-        .detail-header { font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
-
-        .participants-list { background: var(--bg); border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; }
-        .p-group { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .p-group:last-child { border: none; margin: 0; padding: 0; }
-        .p-cap { font-weight: bold; font-size: 0.9rem; color: var(--text); }
-        .p-members { font-size: 0.85rem; color: gray; margin-left: 10px; }
-
-        .btn-close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.1); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; }
-        
-        .btn-full { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; }
-        .btn-join-lg { background: var(--accent); color: white; }
-        .btn-leave-lg { background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
-
-        .modal input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; }
-        .mate-found { border-color: #4caf50 !important; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: max(15px, env(safe-area-inset-bottom)); }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.2s; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-        .material-symbols-outlined { font-size: 24px; }
+        .nav-item span { font-size: 26px; margin-bottom: 4px; }
     </style>
 
     <script type="module">
@@ -98,7 +88,7 @@
       let currentUser = null;
       let myUsername = "";
       let allActivities = [];
-      let currentFilter = 'todos';
+      let selectedDay = "";
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
@@ -113,38 +103,69 @@
           onSnapshot(q, (snapshot) => {
               allActivities = [];
               snapshot.forEach(doc => { allActivities.push({ id: doc.id, ...doc.data() }); });
+              
+              // Generar pestañas de días
+              generarTabsDias();
+              
+              // Seleccionar el primer día por defecto si no hay uno
+              if (!selectedDay && allActivities.length > 0) {
+                  const firstDate = new Date(allActivities[0].fecha.toDate());
+                  selectedDay = firstDate.toDateString();
+              }
               renderActivities();
           });
       }
 
+      function generarTabsDias() {
+          const tabsContainer = document.getElementById("date-tabs");
+          const uniqueDays = {};
+          
+          allActivities.forEach(act => {
+              const d = act.fecha.toDate();
+              const key = d.toDateString();
+              if(!uniqueDays[key]) uniqueDays[key] = d;
+          });
+
+          let html = "";
+          Object.keys(uniqueDays).forEach(key => {
+              const date = uniqueDays[key];
+              const dayName = date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '');
+              const dayNum = date.getDate();
+              const activeClass = selectedDay === key ? 'active' : '';
+              
+              html += `
+                <div class="date-tab ${activeClass}" onclick="setDay('${key}')">
+                    <span class="tab-day">${dayName}</span>
+                    <span class="tab-num">${dayNum}</span>
+                </div>`;
+          });
+          tabsContainer.innerHTML = html;
+      }
+
+      window.setDay = (dayKey) => {
+          selectedDay = dayKey;
+          generarTabsDias(); // Para actualizar clase active
+          renderActivities();
+      }
+
       window.renderActivities = () => {
           const container = document.getElementById("activities-container");
-          const searchVal = document.getElementById("search-input").value.toLowerCase();
           container.innerHTML = "";
 
           const filtered = allActivities.filter(act => {
-              const matchesSearch = act.titulo.toLowerCase().includes(searchVal);
-              const genero = act.genero || 'otro';
-              const audiencia = act.audiencia || 'todos';
-              
-              let matchesFilter = false;
-              if (currentFilter === 'todos') matchesFilter = true;
-              else if (currentFilter === 'infantil') matchesFilter = (audiencia === 'infantil');
-              else if (currentFilter === 'adultos') matchesFilter = (audiencia === 'adultos');
-              else matchesFilter = (genero === currentFilter);
-
-              return matchesSearch && matchesFilter;
+              const actDate = act.fecha.toDate().toDateString();
+              return actDate === selectedDay;
           });
 
-          if (filtered.length === 0) { container.innerHTML = "<p style='text-align:center; color:gray; margin-top:50px;'>No se encontraron eventos.</p>"; return; }
+          if (filtered.length === 0) { 
+              container.innerHTML = "<div style='text-align:center; padding:50px; color:gray; opacity:0.6'><span class='material-symbols-outlined' style='font-size:48px'>event_busy</span><p>No hay eventos este día.</p></div>"; 
+              return; 
+          }
 
           filtered.forEach(act => {
-              const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString([], {day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit'});
-              const inscritos = act.inscritos || [];
-              let estoyDentro = inscritos.some(e => e.capitan_uid === currentUser.uid || (e.miembros && e.miembros.some(m => m.uid === currentUser.uid)));
+              const timeStr = act.fecha.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
               
-              let badgeColor = 'tag-otro';
-              // --- IMAGEN (Prioridad: URL manual > Stock) ---
+              // IMAGEN DEFAULT
               let imgUrl = act.imagen;
               if (!imgUrl) {
                   if(act.genero === 'deporte') imgUrl = 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=600';
@@ -155,51 +176,35 @@
                   else imgUrl = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600';
               }
 
+              let badgeColor = 'tag-otro';
               if(act.genero === 'deporte') badgeColor = 'tag-deporte';
               if(act.genero === 'concurso') badgeColor = 'tag-concurso';
-              if(act.genero === 'torneo') badgeColor = 'tag-torneo';
+              if(act.genero === 'fiesta') badgeColor = 'tag-fiesta';
 
               container.innerHTML += `
                   <div class="act-card" onclick="verDetalles('${act.id}')">
-                      <span class="card-badge ${badgeColor}">${act.genero}</span>
-                      <img src="${imgUrl}" class="act-img" onerror="this.src='https://via.placeholder.com/600x400?text=Sin+Imagen'">
+                      <span class="badge-type ${badgeColor}">${act.genero}</span>
+                      <img src="${imgUrl}" class="act-img" onerror="this.src='https://via.placeholder.com/600x400'">
                       <div class="act-body">
                           <h3 class="act-title">${act.titulo}</h3>
                           <div class="act-meta">
-                              <span class="material-symbols-outlined" style="font-size:18px">schedule</span> ${fechaStr}
-                              <span style="margin: 0 5px">•</span>
-                              <span class="material-symbols-outlined" style="font-size:18px">group</span> ${act.audiencia ? act.audiencia.toUpperCase() : 'TODOS'}
-                          </div>
-                          
-                          <div class="act-actions">
-                              ${estoyDentro ? 
-                                `<button class="btn-mini btn-status-ok"><span class="material-symbols-outlined" style="font-size:18px">check</span> Apuntado</button>` : 
-                                `<button class="btn-mini btn-status-in">Ver / Apuntarse</button>`
-                              }
+                              <span class="meta-item"><span class="material-symbols-outlined">schedule</span> ${timeStr}</span>
+                              <span class="meta-item"><span class="material-symbols-outlined">location_on</span> ${act.lugar || 'Ubicación'}</span>
                           </div>
                       </div>
                   </div>`;
           });
       }
 
-      window.setFilter = (filter) => {
-          currentFilter = filter;
-          document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-          document.getElementById('chip-'+filter).classList.add('active');
-          renderActivities();
-      }
-
-      // --- VER DETALLES ---
       window.verDetalles = (id) => {
           const act = allActivities.find(a => a.id === id);
           if(!act) return;
 
           const modal = document.getElementById("modal-detalles");
-          const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString([], {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
+          const dateFull = act.fecha.toDate().toLocaleString([], {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
           
           let estoyDentro = false;
           let miRol = null;
-
           let participantsHTML = "";
           const inscritos = act.inscritos || [];
           
@@ -208,13 +213,13 @@
           } else {
               inscritos.forEach(equipo => {
                   let membersNames = equipo.miembros ? equipo.miembros.map(m => m.nombre).join(", ") : "";
-                  // --- FIX UNDEFINED: Fallback al capitan ---
+                  // --- FIX UNDEFINED ---
                   const nombreMostrar = equipo.nombre_equipo || equipo.capitan || "Usuario";
                   
                   participantsHTML += `
                     <div class="p-group">
-                        <div class="p-cap">⭐ ${nombreMostrar} (Capitán)</div>
-                        ${membersNames ? `<div class="p-members">Compañeros: ${membersNames}</div>` : ''}
+                        <div class="p-cap">⭐ ${nombreMostrar}</div>
+                        ${membersNames ? `<div class="p-members">${membersNames}</div>` : ''}
                     </div>`;
 
                   if(equipo.capitan_uid === currentUser.uid) { estoyDentro = true; miRol = 'capitan'; }
@@ -222,34 +227,38 @@
               });
           }
 
-          // Imagen en modal
-          let imgUrl = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
-          document.getElementById("d-img").src = imgUrl;
-          
+          document.getElementById("d-img").src = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
           document.getElementById("d-title").innerText = act.titulo;
-          document.getElementById("d-date").innerHTML = `<span class="material-symbols-outlined">schedule</span> ${fechaStr}`;
-          document.getElementById("d-place").innerHTML = `<span class="material-symbols-outlined">location_on</span> ${act.lugar || 'Ubicación por definir'}`;
+          document.getElementById("d-date").innerHTML = `<span class="material-symbols-outlined">schedule</span> ${dateFull}`;
+          document.getElementById("d-place").innerHTML = `<span class="material-symbols-outlined">location_on</span> ${act.lugar || 'Por definir'}`;
           
-          // Descripción
           const desc = act.descripcion ? `<div class="detail-desc">${act.descripcion}</div>` : "";
           document.getElementById("d-desc").innerHTML = desc;
-
           document.getElementById("d-list").innerHTML = participantsHTML;
 
+          // BOTONES DE ACCIÓN
           const btnArea = document.getElementById("d-actions");
           btnArea.innerHTML = "";
-          let extraBtns = `<div style="display:flex; gap:10px; margin-bottom:10px;">
-                <button class="btn-mini" style="background:#e0f7fa; color:#006064; flex:1; justify-content:center;" onclick="window.location.href='chat.html?id=${act.id}'">💬 Chat</button>
-                ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-mini" style="background:#fff8e1; color:#ff6f00; flex:1; justify-content:center;" onclick="window.location.href='ver_carrera.html?id=${act.id}'">📊 Podio</button>` : ''}
-                ${act.genero === 'torneo' ? `<button class="btn-mini" style="background:#fce4ec; color:#880e4f; flex:1; justify-content:center;" onclick="window.location.href='ver_torneo.html?id=${act.id}'">🏆 Cuadro</button>` : ''}
-          </div>`;
-          btnArea.innerHTML += extraBtns;
+          
+          // Botones extra (Chat, Resultados)
+          btnArea.innerHTML += `
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                <button class="btn-mini" style="background:#e3f2fd; color:#1565c0; padding:12px; border-radius:12px;" onclick="window.location.href='chat.html?id=${act.id}'">💬 Chat</button>
+                ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-mini" style="background:#fff3e0; color:#ef6c00; padding:12px; border-radius:12px;" onclick="window.location.href='ver_carrera.html?id=${act.id}'">📊 Resultados</button>` : ''}
+                ${act.genero === 'torneo' ? `<button class="btn-mini" style="background:#fce4ec; color:#c2185b; padding:12px; border-radius:12px;" onclick="window.location.href='ver_torneo.html?id=${act.id}'">🏆 Cuadro</button>` : ''}
+            </div>`;
 
-          if (estoyDentro) {
-              btnArea.innerHTML += `<button class="btn-full btn-leave-lg" onclick="salirDeActividad('${act.id}', '${miRol}')">🗑️ Desapuntarse</button>`;
+          // Botón Principal (Unirse/Salir)
+          if(act.modalidad === 'sin_inscripcion') {
+              btnArea.innerHTML += `<div class="badge-free">🔔 Entrada Libre / No requiere inscripción</div>`;
           } else {
-              btnArea.innerHTML += `<button class="btn-full btn-join-lg" onclick="prepararInscripcion('${act.id}', '${act.modalidad}', ${act.tamano_equipo || 1})">📝 Inscribirse</button>`;
+              if (estoyDentro) {
+                  btnArea.innerHTML += `<button class="btn-action-lg btn-leave" onclick="salirDeActividad('${act.id}', '${miRol}')">🗑️ Desapuntarse</button>`;
+              } else {
+                  btnArea.innerHTML += `<button class="btn-action-lg btn-join" onclick="prepararInscripcion('${act.id}', '${act.modalidad}', ${act.tamano_equipo || 1})">📝 Apuntarme</button>`;
+              }
           }
+
           modal.style.display = "flex";
       }
 
@@ -262,16 +271,16 @@
           currentActId = id; currentModalidad = mod;
           const m = document.getElementById("modal-inscripcion");
           const c = document.getElementById("modal-inputs");
-          document.getElementById("modal-titulo").innerText = mod === 'individual' ? "Confirmar" : `Equipo (${mod})`;
+          document.getElementById("modal-titulo").innerText = mod === 'individual' ? "Confirmar Asistencia" : `Inscribir Equipo (${mod})`;
           
           let html = "";
-          if(mod === 'individual') html = "<p>¿Confirmar asistencia?</p>";
+          if(mod === 'individual') html = "<p style='text-align:center; font-size:1.1rem;'>¿Te apuntas a este evento?</p>";
           else {
-              html = `<p style="font-size:0.9rem; color:gray">Capitán: <strong>${myUsername}</strong></p>`;
-              html += `<div class="helper-text" style="font-size:0.75rem; color:gray; margin-bottom:10px;">Escribe el usuario exacto para vincularlo (se pone verde).</div>`;
+              html = `<p style="font-size:0.9rem; color:gray; margin-bottom:15px;">Capitán: <strong>${myUsername}</strong></p>`;
+              html += `<p style="font-size:0.8rem; color:var(--accent);">👇 Añade a tus compañeros (si tienen cuenta):</p>`;
               const numCompis = mod === 'parejas' ? 1 : (size - 1);
               for(let i=0; i<numCompis; i++) {
-                  html += `<div class="input-mate-container"><input type="text" class="mate-input" placeholder="Usuario compañero ${i+1}" onkeyup="verificarUsuario(this)"></div>`;
+                  html += `<div style="margin-bottom:10px;"><input type="text" class="mate-input" placeholder="Usuario compañero ${i+1}" onkeyup="verificarUsuario(this)"></div>`;
               }
           }
           c.innerHTML = html;
@@ -291,12 +300,11 @@
       window.confirmarInscripcion = async () => {
           const btn = document.getElementById("btn-confirmar"); btn.innerText="..."; btn.disabled=true;
           try {
-              // --- FIX UNDEFINED: Forzar nombre_equipo = myUsername ---
               let data = { 
                   capitan: myUsername, 
                   capitan_uid: currentUser.uid, 
                   fecha: new Date(), 
-                  nombre_equipo: myUsername, // <-- IMPORTANTE
+                  nombre_equipo: myUsername, 
                   miembros: [] 
               };
               
@@ -309,7 +317,7 @@
                   });
               }
               await updateDoc(doc(db, "actividades", currentActId), { inscritos: arrayUnion(data) });
-              alert("✅ ¡Inscrito!"); cerrarInscripcion(); cargarActividades();
+              alert("✅ ¡Inscrito correctamente!"); cerrarInscripcion(); cargarActividades();
           } catch(e) { alert(e.message); }
           btn.innerText="Confirmar"; btn.disabled=false;
       }
@@ -336,47 +344,48 @@
     </script>
 </head>
 <body>
-    <div class="fixed-header">
-        <div class="search-box">
-            <span class="material-symbols-outlined icon">search</span>
-            <input type="text" id="search-input" placeholder="Buscar evento..." oninput="renderActivities()">
-        </div>
-        <div class="filter-scroll">
-            <div id="chip-todos" class="chip active" onclick="setFilter('todos')">Todos</div>
-            <div id="chip-infantil" class="chip" onclick="setFilter('infantil')">👶 Infantil</div>
-            <div id="chip-adultos" class="chip" onclick="setFilter('adultos')">🔞 Adultos</div>
-            <div id="chip-torneo" class="chip" onclick="setFilter('torneo')">🎾 Torneos</div>
-            <div id="chip-concurso" class="chip" onclick="setFilter('concurso')">🏆 Concurso</div>
-            <div id="chip-fiesta" class="chip" onclick="setFilter('fiesta')">🎉 Fiesta</div>
-        </div>
+    
+    <div class="date-tabs-container">
+        <div id="date-tabs" class="date-tabs">
+            </div>
     </div>
-    <div class="container" id="activities-container"><p style="text-align:center;">Cargando...</p></div>
+
+    <div class="container" id="activities-container">
+        <p style="text-align:center; margin-top:50px;">Cargando eventos...</p>
+    </div>
     
     <div id="modal-detalles" class="modal-overlay" onclick="if(event.target === this) cerrarDetalles()">
         <div class="modal">
-            <button class="btn-close-modal" onclick="cerrarDetalles()">×</button>
-            <img id="d-img" class="detail-img" src="" onerror="this.src='https://via.placeholder.com/600x400?text=Sin+Imagen'">
-            <h2 id="d-title" class="detail-title">...</h2>
-            <div id="d-date" class="detail-row"></div>
-            <div id="d-place" class="detail-row"></div>
+            <button class="btn-close-float" onclick="cerrarDetalles()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
             
-            <div id="d-desc"></div>
-
-            <div id="d-actions" style="margin-top:20px;"></div>
-            <div class="detail-section">
-                <div class="detail-header">Lista de Asistentes</div>
-                <div id="d-list" class="participants-list"></div>
+            <img id="d-img" class="modal-header-img" src="">
+            
+            <div class="modal-content">
+                <h2 id="d-title" class="detail-title">...</h2>
+                <div class="act-meta">
+                    <span id="d-date" class="meta-item"></span>
+                    <span id="d-place" class="meta-item"></span>
+                </div>
+                
+                <div id="d-actions"></div> <div id="d-desc"></div> <div class="detail-section">
+                    <div class="detail-header">Lista de Asistentes</div>
+                    <div id="d-list" class="participants-list"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="modal-inscripcion" class="modal-overlay">
-        <div class="modal" style="max-width:400px; border-radius:20px;">
-            <h2 id="modal-titulo" style="margin-top:0">Inscripción</h2>
-            <div id="modal-inputs"></div>
-            <div style="margin-top:20px; display:flex; gap:10px;">
-                <button onclick="cerrarInscripcion()" style="flex:1; padding:12px; background:transparent; border:1px solid #ccc; border-radius:10px;">Cancelar</button>
-                <button onclick="confirmarInscripcion()" id="btn-confirmar" style="flex:1; padding:12px; background:var(--accent); color:white; border:none; border-radius:10px; font-weight:bold;">Confirmar</button>
+        <div class="modal" style="max-width:400px; border-radius:20px; overflow:visible;">
+            <div class="modal-form">
+                <h2 id="modal-titulo">Inscripción</h2>
+                <div id="modal-inputs"></div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button onclick="cerrarInscripcion()" class="btn-action-lg" style="background:#f5f5f5; color:gray; font-weight:normal;">Cancelar</button>
+                    <button onclick="confirmarInscripcion()" id="btn-confirmar" class="btn-action-lg btn-join">Confirmar</button>
+                </div>
             </div>
         </div>
     </div>
