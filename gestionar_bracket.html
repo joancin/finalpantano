@@ -8,19 +8,35 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #e91e63; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #e91e63; --winner-bg: #c8e6c9; --winner-border: #4caf50; --winner-text: #2e7d32; }
+        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --winner-bg: #1b5e20; --winner-border: #43a047; --winner-text: #a5d6a7; }
+        
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
-        .match { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 10px; margin-bottom: 10px; }
-        .team { padding: 8px 12px; background: var(--card); border: 1px solid #ccc; border-radius: 8px; cursor: pointer; flex: 1; text-align: center; font-weight: bold; }
-        .team:hover { background: #e3f2fd; }
-        .team.winner { background: #c8e6c9; border-color: #4caf50; color: #2e7d32; }
-        .vs { padding: 0 10px; font-weight: bold; color: gray; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { margin-top: 0; font-size: 1.5rem; text-align: center; margin-bottom: 10px; }
+        h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
 
-        .btn-gen { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 20px; }
+        /* BRACKET */
+        .match { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; margin-bottom: 12px; border: 1px solid transparent; }
+        
+        .team { padding: 10px 12px; background: var(--card); border: 2px solid #ddd; border-radius: 8px; cursor: pointer; flex: 1; text-align: center; font-weight: bold; transition: all 0.2s; user-select: none; }
+        .team:hover { border-color: var(--accent); }
+        
+        .team.winner { background: var(--winner-bg); border-color: var(--winner-border); color: var(--winner-text); position: relative; }
+        .team.winner::after { content: '👑'; position: absolute; top: -10px; right: -5px; font-size: 14px; }
+        
+        .vs { padding: 0 10px; font-weight: 900; color: #999; font-size: 0.8rem; }
+
+        /* BOTONES */
+        .btn-gen { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3); }
+        .btn-gen:hover { opacity: 0.9; }
+
+        .btn-reset { width: 100%; padding: 10px; background: transparent; color: #ff5252; border: 2px solid #ff5252; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+        .btn-reset:hover { background: #ffebee; }
+
+        .loading { text-align: center; color: gray; font-style: italic; }
     </style>
 
     <script type="module">
@@ -39,80 +55,154 @@
 
         onAuthStateChanged(auth, async (user) => {
             if(!user) window.location.href="index.html";
+            if(!actId) return alert("Error: No hay ID de actividad");
             cargarTorneo();
         });
 
         async function cargarTorneo() {
-            const snap = await getDoc(doc(db, "actividades", actId));
-            currentData = snap.data();
-            document.getElementById("titulo").innerText = "Torneo: " + currentData.titulo;
-            
-            if(currentData.bracket && currentData.bracket.length > 0) {
-                renderBracket(currentData.bracket);
-                document.getElementById("btn-gen").style.display = "none";
-            } else {
-                document.getElementById("matches").innerHTML = "<p style='text-align:center'>Aún no se ha generado el sorteo.</p>";
+            try {
+                const snap = await getDoc(doc(db, "actividades", actId));
+                if (!snap.exists()) return alert("El evento no existe");
+                
+                currentData = snap.data();
+                document.getElementById("titulo").innerText = currentData.titulo;
+                
+                // Si ya hay bracket (sorteo hecho)
+                if(currentData.bracket && currentData.bracket.length > 0) {
+                    renderBracket(currentData.bracket);
+                    document.getElementById("btn-gen").style.display = "none";
+                    document.getElementById("btn-reset").style.display = "block"; // Mostrar botón reiniciar
+                } else {
+                    document.getElementById("matches").innerHTML = `
+                        <div style="text-align:center; padding:20px; background:rgba(0,0,0,0.02); border-radius:10px;">
+                            <span class="material-symbols-outlined" style="font-size:40px; color:gray">shuffle</span>
+                            <p>No se ha realizado el sorteo aún.</p>
+                            <p><strong>Inscritos: ${currentData.inscritos ? currentData.inscritos.length : 0}</strong></p>
+                        </div>`;
+                    document.getElementById("btn-gen").style.display = "flex";
+                    document.getElementById("btn-reset").style.display = "none";
+                }
+            } catch(e) {
+                console.error(e);
+                alert("Error al cargar: " + e.message);
             }
         }
 
         window.generarSorteo = async () => {
-            if(!confirm("¿Cerrar inscripciones y generar cruces aleatorios?")) return;
-            
             const inscritos = currentData.inscritos || [];
-            if(inscritos.length < 2) return alert("Necesitas al menos 2 equipos.");
+            
+            if(inscritos.length < 2) return alert("❌ Error: Necesitas al menos 2 equipos inscritos para hacer un torneo.");
 
-            // Barajar
-            const teams = inscritos.map(i => i.nombre_equipo).sort(() => Math.random() - 0.5);
+            if(!confirm(`Se van a generar los cruces aleatorios para ${inscritos.length} equipos.\n\n¿Continuar?`)) return;
+
+            // 1. OBTENER NOMBRES (Limpieza de datos)
+            // Si no tiene nombre_equipo, usamos el del capitán
+            const teams = inscritos.map(i => i.nombre_equipo || i.capitan || "Sin Nombre").filter(n => n);
+            
+            // 2. BARAJAR (Shuffle)
+            teams.sort(() => Math.random() - 0.5);
+
             const bracket = [];
 
-            // Crear parejas
-            for(let i=0; i<teams.length; i+=2) {
-                if(i+1 < teams.length) {
+            // 3. EMPAREJAR
+            for(let i=0; i < teams.length; i += 2) {
+                if(i + 1 < teams.length) {
+                    // Pareja normal
                     bracket.push({ team1: teams[i], team2: teams[i+1], winner: null });
                 } else {
-                    // Impar (Pasa directo o Bye)
-                    bracket.push({ team1: teams[i], team2: "BYE (Pasa directo)", winner: teams[i] });
+                    // Impar: Pasa directo (BYE)
+                    bracket.push({ team1: teams[i], team2: "---", winner: teams[i], bye: true });
                 }
             }
 
-            await updateDoc(doc(db, "actividades", actId), { bracket: bracket });
-            alert("✅ Sorteo realizado");
-            location.reload();
+            // 4. GUARDAR
+            try {
+                await updateDoc(doc(db, "actividades", actId), { bracket: bracket });
+                alert("✅ ¡Sorteo realizado!");
+                location.reload();
+            } catch(e) { alert("Error al guardar: " + e.message); }
         }
 
+        // FUNCIÓN PARA RENDERIZAR
         function renderBracket(bracket) {
             const div = document.getElementById("matches");
             div.innerHTML = "";
+            
             bracket.forEach((match, idx) => {
-                div.innerHTML += `
-                    <div class="match">
-                        <div class="team ${match.winner === match.team1 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team1}')">${match.team1}</div>
-                        <span class="vs">VS</span>
-                        <div class="team ${match.winner === match.team2 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team2}')">${match.team2}</div>
-                    </div>`;
+                // Si es un "Pasa directo" (BYE)
+                if(match.bye) {
+                    div.innerHTML += `
+                        <div class="match" style="background:#e8f5e9; border:1px dashed #4caf50;">
+                            <div class="team winner" style="cursor:default">${match.team1}</div>
+                            <span class="vs">➜</span>
+                            <div style="font-size:0.8rem; color:#2e7d32; font-weight:bold;">PASA DIRECTO</div>
+                        </div>`;
+                } else {
+                    // Partido normal
+                    div.innerHTML += `
+                        <div class="match">
+                            <div class="team ${match.winner === match.team1 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team1}')">
+                                ${match.team1}
+                            </div>
+                            <span class="vs">VS</span>
+                            <div class="team ${match.winner === match.team2 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team2}')">
+                                ${match.team2}
+                            </div>
+                        </div>`;
+                }
             });
         }
 
         window.setWinner = async (matchIdx, winnerName) => {
-            if(confirm(`¿Declarar ganador a ${winnerName}?`)) {
+            if(confirm(`¿Declarar ganador a: ${winnerName}?`)) {
                 const newBracket = [...currentData.bracket];
                 newBracket[matchIdx].winner = winnerName;
-                await updateDoc(doc(db, "actividades", actId), { bracket: newBracket });
-                location.reload();
+                
+                try {
+                    await updateDoc(doc(db, "actividades", actId), { bracket: newBracket });
+                    // No recargamos toda la página, solo actualizamos visualmente y los datos
+                    currentData.bracket = newBracket;
+                    renderBracket(newBracket);
+                } catch(e) { alert("Error al guardar resultado"); }
             }
+        }
+
+        // REINICIAR SORTEO (Borrar bracket)
+        window.resetSorteo = async () => {
+            const code = prompt("⚠️ PELIGRO ⚠️\nEsto borrará todos los resultados actuales.\n\nEscribe 'BORRAR' para confirmar:");
+            if(code !== 'BORRAR') return;
+
+            try {
+                // Enviamos null o array vacío para borrar
+                await updateDoc(doc(db, "actividades", actId), { bracket: [] });
+                alert("Sorteo eliminado. Puedes generar uno nuevo.");
+                location.reload();
+            } catch(e) { alert("Error: " + e.message); }
         }
     </script>
 </head>
 <body>
     <div class="container">
-        <button onclick="window.history.back()" style="background:transparent; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">← Volver</button>
+        <button onclick="window.location.href='gestion.html'" style="background:transparent; border:none; color:var(--text); font-size:1rem; cursor:pointer; display:flex; align-items:center; gap:5px; margin-bottom:15px;">
+            <span class="material-symbols-outlined">arrow_back</span> Volver a Gestión
+        </button>
+        
         <div class="card">
             <h1 id="titulo">Cargando...</h1>
-            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">🎲 Generar Sorteo Aleatorio</button>
             
-            <h3>Ronda Actual</h3>
-            <p style="font-size:0.8rem; color:gray">Haz clic en un equipo para declararlo ganador.</p>
-            <div id="matches"></div>
+            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">
+                <span class="material-symbols-outlined">casino</span>
+                GENERAR SORTEO Y CERRAR INSCRIPCIONES
+            </button>
+            
+            <h3>Cuadro de Enfrentamientos</h3>
+            <p style="font-size:0.8rem; color:gray; margin-bottom:15px;">Toca sobre un equipo para declararlo ganador del partido.</p>
+            
+            <div id="matches" class="loading">Cargando datos...</div>
+
+            <button id="btn-reset" class="btn-reset" onclick="resetSorteo()">
+                ♻️ BORRAR Y REINICIAR SORTEO
+            </button>
         </div>
     </div>
 </body>
