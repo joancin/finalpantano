@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Torneo</title>
+    <title>Gestionar Sorteo</title>
     <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
@@ -13,196 +13,134 @@
         
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
-        
         .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h1 { margin-top: 0; font-size: 1.5rem; text-align: center; margin-bottom: 10px; }
-        h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
+        h1 { margin-top: 0; text-align: center; }
 
-        /* BRACKET */
-        .match { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; margin-bottom: 12px; border: 1px solid transparent; }
-        
+        .match { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; margin-bottom: 12px; }
         .team { padding: 10px 12px; background: var(--card); border: 2px solid #ddd; border-radius: 8px; cursor: pointer; flex: 1; text-align: center; font-weight: bold; transition: all 0.2s; user-select: none; }
         .team:hover { border-color: var(--accent); }
-        
-        .team.winner { background: var(--winner-bg); border-color: var(--winner-border); color: var(--winner-text); position: relative; }
-        .team.winner::after { content: '👑'; position: absolute; top: -10px; right: -5px; font-size: 14px; }
-        
-        .vs { padding: 0 10px; font-weight: 900; color: #999; font-size: 0.8rem; }
+        .team.winner { background: var(--winner-bg); border-color: var(--winner-border); color: var(--winner-text); }
+        .vs { padding: 0 10px; font-weight: 900; color: #999; }
 
-        /* BOTONES */
-        .btn-gen { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3); }
-        .btn-gen:hover { opacity: 0.9; }
-
+        .btn-gen { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-reset { width: 100%; padding: 10px; background: transparent; color: #ff5252; border: 2px solid #ff5252; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
-        .btn-reset:hover { background: #ffebee; }
-
-        .loading { text-align: center; color: gray; font-style: italic; }
     </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
+        
+        // PERSISTENCIA (Opcional en admin, pero no hace daño)
+        enableIndexedDbPersistence(db).catch(err => console.log(err));
 
+        const auth = getAuth(app);
         const params = new URLSearchParams(window.location.search);
         const actId = params.get("id");
         let currentData = null;
 
         onAuthStateChanged(auth, async (user) => {
-            if(!user) window.location.href="index.html";
-            if(!actId) return alert("Error: No hay ID de actividad");
+            if(!user || !actId) window.location.href="index.html";
             cargarTorneo();
         });
 
         async function cargarTorneo() {
             try {
                 const snap = await getDoc(doc(db, "actividades", actId));
-                if (!snap.exists()) return alert("El evento no existe");
+                if (!snap.exists()) return alert("Error carga");
                 
                 currentData = snap.data();
                 document.getElementById("titulo").innerText = currentData.titulo;
                 
-                // Si ya hay bracket (sorteo hecho)
                 if(currentData.bracket && currentData.bracket.length > 0) {
                     renderBracket(currentData.bracket);
                     document.getElementById("btn-gen").style.display = "none";
-                    document.getElementById("btn-reset").style.display = "block"; // Mostrar botón reiniciar
+                    document.getElementById("btn-reset").style.display = "block";
                 } else {
-                    document.getElementById("matches").innerHTML = `
-                        <div style="text-align:center; padding:20px; background:rgba(0,0,0,0.02); border-radius:10px;">
-                            <span class="material-symbols-outlined" style="font-size:40px; color:gray">shuffle</span>
-                            <p>No se ha realizado el sorteo aún.</p>
-                            <p><strong>Inscritos: ${currentData.inscritos ? currentData.inscritos.length : 0}</strong></p>
-                        </div>`;
+                    document.getElementById("matches").innerHTML = `<p style="text-align:center">Sin sorteo. Inscritos: ${currentData.inscritos ? currentData.inscritos.length : 0}</p>`;
                     document.getElementById("btn-gen").style.display = "flex";
-                    document.getElementById("btn-reset").style.display = "none";
                 }
-            } catch(e) {
-                console.error(e);
-                alert("Error al cargar: " + e.message);
-            }
+            } catch(e) { console.error(e); }
         }
 
         window.generarSorteo = async () => {
             const inscritos = currentData.inscritos || [];
-            
-            if(inscritos.length < 2) return alert("❌ Error: Necesitas al menos 2 equipos inscritos para hacer un torneo.");
+            if(inscritos.length < 2) return alert("Mínimo 2 equipos");
+            if(!confirm(`¿Generar cruces para ${inscritos.length} equipos?`)) return;
 
-            if(!confirm(`Se van a generar los cruces aleatorios para ${inscritos.length} equipos.\n\n¿Continuar?`)) return;
-
-            // 1. OBTENER NOMBRES (Limpieza de datos)
-            // Si no tiene nombre_equipo, usamos el del capitán
-            const teams = inscritos.map(i => i.nombre_equipo || i.capitan || "Sin Nombre").filter(n => n);
+            // FIX UNDEFINED: Usar nombre_equipo O capitan
+            const teams = inscritos.map(i => i.nombre_equipo || i.capitan || "Participante").filter(n => n);
             
-            // 2. BARAJAR (Shuffle)
+            // Barajar
             teams.sort(() => Math.random() - 0.5);
 
             const bracket = [];
-
-            // 3. EMPAREJAR
             for(let i=0; i < teams.length; i += 2) {
                 if(i + 1 < teams.length) {
-                    // Pareja normal
                     bracket.push({ team1: teams[i], team2: teams[i+1], winner: null });
                 } else {
-                    // Impar: Pasa directo (BYE)
                     bracket.push({ team1: teams[i], team2: "---", winner: teams[i], bye: true });
                 }
             }
 
-            // 4. GUARDAR
             try {
                 await updateDoc(doc(db, "actividades", actId), { bracket: bracket });
-                alert("✅ ¡Sorteo realizado!");
+                alert("✅ Sorteo listo");
                 location.reload();
-            } catch(e) { alert("Error al guardar: " + e.message); }
+            } catch(e) { alert("Error: " + e.message); }
         }
 
-        // FUNCIÓN PARA RENDERIZAR
         function renderBracket(bracket) {
             const div = document.getElementById("matches");
             div.innerHTML = "";
-            
             bracket.forEach((match, idx) => {
-                // Si es un "Pasa directo" (BYE)
                 if(match.bye) {
                     div.innerHTML += `
-                        <div class="match" style="background:#e8f5e9; border:1px dashed #4caf50;">
-                            <div class="team winner" style="cursor:default">${match.team1}</div>
+                        <div class="match" style="background:#e8f5e9;">
+                            <div class="team winner">${match.team1}</div>
                             <span class="vs">➜</span>
-                            <div style="font-size:0.8rem; color:#2e7d32; font-weight:bold;">PASA DIRECTO</div>
+                            <div>PASA</div>
                         </div>`;
                 } else {
-                    // Partido normal
                     div.innerHTML += `
                         <div class="match">
-                            <div class="team ${match.winner === match.team1 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team1}')">
-                                ${match.team1}
-                            </div>
+                            <div class="team ${match.winner === match.team1 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team1}')">${match.team1}</div>
                             <span class="vs">VS</span>
-                            <div class="team ${match.winner === match.team2 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team2}')">
-                                ${match.team2}
-                            </div>
+                            <div class="team ${match.winner === match.team2 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team2}')">${match.team2}</div>
                         </div>`;
                 }
             });
         }
 
         window.setWinner = async (matchIdx, winnerName) => {
-            if(confirm(`¿Declarar ganador a: ${winnerName}?`)) {
+            if(confirm(`¿Gana ${winnerName}?`)) {
                 const newBracket = [...currentData.bracket];
                 newBracket[matchIdx].winner = winnerName;
-                
-                try {
-                    await updateDoc(doc(db, "actividades", actId), { bracket: newBracket });
-                    // No recargamos toda la página, solo actualizamos visualmente y los datos
-                    currentData.bracket = newBracket;
-                    renderBracket(newBracket);
-                } catch(e) { alert("Error al guardar resultado"); }
+                await updateDoc(doc(db, "actividades", actId), { bracket: newBracket });
+                currentData.bracket = newBracket;
+                renderBracket(newBracket);
             }
         }
 
-        // REINICIAR SORTEO (Borrar bracket)
         window.resetSorteo = async () => {
-            const code = prompt("⚠️ PELIGRO ⚠️\nEsto borrará todos los resultados actuales.\n\nEscribe 'BORRAR' para confirmar:");
-            if(code !== 'BORRAR') return;
-
-            try {
-                // Enviamos null o array vacío para borrar
-                await updateDoc(doc(db, "actividades", actId), { bracket: [] });
-                alert("Sorteo eliminado. Puedes generar uno nuevo.");
-                location.reload();
-            } catch(e) { alert("Error: " + e.message); }
+            if(prompt("Escribe BORRAR para reiniciar:") !== 'BORRAR') return;
+            await updateDoc(doc(db, "actividades", actId), { bracket: [] });
+            location.reload();
         }
     </script>
 </head>
 <body>
     <div class="container">
-        <button onclick="window.location.href='gestion.html'" style="background:transparent; border:none; color:var(--text); font-size:1rem; cursor:pointer; display:flex; align-items:center; gap:5px; margin-bottom:15px;">
-            <span class="material-symbols-outlined">arrow_back</span> Volver a Gestión
-        </button>
-        
+        <button onclick="window.history.back()" style="border:none; background:none; cursor:pointer; margin-bottom:10px;">⬅ Volver</button>
         <div class="card">
-            <h1 id="titulo">Cargando...</h1>
-            
-            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">
-                <span class="material-symbols-outlined">casino</span>
-                GENERAR SORTEO Y CERRAR INSCRIPCIONES
-            </button>
-            
-            <h3>Cuadro de Enfrentamientos</h3>
-            <p style="font-size:0.8rem; color:gray; margin-bottom:15px;">Toca sobre un equipo para declararlo ganador del partido.</p>
-            
-            <div id="matches" class="loading">Cargando datos...</div>
-
-            <button id="btn-reset" class="btn-reset" onclick="resetSorteo()">
-                ♻️ BORRAR Y REINICIAR SORTEO
-            </button>
+            <h1 id="titulo">...</h1>
+            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">🎲 REALIZAR SORTEO</button>
+            <div id="matches"></div>
+            <button id="btn-reset" class="btn-reset" onclick="resetSorteo()">♻️ REINICIAR</button>
         </div>
     </div>
 </body>
