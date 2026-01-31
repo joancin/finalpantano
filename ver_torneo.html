@@ -17,15 +17,14 @@
         
         h1 { text-align: center; margin-bottom: 30px; font-weight: 800; font-size: 1.8rem; }
         
-        /* ESTILOS DEL CUADRO VISUAL */
-        .bracket-container { display: flex; padding: 20px; gap: 40px; justify-content: flex-start; }
+        .bracket-container { display: flex; padding: 20px; gap: 40px; justify-content: flex-start; min-width: fit-content; }
         .round { display: flex; flex-direction: column; justify-content: space-around; gap: 20px; min-width: 180px; }
         .round-title { text-align: center; font-weight: bold; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; font-size: 0.9rem; }
 
         .match { background: var(--card); border-radius: 10px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 5px; position: relative; border: 1px solid rgba(0,0,0,0.05); }
-        .team { padding: 8px 12px; background: rgba(0,0,0,0.03); border-radius: 6px; font-weight: 600; text-align: center; font-size: 0.9rem; }
-        .team.winner { background: var(--win-bg); color: var(--win-text); font-weight: 800; }
-        .team.bye { opacity: 0.6; font-style: italic; }
+        .team { padding: 8px 12px; background: rgba(0,0,0,0.03); border-radius: 6px; font-weight: 600; text-align: center; font-size: 0.9rem; transition: all 0.2s; }
+        .team.winner { background: var(--win-bg); color: var(--win-text); font-weight: 800; border: 1px solid var(--win-text); }
+        .team.bye { opacity: 0.6; font-style: italic; font-size: 0.8rem; }
 
         /* LÍNEAS CONECTORAS */
         .round:not(:last-child) .match::after {
@@ -53,31 +52,34 @@
             if(!docSnap.exists()) return;
             const data = docSnap.data();
             document.getElementById("titulo").innerText = data.titulo;
-            renderBracket(data.bracket || []);
+            renderBracket(data.bracket);
         });
 
         function renderBracket(bracketData) {
             const container = document.getElementById("bracket-view");
             container.innerHTML = "";
 
-            if(!bracketData || bracketData.length === 0) {
-                container.innerHTML = "<p class='loading'>Cuadro no disponible aún.</p>";
-                container.style.display = "block"; container.style.textAlign = "center";
+            if(!bracketData || !bracketData.rounds || bracketData.rounds.length === 0) {
+                container.innerHTML = "<div class='loading'>El cuadro no está disponible o no se ha sorteado aún.</div>";
+                container.style.display = "block"; 
                 return;
             }
             container.style.display = "flex";
 
-            bracketData.forEach((round, roundIndex) => {
+            bracketData.rounds.forEach((round, roundIndex) => {
                 let roundTitle = `Ronda ${roundIndex + 1}`;
-                if (round.length === 1) roundTitle = "🏆 FINAL";
-                else if (round.length === 2) roundTitle = "SEMIFINAL";
+                if (bracketData.rounds.length > 1) {
+                    if (roundIndex === bracketData.rounds.length - 1) roundTitle = "🏆 FINAL";
+                    else if (roundIndex === bracketData.rounds.length - 2) roundTitle = "SEMIFINAL";
+                }
 
                 let roundHtml = `<div class="round"><div class="round-title">${roundTitle}</div>`;
-                round.forEach(match => {
+                
+                round.matches.forEach(match => {
                     if(match.bye) {
                          roundHtml += `
                             <div class="match">
-                                <div class="team winner bye">${match.team1} (Pasa)</div>
+                                <div class="team winner bye">${match.team1} (Pasa directo)</div>
                             </div>`;
                     } else {
                         roundHtml += `
