@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Fiestas</title>
+    <title>Gestión</title>
     <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
@@ -71,11 +71,18 @@
           escucharActividades();
       });
 
-      // Vista previa de imagen URL
       window.previewImage = () => {
           const url = document.getElementById("act-image").value;
           const img = document.getElementById("img-preview");
           if(url) { img.src = url; img.style.display = "block"; } else { img.style.display = "none"; }
+      }
+
+      // Controlar visibilidad del tamaño de equipo
+      window.checkModality = () => {
+          const val = document.getElementById("act-modality").value;
+          const sizeGroup = document.getElementById("size-group");
+          if(val === 'equipos') sizeGroup.style.display = 'block';
+          else sizeGroup.style.display = 'none';
       }
 
       window.guardarActividad = async () => {
@@ -132,7 +139,7 @@
                         <img src="${act.imagen || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; object-fit:cover; border-radius:5px; margin-right:10px;">
                         <div class="item-info">
                             <strong>${act.titulo}</strong><br>
-                            <small>${fecha} - ${act.genero} (${act.inscritos ? act.inscritos.length : 0} apuntados)</small>
+                            <small>${fecha} - ${act.genero}</small>
                         </div>
                         <div class="item-actions">
                             <button class="btn-icon btn-users" onclick="abrirParticipantes('${d.id}')">👥</button>
@@ -145,7 +152,6 @@
           });
       }
 
-      // --- LÓGICA DE GESTIÓN DE PARTICIPANTES ---
       window.abrirParticipantes = async (actId) => {
           const modal = document.getElementById("modal-participantes");
           const snap = await getDoc(doc(db, "actividades", actId));
@@ -156,18 +162,22 @@
           const inputsContainer = document.getElementById("manual-inputs");
           inputsContainer.innerHTML = ""; 
           
-          // Input Capitán (Siempre)
-          inputsContainer.innerHTML += `<input type="text" id="manual-cap" class="manual-input" placeholder="Nombre Capitán / Participante">`;
-          
-          // Inputs Extra si es equipo
-          if (currentParticipantsAct.modalidad !== 'individual') {
-              const numExtras = currentParticipantsAct.modalidad === 'parejas' ? 1 : (currentParticipantsAct.tamano_equipo - 1);
-              for(let i=0; i < numExtras; i++) {
-                  inputsContainer.innerHTML += `<input type="text" class="manual-mate manual-input" placeholder="Nombre Compañero ${i+1}">`;
+          // Si es sin inscripcion, no mostramos formulario
+          if(currentParticipantsAct.modalidad === 'sin_inscripcion') {
+              document.querySelector('.add-section').style.display = 'none';
+              document.getElementById("p-list").innerHTML = "<p style='text-align:center'>Este evento es de entrada libre.</p>";
+          } else {
+              document.querySelector('.add-section').style.display = 'block';
+              inputsContainer.innerHTML += `<input type="text" id="manual-cap" class="manual-input" placeholder="Nombre Capitán / Participante">`;
+              
+              if (currentParticipantsAct.modalidad !== 'individual') {
+                  const numExtras = currentParticipantsAct.modalidad === 'parejas' ? 1 : (currentParticipantsAct.tamano_equipo - 1);
+                  for(let i=0; i < numExtras; i++) {
+                      inputsContainer.innerHTML += `<input type="text" class="manual-mate manual-input" placeholder="Nombre Compañero ${i+1}">`;
+                  }
               }
+              renderListaParticipantes(currentParticipantsAct.inscritos || []);
           }
-
-          renderListaParticipantes(currentParticipantsAct.inscritos || []);
           modal.style.display = "flex";
       }
 
@@ -223,7 +233,6 @@
               inscritos.push(nuevaInscripcion);
               await updateDoc(actRef, { inscritos: inscritos });
               
-              // Limpiar
               document.getElementById("manual-cap").value = "";
               document.querySelectorAll(".manual-mate").forEach(i => i.value = "");
               
@@ -237,9 +246,7 @@
               const actRef = doc(db, "actividades", currentParticipantsAct.id);
               const snap = await getDoc(actRef);
               let inscritos = snap.data().inscritos || [];
-              
               inscritos.splice(index, 1);
-              
               await updateDoc(actRef, { inscritos: inscritos });
               renderListaParticipantes(inscritos);
           } catch(e) { alert("Error: " + e.message); }
@@ -247,7 +254,6 @@
 
       window.cerrarParticipantes = () => document.getElementById("modal-participantes").style.display = "none";
 
-      // --- EDICIÓN ---
       window.cargarParaEditar = (dataStr) => {
           const data = JSON.parse(decodeURIComponent(dataStr));
           editMode = true; editId = data.id;
@@ -267,7 +273,7 @@
           document.getElementById("act-size").value = data.tamano_equipo || 5;
 
           previewImage();
-          document.getElementById("size-group").style.display = data.modalidad==='equipos' ? 'block' : 'none';
+          checkModality();
           window.scrollTo(0,0);
       }
 
@@ -328,12 +334,14 @@
                     <option value="adultos">🔞 Adultos</option>
                 </select>
             </div>
+            
             <div class="form-group">
                 <label>Modalidad</label>
-                <select id="act-modality" onchange="document.getElementById('size-group').style.display = this.value==='equipos' ? 'block' : 'none'">
+                <select id="act-modality" onchange="checkModality()">
                     <option value="individual">Individual</option>
                     <option value="parejas">Parejas</option>
                     <option value="equipos">Equipos</option>
+                    <option value="sin_inscripcion">🔔 Entrada Libre (Misas, Desfiles...)</option>
                 </select>
             </div>
             <div class="form-group" id="size-group" style="display:none;">
