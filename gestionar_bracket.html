@@ -3,27 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Sorteo</title>
+    <title>Gestionar Cuadro</title>
     <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #e91e63; --winner-bg: #c8e6c9; --winner-border: #4caf50; --winner-text: #2e7d32; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --winner-bg: #1b5e20; --winner-border: #43a047; --winner-text: #a5d6a7; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #673ab7; --win-bg: #c8e6c9; --win-text: #2e7d32; }
+        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --win-bg: #1b5e20; --win-text: #a5d6a7; }
         
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; overflow-x: auto; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h1 { margin-top: 0; text-align: center; }
 
-        .match { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; margin-bottom: 12px; }
-        .team { padding: 10px 12px; background: var(--card); border: 2px solid #ddd; border-radius: 8px; cursor: pointer; flex: 1; text-align: center; font-weight: bold; transition: all 0.2s; user-select: none; }
+        /* ESTILOS DEL CUADRO (BRACKET) */
+        .bracket-container { display: flex; padding: 20px 0; gap: 30px; }
+        .round { display: flex; flex-direction: column; justify-content: center; gap: 20px; min-width: 200px; }
+        .round-title { text-align: center; font-weight: bold; margin-bottom: 10px; color: var(--accent); }
+
+        .match { background: rgba(0,0,0,0.03); border-radius: 10px; padding: 10px; border: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 5px; position: relative; }
+        .team { padding: 8px 12px; background: var(--card); border: 2px solid #ddd; border-radius: 6px; cursor: pointer; text-align: center; font-weight: bold; transition: all 0.2s; user-select: none; }
         .team:hover { border-color: var(--accent); }
-        .team.winner { background: var(--winner-bg); border-color: var(--winner-border); color: var(--winner-text); }
-        .vs { padding: 0 10px; font-weight: 900; color: #999; }
+        .team.winner { background: var(--win-bg); border-color: var(--win-text); color: var(--win-text); }
+        .team.bye { opacity: 0.6; border-style: dashed; cursor: default; }
+
+        /* LÍNEAS CONECTORAS (BÁSICAS) */
+        .round:not(:last-child) .match::after {
+            content: ''; position: absolute; right: -30px; top: 50%; width: 30px; height: 2px; background: #ccc;
+        }
 
         .btn-gen { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-reset { width: 100%; padding: 10px; background: transparent; color: #ff5252; border: 2px solid #ff5252; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+        .btn-reset { width: 100%; padding: 10px; background: transparent; color: #ff5252; border: 2px solid #ff5252; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .btn-back { background: transparent; border: none; cursor: pointer; margin-bottom: 10px; font-size: 1rem; color: gray; }
     </style>
 
     <script type="module">
@@ -34,10 +45,7 @@
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
-        // PERSISTENCIA (Opcional en admin, pero no hace daño)
         enableIndexedDbPersistence(db).catch(err => console.log(err));
-
         const auth = getAuth(app);
         const params = new URLSearchParams(window.location.search);
         const actId = params.get("id");
@@ -49,98 +57,121 @@
         });
 
         async function cargarTorneo() {
-            try {
-                const snap = await getDoc(doc(db, "actividades", actId));
-                if (!snap.exists()) return alert("Error carga");
-                
-                currentData = snap.data();
-                document.getElementById("titulo").innerText = currentData.titulo;
-                
-                if(currentData.bracket && currentData.bracket.length > 0) {
-                    renderBracket(currentData.bracket);
-                    document.getElementById("btn-gen").style.display = "none";
-                    document.getElementById("btn-reset").style.display = "block";
-                } else {
-                    document.getElementById("matches").innerHTML = `<p style="text-align:center">Sin sorteo. Inscritos: ${currentData.inscritos ? currentData.inscritos.length : 0}</p>`;
-                    document.getElementById("btn-gen").style.display = "flex";
-                }
-            } catch(e) { console.error(e); }
+            const snap = await getDoc(doc(db, "actividades", actId));
+            if (!snap.exists()) return;
+            currentData = snap.data();
+            document.getElementById("titulo").innerText = currentData.titulo;
+            
+            if(currentData.bracket && currentData.bracket.length > 0) {
+                renderBracket(currentData.bracket);
+                document.getElementById("btn-gen").style.display = "none";
+                document.getElementById("btn-reset").style.display = "block";
+            } else {
+                document.getElementById("bracket-view").innerHTML = `<p style="text-align:center; color:gray">Sin sorteo realizado.<br>Inscritos: ${currentData.inscritos ? currentData.inscritos.length : 0}</p>`;
+                document.getElementById("btn-gen").style.display = "flex";
+                document.getElementById("btn-reset").style.display = "none";
+            }
         }
 
         window.generarSorteo = async () => {
             const inscritos = currentData.inscritos || [];
             if(inscritos.length < 2) return alert("Mínimo 2 equipos");
-            if(!confirm(`¿Generar cruces para ${inscritos.length} equipos?`)) return;
+            if(!confirm(`¿Generar cuadro para ${inscritos.length} equipos?`)) return;
 
-            // FIX UNDEFINED: Usar nombre_equipo O capitan
             const teams = inscritos.map(i => i.nombre_equipo || i.capitan || "Participante").filter(n => n);
-            
-            // Barajar
             teams.sort(() => Math.random() - 0.5);
 
-            const bracket = [];
+            let round1 = [];
             for(let i=0; i < teams.length; i += 2) {
                 if(i + 1 < teams.length) {
-                    bracket.push({ team1: teams[i], team2: teams[i+1], winner: null });
+                    round1.push({ team1: teams[i], team2: teams[i+1], winner: null });
                 } else {
-                    bracket.push({ team1: teams[i], team2: "---", winner: teams[i], bye: true });
+                    round1.push({ team1: teams[i], team2: null, winner: teams[i], bye: true });
                 }
             }
 
+            const newBracket = [ round1 ]; // El bracket es ahora un array de rondas
+
             try {
-                await updateDoc(doc(db, "actividades", actId), { bracket: bracket });
-                alert("✅ Sorteo listo");
+                await updateDoc(doc(db, "actividades", actId), { bracket: newBracket });
+                alert("✅ Cuadro generado");
                 location.reload();
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        function renderBracket(bracket) {
-            const div = document.getElementById("matches");
-            div.innerHTML = "";
-            bracket.forEach((match, idx) => {
-                if(match.bye) {
-                    div.innerHTML += `
-                        <div class="match" style="background:#e8f5e9;">
-                            <div class="team winner">${match.team1}</div>
-                            <span class="vs">➜</span>
-                            <div>PASA</div>
-                        </div>`;
-                } else {
-                    div.innerHTML += `
-                        <div class="match">
-                            <div class="team ${match.winner === match.team1 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team1}')">${match.team1}</div>
-                            <span class="vs">VS</span>
-                            <div class="team ${match.winner === match.team2 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team2}')">${match.team2}</div>
-                        </div>`;
-                }
+        function renderBracket(bracketData) {
+            const container = document.getElementById("bracket-view");
+            container.innerHTML = "";
+
+            bracketData.forEach((round, roundIndex) => {
+                let roundHtml = `<div class="round"><div class="round-title">Ronda ${roundIndex + 1}</div>`;
+                round.forEach((match, matchIndex) => {
+                    if(match.bye) {
+                         roundHtml += `
+                            <div class="match">
+                                <div class="team winner bye">${match.team1} (Pasa directo)</div>
+                            </div>`;
+                    } else {
+                        roundHtml += `
+                            <div class="match">
+                                <div class="team ${match.winner === match.team1 ? 'winner' : ''}" onclick="setWinner(${roundIndex}, ${matchIndex}, '${match.team1}')">${match.team1}</div>
+                                <div class="team ${match.winner === match.team2 ? 'winner' : ''}" onclick="setWinner(${roundIndex}, ${matchIndex}, '${match.team2}')">${match.team2}</div>
+                            </div>`;
+                    }
+                });
+                roundHtml += "</div>";
+                container.innerHTML += roundHtml;
             });
         }
 
-        window.setWinner = async (matchIdx, winnerName) => {
-            if(confirm(`¿Gana ${winnerName}?`)) {
-                const newBracket = [...currentData.bracket];
-                newBracket[matchIdx].winner = winnerName;
-                await updateDoc(doc(db, "actividades", actId), { bracket: newBracket });
-                currentData.bracket = newBracket;
-                renderBracket(newBracket);
+        window.setWinner = async (roundIndex, matchIndex, winnerName) => {
+            if(!confirm(`¿Gana ${winnerName}?`)) return;
+
+            let bracket = [...currentData.bracket];
+            bracket[roundIndex][matchIndex].winner = winnerName;
+
+            // Comprobar si la ronda ha terminado
+            const currentRound = bracket[roundIndex];
+            const roundComplete = currentRound.every(m => m.winner !== null);
+
+            if (roundComplete) {
+                // Generar siguiente ronda
+                const winners = currentRound.map(m => m.winner);
+                let nextRound = [];
+                if (winners.length > 1) {
+                    for(let i=0; i < winners.length; i += 2) {
+                         if(i + 1 < winners.length) {
+                            nextRound.push({ team1: winners[i], team2: winners[i+1], winner: null });
+                        } else {
+                            nextRound.push({ team1: winners[i], team2: null, winner: winners[i], bye: true });
+                        }
+                    }
+                    bracket.push(nextRound);
+                } else if (winners.length === 1 && roundIndex === bracket.length - 1) {
+                     alert(`¡TORNEO FINALIZADO! 🏆 Ganador: ${winners[0]}`);
+                }
             }
+
+            await updateDoc(doc(db, "actividades", actId), { bracket: bracket });
+            location.reload();
         }
 
         window.resetSorteo = async () => {
-            if(prompt("Escribe BORRAR para reiniciar:") !== 'BORRAR') return;
-            await updateDoc(doc(db, "actividades", actId), { bracket: [] });
-            location.reload();
+            if(confirm("¿Borrar cuadro y empezar de cero?")) {
+                await updateDoc(doc(db, "actividades", actId), { bracket: [] });
+                location.reload();
+            }
         }
     </script>
 </head>
 <body>
     <div class="container">
-        <button onclick="window.history.back()" style="border:none; background:none; cursor:pointer; margin-bottom:10px;">⬅ Volver</button>
+        <button class="btn-back" onclick="window.history.back()">⬅ Volver</button>
         <div class="card">
             <h1 id="titulo">...</h1>
-            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">🎲 REALIZAR SORTEO</button>
-            <div id="matches"></div>
-            <button id="btn-reset" class="btn-reset" onclick="resetSorteo()">♻️ REINICIAR</button>
+            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">🎲 GENERAR CUADRO DEL TORNEO</button>
+            <div id="bracket-view" class="bracket-container"></div>
+            <button id="btn-reset" class="btn-reset" onclick="resetSorteo()">♻️ REINICIAR CUADRO</button>
         </div>
     </div>
 </body>
