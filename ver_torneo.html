@@ -3,206 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torneo en Vivo</title>
-    <script>
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
-    </script>
+    <title>Cuadro del Torneo</title>
+    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --win: #4caf50; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #e91e63; --win-bg: #e8f5e9; --win-text: #2e7d32; }
+        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --win-bg: #1b5e20; --win-text: #a5d6a7; }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        .container { max-width: 1000px; margin: 0 auto; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
+        .container { max-width: 600px; margin: 0 auto; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        h1 { text-align: center; margin-bottom: 5px; font-size: 1.5rem; }
+        .subtitle { text-align: center; color: gray; margin-bottom: 30px; font-size: 0.9rem; }
 
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-        .tab { padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; opacity: 0.6; }
-        .tab.active { background: var(--accent); color: white; opacity: 1; }
-
-        /* BRACKET (Igual que el admin pero sin cursor pointer) */
-        .bracket-container { display: flex; overflow-x: auto; padding: 20px 0; gap: 40px; }
-        .round { display: flex; flex-direction: column; justify-content: space-around; min-width: 220px; }
-        .round-title { text-align: center; font-weight: bold; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; font-size: 0.9rem; }
+        /* MATCH CARD */
+        .bracket-container { display: flex; flex-direction: column; gap: 15px; }
         
-        .match { background: var(--card); border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0; display: flex; flex-direction: column; gap: 5px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .match-card { background: var(--card); border-radius: 15px; padding: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
         
-        .team { padding: 8px; border-radius: 4px; display: flex; flex-direction: column; }
-        .team.winner { background: var(--win); color: white; font-weight: bold; }
-        .team.winner .members { color: #e8f5e9; }
-        .members { font-size: 0.75rem; color: #666; margin-top: 2px; font-weight: normal; }
-
-        /* Conectores */
-        .match::after { content: ''; position: absolute; right: -20px; top: 50%; width: 20px; height: 2px; background: #ccc; z-index: -1; }
-        .round:last-child .match::after { display: none; }
-
-        .list-item { background: var(--card); padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .hidden { display: none !important; }
+        .team { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .team:last-child { border-bottom: none; }
         
-        /* Animación de "En Vivo" */
-        .live-badge { background: #ff4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; animation: pulse 2s infinite; vertical-align: middle; margin-left: 10px; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .team-name { font-weight: 600; font-size: 1rem; }
+        
+        /* ESTILOS DE GANADOR */
+        .winner { background: var(--win-bg); color: var(--win-text); }
+        .winner .team-name::after { content: '👑'; margin-left: 8px; }
+        
+        /* ESTILO BYE (Pasa directo) */
+        .bye-card { border: 2px dashed #ccc; background: transparent; box-shadow: none; opacity: 0.7; }
+        .bye-badge { background: #eee; color: #555; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; }
+
+        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; }
+        
+        .loading { text-align: center; margin-top: 50px; color: gray; }
     </style>
 
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-      // --- CONFIGURACIÓN ---
-      const firebaseConfig = {
-        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
-        authDomain: "fiestas-pantano.firebaseapp.com",
-        projectId: "fiestas-pantano",
-        storageBucket: "fiestas-pantano.firebasestorage.app",
-        messagingSenderId: "801380435613",
-        appId: "1:801380435613:web:a842572cf7cee93ac57674",
-        measurementId: "G-EG2MZGBT1B"
-      };
+        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const auth = getAuth(app);
-      
-      let activityId = "";
-      let activityData = null;
+        const params = new URLSearchParams(window.location.search);
+        const actId = params.get("id");
 
-      onAuthStateChanged(auth, (user) => {
-          if (!user) window.location.href = "index.html";
-          aplicarTema();
-          
-          const params = new URLSearchParams(window.location.search);
-          activityId = params.get("id");
-          if(!activityId) { window.location.href = "actividades.html"; }
-          
-          escucharDatos();
-      });
+        if(!actId) window.location.href = "actividades.html";
 
-      // ESCUCHA EN TIEMPO REAL (onSnapshot)
-      function escucharDatos() {
-          const docRef = doc(db, "actividades", activityId);
-          
-          onSnapshot(docRef, (docSnap) => {
-              if(!docSnap.exists()) return;
-              activityData = docSnap.data();
-              
-              document.getElementById("page-title").innerText = activityData.titulo;
-              
-              renderParticipantes();
-              if(activityData.bracket) {
-                  renderBracket();
-                  // Si hay bracket, vamos directos a la pestaña bracket
-                  if(!document.getElementById('tab-bracket').classList.contains('active')) {
-                      // switchTab('bracket'); // Opcional: forzar vista bracket al cargar
-                  }
-              } else {
-                  document.getElementById("bracket-view").innerHTML = "<p style='text-align:center; padding:20px;'>El sorteo aún no ha comenzado.</p>";
-              }
-          });
-      }
+        // Escuchar cambios en tiempo real (si el admin actualiza, tú lo ves al momento)
+        onSnapshot(doc(db, "actividades", actId), (docSnap) => {
+            if(!docSnap.exists()) return;
+            const data = docSnap.data();
+            
+            document.getElementById("titulo").innerText = data.titulo;
+            renderBracket(data.bracket || []);
+        });
 
-      window.switchTab = (tabName) => {
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          document.getElementById('tab-'+tabName).classList.add('active');
-          document.getElementById('section-participantes').classList.add('hidden');
-          document.getElementById('section-bracket').classList.add('hidden');
-          document.getElementById('section-'+tabName).classList.remove('hidden');
-      }
+        function renderBracket(bracket) {
+            const container = document.getElementById("bracket");
+            container.innerHTML = "";
 
-      function getMembersHTML(teamName) {
-          if (teamName === "PASE DIRECTO" || teamName === "Esperando...") return "";
-          const equipo = (activityData.inscritos || []).find(e => (e.nombre_equipo === teamName || e.capitan === teamName));
-          if (equipo && equipo.miembros && equipo.miembros.length > 0) {
-              const nombres = equipo.miembros.map(m => m.nombre).join(", ");
-              return `<span class="members">${nombres}</span>`;
-          }
-          return "";
-      }
+            if(bracket.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:40px; background:rgba(0,0,0,0.03); border-radius:20px;">
+                        <span class="material-symbols-outlined" style="font-size:48px; color:gray; opacity:0.5">hourglass_empty</span>
+                        <p style="color:gray;">El sorteo aún no se ha realizado.</p>
+                    </div>`;
+                return;
+            }
 
-      function renderParticipantes() {
-          const lista = document.getElementById("lista-participantes");
-          lista.innerHTML = "";
-          const inscritos = activityData.inscritos || [];
-          
-          inscritos.forEach((p) => {
-              const nombreMostrado = p.nombre_equipo || p.capitan || "Sin nombre";
-              const miembrosStr = (p.miembros && p.miembros.length > 0) ? 
-                  p.miembros.map(m=>m.nombre).join(", ") : "";
-
-              lista.innerHTML += `
-                <div class="list-item">
-                    <div>
-                        <strong>${nombreMostrado}</strong>
-                        <div style="font-size:0.8rem; color:gray;">${miembrosStr}</div>
-                    </div>
-                </div>`;
-          });
-          document.getElementById("count-part").innerText = inscritos.length;
-      }
-
-      function renderBracket() {
-          const container = document.getElementById("bracket-view");
-          container.innerHTML = "";
-          const rounds = activityData.bracket.rounds;
-          
-          rounds.forEach((roundObj, rIndex) => {
-              const matches = roundObj.matches;
-              const roundDiv = document.createElement("div");
-              roundDiv.className = "round";
-              
-              let title = `Ronda ${rIndex + 1}`;
-              if(matches.length === 1) title = "🏆 FINAL";
-              else if(matches.length === 2) title = "SEMIFINAL";
-              roundDiv.innerHTML = `<div class="round-title">${title}</div>`;
-
-              matches.forEach((match) => {
-                  const matchDiv = document.createElement("div");
-                  matchDiv.className = "match";
-                  
-                  const class1 = (match.winner === 0) ? "team winner" : "team";
-                  const class2 = (match.winner === 1) ? "team winner" : "team";
-                  
-                  const members1 = getMembersHTML(match.p1);
-                  const members2 = getMembersHTML(match.p2);
-
-                  matchDiv.innerHTML = `
-                      <div class="${class1}"><span>${match.p1}</span>${members1}</div>
-                      <div class="${class2}"><span>${match.p2}</span>${members2}</div>
-                  `;
-                  roundDiv.appendChild(matchDiv);
-              });
-              container.appendChild(roundDiv);
-          });
-      }
-
-      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+            bracket.forEach((match, index) => {
+                if(match.bye) {
+                    // Tarjeta de "Pasa directo"
+                    container.innerHTML += `
+                        <div class="match-card bye-card">
+                            <div class="team">
+                                <span class="team-name">${match.team1}</span>
+                                <span class="bye-badge">PASA DIRECTO ➜</span>
+                            </div>
+                        </div>`;
+                } else {
+                    // Partido Normal
+                    container.innerHTML += `
+                        <div class="match-card">
+                            <div class="team ${match.winner === match.team1 ? 'winner' : ''}">
+                                <span class="team-name">${match.team1}</span>
+                                ${match.winner === match.team1 ? '<span class="material-symbols-outlined">emoji_events</span>' : ''}
+                            </div>
+                            <div class="team ${match.winner === match.team2 ? 'winner' : ''}">
+                                <span class="team-name">${match.team2}</span>
+                                ${match.winner === match.team2 ? '<span class="material-symbols-outlined">emoji_events</span>' : ''}
+                            </div>
+                        </div>`;
+                }
+            });
+        }
     </script>
 </head>
 <body>
+
     <div class="container">
-        <div class="header">
-            <div>
-                <h1 style="display:inline; margin:0;" id="page-title">Cargando...</h1>
-                <span class="live-badge">EN VIVO</span>
-            </div>
-            <button class="btn-back" onclick="window.location.href='actividades.html'">Volver</button>
-        </div>
+        <h1 id="titulo">Cargando...</h1>
+        <p class="subtitle">Cuadro de Enfrentamientos</p>
 
-        <div class="tabs">
-            <div id="tab-bracket" class="tab active" onclick="switchTab('bracket')">🏆 Cuadro</div>
-            <div id="tab-participantes" class="tab" onclick="switchTab('participantes')">Participantes (<span id="count-part">0</span>)</div>
-        </div>
-
-        <div id="section-bracket">
-            <div id="bracket-view" class="bracket-container"></div>
-        </div>
-
-        <div id="section-participantes" class="hidden">
-            <div id="lista-participantes"></div>
+        <div id="bracket" class="bracket-container">
+            <div class="loading">Cargando cruces...</div>
         </div>
     </div>
+
+    <button class="btn-back-float" onclick="window.history.back()">
+        <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+
 </body>
 </html>
