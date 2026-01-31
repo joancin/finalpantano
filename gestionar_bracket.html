@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Torneo</title>
+    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #e91e63; }
+        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        .match { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+        .team { padding: 8px 12px; background: var(--card); border: 1px solid #ccc; border-radius: 8px; cursor: pointer; flex: 1; text-align: center; font-weight: bold; }
+        .team:hover { background: #e3f2fd; }
+        .team.winner { background: #c8e6c9; border-color: #4caf50; color: #2e7d32; }
+        .vs { padding: 0 10px; font-weight: bold; color: gray; }
+
+        .btn-gen { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 20px; }
+    </style>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const params = new URLSearchParams(window.location.search);
+        const actId = params.get("id");
+        let currentData = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if(!user) window.location.href="index.html";
+            cargarTorneo();
+        });
+
+        async function cargarTorneo() {
+            const snap = await getDoc(doc(db, "actividades", actId));
+            currentData = snap.data();
+            document.getElementById("titulo").innerText = "Torneo: " + currentData.titulo;
+            
+            if(currentData.bracket && currentData.bracket.length > 0) {
+                renderBracket(currentData.bracket);
+                document.getElementById("btn-gen").style.display = "none";
+            } else {
+                document.getElementById("matches").innerHTML = "<p style='text-align:center'>Aún no se ha generado el sorteo.</p>";
+            }
+        }
+
+        window.generarSorteo = async () => {
+            if(!confirm("¿Cerrar inscripciones y generar cruces aleatorios?")) return;
+            
+            const inscritos = currentData.inscritos || [];
+            if(inscritos.length < 2) return alert("Necesitas al menos 2 equipos.");
+
+            // Barajar
+            const teams = inscritos.map(i => i.nombre_equipo).sort(() => Math.random() - 0.5);
+            const bracket = [];
+
+            // Crear parejas
+            for(let i=0; i<teams.length; i+=2) {
+                if(i+1 < teams.length) {
+                    bracket.push({ team1: teams[i], team2: teams[i+1], winner: null });
+                } else {
+                    // Impar (Pasa directo o Bye)
+                    bracket.push({ team1: teams[i], team2: "BYE (Pasa directo)", winner: teams[i] });
+                }
+            }
+
+            await updateDoc(doc(db, "actividades", actId), { bracket: bracket });
+            alert("✅ Sorteo realizado");
+            location.reload();
+        }
+
+        function renderBracket(bracket) {
+            const div = document.getElementById("matches");
+            div.innerHTML = "";
+            bracket.forEach((match, idx) => {
+                div.innerHTML += `
+                    <div class="match">
+                        <div class="team ${match.winner === match.team1 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team1}')">${match.team1}</div>
+                        <span class="vs">VS</span>
+                        <div class="team ${match.winner === match.team2 ? 'winner' : ''}" onclick="setWinner(${idx}, '${match.team2}')">${match.team2}</div>
+                    </div>`;
+            });
+        }
+
+        window.setWinner = async (matchIdx, winnerName) => {
+            if(confirm(`¿Declarar ganador a ${winnerName}?`)) {
+                const newBracket = [...currentData.bracket];
+                newBracket[matchIdx].winner = winnerName;
+                await updateDoc(doc(db, "actividades", actId), { bracket: newBracket });
+                location.reload();
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <button onclick="window.history.back()" style="background:transparent; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">← Volver</button>
+        <div class="card">
+            <h1 id="titulo">Cargando...</h1>
+            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">🎲 Generar Sorteo Aleatorio</button>
+            
+            <h3>Ronda Actual</h3>
+            <p style="font-size:0.8rem; color:gray">Haz clic en un equipo para declararlo ganador.</p>
+            <div id="matches"></div>
+        </div>
+    </div>
+</body>
+</html>
