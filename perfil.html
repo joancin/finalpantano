@@ -3,181 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil</title>
+    <title>Mi Carnet</title>
     
     <script>
         if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
     </script>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; --danger: #d32f2f; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --gradient: linear-gradient(135deg, #ff5722, #ff9800); }
+        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --gradient: linear-gradient(135deg, #d84315, #f57c00); }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; transition: background 0.3s; }
-        .container { max-width: 600px; margin: 0 auto; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
+        .container { max-width: 500px; margin: 0 auto; }
         
-        .profile-card { background: var(--card); border-radius: 20px; padding: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .avatar-circle { width: 100px; height: 100px; background: var(--accent); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 40px; margin: 0 auto 15px auto; font-weight: bold; }
-        
-        .role-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px; display: inline-block; }
-        .role-admin { background: #e91e63; } .role-festero { background: #9c27b0; }
+        h1 { margin-bottom: 20px; font-weight: 800; }
 
-        .input-group { text-align: left; margin-top: 20px; }
-        .input-group label { font-size: 0.8rem; color: gray; margin-left: 5px; }
-        
-        /* ESTILO PARA INPUT BLOQUEADO */
-        .input-wrapper { position: relative; }
-        .input-wrapper .icon-lock { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: gray; font-size: 1.2rem; }
-        
-        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.05); color: gray; box-sizing: border-box; margin-top: 5px; cursor: not-allowed; }
-        html.dark-mode .input-group input { background: rgba(255,255,255,0.05); color: #888; }
+        /* --- CARNET DIGITAL (LIMPIO) --- */
+        .carnet {
+            background: var(--gradient);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(255, 87, 34, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            transition: transform 0.3s;
+        }
+        .carnet:active { transform: scale(0.98); }
 
-        .menu-item { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-        
-        .btn-logout { width: 100%; padding: 15px; background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        /* BOTÓN DE BORRAR CUENTA */
-        .btn-delete-account { width: 100%; padding: 15px; background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
-        .btn-delete-account:hover { background: #ffcdd2; }
-        html.dark-mode .btn-delete-account { background: rgba(211, 47, 47, 0.1); border-color: #ef9a9a; color: #ef9a9a; }
+        /* Decoración de fondo */
+        .carnet::before {
+            content: ''; position: absolute; top: -50px; right: -50px;
+            width: 180px; height: 180px;
+            background: rgba(255,255,255,0.1); border-radius: 50%;
+        }
+        .carnet::after {
+            content: ''; position: absolute; bottom: -30px; left: -30px;
+            width: 120px; height: 120px;
+            background: rgba(255,255,255,0.1); border-radius: 50%;
+        }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.3s; }
+        .carnet-header { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
+        .app-name { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.8; text-transform: uppercase; font-weight: bold; }
+        .carnet-role { background: rgba(255,255,255,0.25); padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; backdrop-filter: blur(5px); text-transform: uppercase; border: 1px solid rgba(255,255,255,0.4); }
+
+        .carnet-body { z-index: 2; margin-top: 25px; }
+        .user-name { font-size: 2rem; font-weight: 800; margin: 0; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .user-id { font-family: 'Share Tech Mono', monospace; font-size: 1rem; opacity: 0.85; margin-top: 8px; letter-spacing: 1px; }
+
+        /* --- SECCIONES --- */
+        .section-title { font-size: 0.9rem; color: gray; margin-bottom: 10px; font-weight: 600; margin-left: 5px; }
+        
+        .action-list { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 25px; }
+        
+        .action-item { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: background 0.2s; }
+        .action-item:last-child { border-bottom: none; }
+        .action-item:active { background: rgba(0,0,0,0.02); }
+        
+        .a-left { display: flex; align-items: center; gap: 15px; font-weight: 600; color: var(--text); }
+        .icon-box { width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; }
+        
+        .i-admin { background: #673ab7; }
+        .i-theme { background: #2196f3; }
+        .i-logout { background: #ff5252; }
+
+        /* SWITCH */
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: max(15px, env(safe-area-inset-bottom)); }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.2s; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-        .nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 2px; }
-        .msg { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; z-index: 2000; }
+        .nav-item span { font-size: 26px; margin-bottom: 4px; }
     </style>
 
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      // Importamos deleteUser (aunque usaremos currentUser.delete())
-      import { getAuth, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const auth = getAuth(app);
-      let currentUser = null;
+        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-      onAuthStateChanged(auth, async (user) => {
-          if (!user) window.location.href = "index.html";
-          currentUser = user;
-          actualizarIconoTema();
-          
-          const uDoc = await getDoc(doc(db, "usuarios", user.uid));
-          if(uDoc.exists()) {
-              const data = uDoc.data();
-              document.getElementById("user-alias").value = data.username;
-              document.getElementById("avatar-initial").innerText = data.username.charAt(0).toUpperCase();
-              
-              const rolEl = document.getElementById("user-role");
-              rolEl.innerText = data.rol.toUpperCase();
-              if(data.rol === 'admin') rolEl.classList.add('role-admin');
-              if(data.rol === 'festero') rolEl.classList.add('role-festero');
-          }
-      });
+        enableIndexedDbPersistence(db).catch(() => {});
 
-      // --- ELIMINAR CUENTA COMPLETA ---
-      window.eliminarCuenta = async () => {
-          if(!confirm("⚠️ ¿ESTÁS SEGURO?\n\nEsta acción es irreversible. Se borrará tu usuario y tendrás que registrarte de nuevo si quieres volver.")) return;
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) window.location.href = "index.html";
+            
+            const docRef = doc(db, "usuarios", user.uid);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                
+                document.getElementById("u-name").innerText = data.username.toUpperCase();
+                document.getElementById("u-id").innerText = "ID: " + user.uid.slice(0, 8).toUpperCase();
+                
+                if (data.rol === 'admin' || data.rol === 'festero') {
+                    document.getElementById("u-role").innerText = "ADMIN / FESTERO";
+                    document.getElementById("admin-zone").style.display = "block";
+                } else {
+                    document.getElementById("u-role").innerText = "MIEMBRO OFICIAL";
+                }
+            }
+        });
 
-          const btn = document.getElementById("btn-delete");
-          btn.innerText = "Borrando..."; btn.disabled = true;
+        window.initTheme = () => {
+            const isDark = localStorage.getItem('theme') === 'dark';
+            document.getElementById('theme-toggle').checked = isDark;
+        }
 
-          try {
-              const uid = currentUser.uid;
+        window.toggleTheme = (checkbox) => {
+            if(checkbox.checked) {
+                document.documentElement.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
 
-              // 1. Borrar datos de Firestore
-              await deleteDoc(doc(db, "usuarios", uid));
+        window.cerrarSesion = () => {
+            if(confirm("¿Cerrar sesión?")) {
+                signOut(auth).then(() => window.location.href = "index.html");
+            }
+        }
 
-              // 2. Borrar cuenta de Autenticación
-              await deleteUser(currentUser);
-
-              alert("Tu cuenta ha sido eliminada.");
-              window.location.href = "index.html";
-
-          } catch(e) {
-              console.error(e);
-              btn.innerText = "🗑️ Eliminar mi Cuenta"; btn.disabled = false;
-
-              // Si pide login reciente
-              if(e.code === 'auth/requires-recent-login') {
-                  alert("⚠️ SEGURIDAD:\nPara borrar tu cuenta, Google necesita confirmar que eres tú.\n\nPor favor:\n1. Cierra sesión.\n2. Vuelve a entrar.\n3. Intenta borrar la cuenta de nuevo.");
-              } else {
-                  alert("Error al borrar: " + e.message);
-              }
-          }
-      }
-
-      window.cambiarTema = () => {
-          document.body.classList.toggle('dark-mode');
-          document.documentElement.classList.toggle('dark-mode');
-          localStorage.setItem('theme', document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light');
-          actualizarIconoTema();
-      }
-      window.cerrarSesion = () => { signOut(auth).then(() => window.location.href = "index.html"); }
-      
-      function actualizarIconoTema() {
-          const isDark = document.documentElement.classList.contains('dark-mode');
-          document.getElementById("theme-text").innerText = isDark ? "Modo Claro" : "Modo Oscuro";
-          document.getElementById("theme-icon").innerText = isDark ? "light_mode" : "dark_mode";
-      }
+        window.onload = initTheme;
     </script>
 </head>
 <body>
+
     <div class="container">
-        <h1>Perfil</h1>
-        <div class="profile-card">
-            <span id="user-role" class="role-badge">CARGANDO</span>
-            <div id="avatar-initial" class="avatar-circle">?</div>
+        <h1>Mi Perfil</h1>
+
+        <div class="carnet">
+            <div class="carnet-header">
+                <span class="app-name">FIESTAS PANTANO</span>
+                <span class="carnet-role" id="u-role">Cargando...</span>
+            </div>
             
-            <div class="input-group">
-                <label>Tu Alias (No se puede modificar)</label>
-                <div class="input-wrapper">
-                    <input type="text" id="user-alias" disabled>
-                    <span class="material-symbols-outlined icon-lock">lock</span>
+            <div class="carnet-body">
+                <div class="user-name" id="u-name">...</div>
+                <div class="user-id" id="u-id">****</div>
+            </div>
+        </div>
+
+        <div id="admin-zone" style="display:none;">
+            <div class="section-title">ADMINISTRACIÓN</div>
+            <div class="action-list">
+                <div class="action-item" onclick="window.location.href='gestion.html'">
+                    <div class="a-left">
+                        <div class="icon-box i-admin"><span class="material-symbols-outlined">settings_suggest</span></div>
+                        Gestionar Eventos
+                    </div>
+                    <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
                 </div>
             </div>
         </div>
 
-        <div class="menu-item" onclick="cambiarTema()">
-            <span style="display:flex; align-items:center; gap:10px;">
-                <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
-                <span id="theme-text">Modo Oscuro</span>
-            </span>
-            <span class="material-symbols-outlined">chevron_right</span>
+        <div class="section-title">CONFIGURACIÓN</div>
+        <div class="action-list">
+            <div class="action-item">
+                <div class="a-left">
+                    <div class="icon-box i-theme"><span class="material-symbols-outlined">dark_mode</span></div>
+                    Modo Oscuro
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle" onchange="toggleTheme(this)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="action-item" onclick="cerrarSesion()">
+                <div class="a-left">
+                    <div class="icon-box i-logout"><span class="material-symbols-outlined">logout</span></div>
+                    <span style="color:var(--danger)">Cerrar Sesión</span>
+                </div>
+            </div>
         </div>
-
-        <button class="btn-logout" onclick="cerrarSesion()">
-            <span class="material-symbols-outlined">logout</span> Cerrar Sesión
-        </button>
-
-        <button id="btn-delete" class="btn-delete-account" onclick="eliminarCuenta()">
-            <span class="material-symbols-outlined">delete_forever</span> Eliminar mi Cuenta
-        </button>
         
-        <p style="text-align:center; color:gray; font-size:0.75rem; margin-top:10px;">
-            Al eliminar tu cuenta, tu nombre quedará libre para un nuevo registro.
+        <p style="text-align:center; color:gray; font-size:0.75rem; margin-top:20px;">
+            Fiestas Pantano App v2.0
         </p>
-
-        <div id="toast" class="msg"></div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="panel.html" class="nav-item">
-            <span class="material-symbols-outlined">home</span>Inicio
-        </a>
-        <a href="actividades.html" class="nav-item">
-            <span class="material-symbols-outlined">event</span>Fiestas
-        </a>
-        <a href="mis_inscripciones.html" class="nav-item">
-            <span class="material-symbols-outlined">confirmation_number</span>Tickets
-        </a>
-        <a href="#" class="nav-item active"> <span class="material-symbols-outlined">person</span>Perfil
-        </a>
+        <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
+        <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
+        <a href="mis_inscripciones.html" class="nav-item"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
+        <a href="#" class="nav-item active"><span class="material-symbols-outlined">person</span>Perfil</a>
     </nav>
+
 </body>
 </html>
