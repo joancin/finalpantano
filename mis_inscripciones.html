@@ -1,411 +1,763 @@
 <!DOCTYPE html>
+
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Mis Tickets</title>
+
     
+
     <script>
+
         if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
+
     </script>
+
+
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        
-        /* CABECERA CON SWITCH */
-        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        h1 { margin: 0; font-size: 1.8rem; font-weight: 800; background: linear-gradient(45deg, #FF5722, #FFC107); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* SWITCH MODERNO */
-        .toggle-wrapper { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 600; color: gray; }
-        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+    
+
+    <style>
+
+        :root { --bg: #f4f7f6; --text: #333; --card: white; --accent: #ff5722; --border: #e0e0e0; --shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --border: #333; --shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+        
+
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
+
+        .container { max-width: 800px; margin: 0 auto; }
+
+        
+
+        /* CABECERA */
+
+        .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+
+        h1 { margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text); }
+
+
+
+        /* SWITCH TOGGLE */
+
+        .toggle-container { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+
         .switch input { opacity: 0; width: 0; height: 0; }
+
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        input:checked + .slider { background-color: #FF5722; }
+
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+
+        input:checked + .slider { background-color: var(--accent); }
+
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* GRID DE TICKETS */
-        .tickets-list { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 
-        /* ESTILO TICKET/LIBRO */
-        .ticket {
-            background: var(--card);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            position: relative;
-            display: flex;
-            transition: transform 0.2s;
-            cursor: pointer;
-            min-height: 110px;
-        }
+
+        /* GRID TICKETS */
+
+        .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+
+
+        .ticket { background: var(--card); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); position: relative; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer; display: flex; min-height: 120px; }
+
         .ticket:active { transform: scale(0.98); }
-        
-        /* EVENTOS PASADOS (Gris y opacos) */
-        .ticket.past { filter: grayscale(1); opacity: 0.6; }
 
-        /* BARRA DE COLOR LATERAL */
-        .ticket-color-bar { width: 10px; height: 100%; flex-shrink: 0; }
-        
-        /* CONTENIDO TICKET */
-        .ticket-body { flex: 1; padding: 15px; display: flex; flex-direction: column; justify-content: center; position: relative; }
-        
-        /* FECHA ESTILO CALENDARIO */
-        .date-badge {
-            position: absolute; right: 15px; top: 15px;
-            text-align: center;
-            background: rgba(0,0,0,0.05);
-            border-radius: 8px;
-            padding: 5px 10px;
-            min-width: 45px;
-        }
-        .d-day { font-size: 1.2rem; font-weight: 800; line-height: 1; display: block; }
-        .d-month { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; color: gray; }
+        .ticket.past { opacity: 0.6; filter: grayscale(1); }
 
-        .t-title { font-size: 1.1rem; font-weight: 700; margin-right: 60px; margin-bottom: 5px; line-height: 1.2; }
-        .t-info { font-size: 0.85rem; color: gray; display: flex; align-items: center; gap: 5px; margin-top: 4px; }
         
-        /* ETIQUETA ROL */
-        .role-badge {
-            display: inline-block;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 4px 8px;
-            border-radius: 6px;
-            margin-top: 10px;
-            width: fit-content;
-            letter-spacing: 0.5px;
-        }
 
-        /* MODAL PRETTY */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 2000; backdrop-filter: blur(4px); }
-        .modal { background: var(--card); width: 100%; max-width: 600px; margin: 0 auto; border-radius: 25px 25px 0 0; padding: 25px; padding-bottom: 40px; position: relative; animation: slideUp 0.3s; max-height: 85vh; overflow-y: auto; }
+        .ticket-left { width: 12px; background: var(--accent); }
+
+        .ticket.past .ticket-left { background: gray; }
+
         
+
+        .ticket-content { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+        
+
+        .t-title { font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 800; line-height: 1.2; }
+
+        .t-meta { display: flex; align-items: center; gap: 8px; color: gray; font-size: 0.9rem; margin-bottom: 4px; }
+
+        .t-role { display: inline-block; padding: 5px 10px; background: rgba(0,0,0,0.05); border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: var(--text); margin-top: 10px; width: fit-content; text-transform: uppercase; }
+
+
+
+        /* MODAL DETALLES */
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 2000; backdrop-filter: blur(5px); }
+
+        .modal { background: var(--card); padding: 0; border-radius: 25px 25px 0 0; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; animation: slideUp 0.3s; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+
+        
+
+        .modal-header-img { width: 100%; height: 220px; object-fit: cover; background: #eee; }
+
+        .modal-content { padding: 25px; padding-bottom: 40px; }
+
+        
+
+        .btn-close-float { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.3); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; backdrop-filter: blur(4px); }
+
+        
+
+        .detail-title { font-size: 1.6rem; margin: 0 0 10px 0; line-height: 1.2; font-weight: 800; }
+
+        .detail-meta { font-size: 1rem; color: gray; margin-bottom: 20px; display: flex; flex-direction: column; gap: 5px; }
+
+        .detail-desc { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 12px; margin: 20px 0; line-height: 1.6; font-size: 0.95rem; }
+
+        
+
+        .participants-list { background: var(--bg); border-radius: 15px; padding: 20px; margin-top: 25px; }
+
+        .p-group { padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+        .p-group:last-child { border: none; }
+
+        .p-cap { font-weight: bold; font-size: 1rem; color: var(--text); }
+
+        .p-members { font-size: 0.9rem; color: gray; margin-left: 10px; margin-top: 2px; }
+
+
+
+        .btn-action { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform 0.2s; }
+
+        .btn-action:active { transform: scale(0.98); }
+
+        
+
+        .btn-chat { background: #e3f2fd; color: #1565c0; }
+
+        .btn-leave { background: #ffebee; color: #d32f2f; border: 2px solid #ffcdd2; }
+
+        .btn-edit-eq { background: #f5f5f5; color: #333; border: 1px solid #ccc; }
+
+
+
+        /* MODAL EDITAR */
+
+        .modal-edit-container { padding: 30px; }
+
+        .modal-edit-container h2 { margin-top: 0; font-size: 1.5rem; margin-bottom: 20px; }
+
+        .modal input { width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 1rem; }
+
+        .mate-found { border-color: #4caf50 !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='//www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234caf50' width='24px'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+
+
+
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        .close-btn { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: #333; display: flex; align-items: center; justify-content: center; }
-        
-        .modal-header-color { height: 100px; margin: -25px -25px 20px -25px; position: relative; }
-        .modal-icon { position: absolute; bottom: -25px; left: 25px; width: 60px; height: 60px; background: var(--card); border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 30px; }
 
-        .m-title { font-size: 1.5rem; font-weight: 800; margin-top: 15px; margin-bottom: 5px; }
-        .m-sub { font-size: 0.9rem; color: gray; margin-bottom: 20px; }
 
-        .list-group { margin-top: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; padding: 15px; }
-        .list-item { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); padding: 8px 0; font-size: 0.9rem; }
-        .list-item:last-child { border: none; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: max(15px, env(safe-area-inset-bottom)); }
 
-        .btn-action { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 700; margin-top: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1rem; }
-        .btn-chat { background: #E3F2FD; color: #1976D2; }
-        .btn-danger { background: #FFEBEE; color: #D32F2F; }
-        .btn-edit { background: #F3E5F5; color: #7B1FA2; }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.2s; }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: max(15px, env(safe-area-inset-bottom)); }
-        .nav-item { text-decoration: none; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; }
-        .nav-item.active { color: #FF5722; font-weight: bold; }
-        .nav-item span { font-size: 24px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+
+        .nav-item span { font-size: 26px; margin-bottom: 4px; }
+
     </style>
 
+
+
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // ✅ PERSISTENCIA ACTIVADA
-        import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, updateDoc, getDocs, where, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        enableIndexedDbPersistence(db).catch(() => {});
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
-        const auth = getAuth(app);
-        let allTickets = [];
-        let currentUser = null;
+      // ✅ IMPORTAMOS enableIndexedDbPersistence PARA AHORRAR LECTURAS
 
-        // FUNCIÓN PARA GENERAR COLOR ÚNICO SEGÚN EL ID DEL EVENTO
-        function getColor(str) {
-            const colors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#009688', '#4CAF50', '#FF9800', '#FF5722', '#795548'];
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            return colors[Math.abs(hash) % colors.length];
-        }
+      import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, updateDoc, getDocs, where, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) window.location.href = "index.html";
-            currentUser = user;
-            
-            const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
-            onSnapshot(q, (snapshot) => {
-                allTickets = [];
-                snapshot.forEach((docSnap) => {
-                    const act = docSnap.data();
-                    const inscritos = act.inscritos || [];
-                    const fechaEvento = act.fecha.toDate ? act.fecha.toDate() : new Date(act.fecha);
-                    
-                    let miRol = null;
-                    let miEquipo = null;
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-                    const soyCapitan = inscritos.find(e => e.capitan_uid === user.uid);
-                    const soyMiembroUID = inscritos.find(e => e.miembros && e.miembros.some(m => m.uid === user.uid));
-                    
-                    if (soyCapitan) { miRol = "Capitán"; miEquipo = soyCapitan; } 
-                    else if (soyMiembroUID) { miRol = "Miembro"; miEquipo = soyMiembroUID; } 
 
-                    if (miEquipo) {
-                        // ✅ LÓGICA IMPORTANTE: SI ES INDIVIDUAL, NO ES CAPITÁN
-                        let etiquetaRol = miRol;
-                        if(act.modalidad === 'individual') etiquetaRol = "Participante";
 
-                        allTickets.push({
-                            id: docSnap.id,
-                            data: act,
-                            titulo: act.titulo,
-                            fecha: fechaEvento,
-                            rol: etiquetaRol, // Usamos la etiqueta corregida
-                            rolReal: miRol, // Guardamos el rol técnico para permisos
-                            equipo: miEquipo,
-                            esPasado: fechaEvento < new Date(),
-                            color: getColor(docSnap.id) // Color único
-                        });
-                    }
-                });
-                renderTickets();
-            });
-        });
+      const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
 
-        window.renderTickets = () => {
-            const container = document.getElementById("tickets-list");
-            const hidePast = document.getElementById("toggle-past").checked;
-            container.innerHTML = "";
-            
-            // FILTRADO DE PASADOS
-            const filtered = allTickets.filter(t => hidePast ? !t.esPasado : true);
+      
 
-            if(filtered.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:50px; color:gray;">
-                    <span class="material-symbols-outlined" style="font-size:48px; opacity:0.5;">confirmation_number</span>
-                    <p>No tienes tickets visibles.</p>
+      const app = initializeApp(firebaseConfig);
+
+      const db = getFirestore(app);
+
+      
+
+      // ✅ ACTIVAR PERSISTENCIA (CACHE)
+
+      enableIndexedDbPersistence(db).catch((err) => {
+
+          if (err.code == 'failed-precondition') console.log('Múltiples pestañas abiertas.');
+
+          else if (err.code == 'unimplemented') console.log('Navegador no soporta persistencia.');
+
+      });
+
+
+
+      const auth = getAuth(app);
+
+
+
+      let allTickets = [];
+
+      let currentUser = null;
+
+
+
+      onAuthStateChanged(auth, async (user) => {
+
+          if (!user) window.location.href = "index.html";
+
+          currentUser = user;
+
+          
+
+          const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
+
+          onSnapshot(q, (snapshot) => {
+
+              allTickets = [];
+
+              snapshot.forEach((docSnap) => {
+
+                  const act = docSnap.data();
+
+                  const inscritos = act.inscritos || [];
+
+                  const fechaEvento = act.fecha.toDate ? act.fecha.toDate() : new Date(act.fecha);
+
+                  
+
+                  let miRol = null;
+
+                  let miEquipo = null;
+
+
+
+                  // Buscamos si soy capitán o miembro
+
+                  const soyCapitan = inscritos.find(e => e.capitan_uid === user.uid);
+
+                  const soyMiembroUID = inscritos.find(e => e.miembros && e.miembros.some(m => m.uid === user.uid));
+
+                  
+
+                  if (soyCapitan) { miRol = "Capitán"; miEquipo = soyCapitan; } 
+
+                  else if (soyMiembroUID) { miRol = "Miembro"; miEquipo = soyMiembroUID; } 
+
+
+
+                  if (miEquipo) {
+
+                      allTickets.push({
+
+                          id: docSnap.id,
+
+                          data: act, // Guardamos todo el objeto para el modal
+
+                          titulo: act.titulo,
+
+                          fecha: fechaEvento,
+
+                          rol: miRol,
+
+                          equipo: miEquipo,
+
+                          esPasado: fechaEvento < new Date()
+
+                      });
+
+                  }
+
+              });
+
+              renderTickets();
+
+          });
+
+      });
+
+
+
+      window.renderTickets = () => {
+
+          const container = document.getElementById("tickets-grid");
+
+          const hidePast = document.getElementById("toggle-past").checked;
+
+          container.innerHTML = "";
+
+          
+
+          const filtered = allTickets.filter(t => hidePast ? !t.esPasado : true);
+
+
+
+          if(filtered.length === 0) {
+
+              container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:60px 20px; color:gray; opacity:0.6;">
+
+                  <span class="material-symbols-outlined" style="font-size:64px; margin-bottom:10px;">confirmation_number</span>
+
+                  <p style="font-size:1.1rem;">No tienes tickets activos.</p>
+
+                  <p style="font-size:0.9rem;">(Activa "Mostrar Pasados" si quieres ver el historial)</p>
+
+              </div>`;
+
+              return;
+
+          }
+
+
+
+          filtered.forEach(t => {
+
+              const fechaStr = t.fecha.toLocaleString([], {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+
+              // ✅ CORRECCIÓN UNDEFINED
+
+              const nombreEquipo = t.equipo.nombre_equipo || t.equipo.capitan || "Participante";
+
+
+
+              container.innerHTML += `
+
+                <div class="ticket ${t.esPasado ? 'past' : ''}" onclick="verDetalles('${t.id}')">
+
+                    <div class="ticket-left"></div>
+
+                    <div class="ticket-content">
+
+                        <div class="t-title">${t.titulo}</div>
+
+                        <div class="t-meta"><span class="material-symbols-outlined">schedule</span> ${fechaStr}</div>
+
+                        <div class="t-meta"><span class="material-symbols-outlined">group</span> ${nombreEquipo}</div>
+
+                        <span class="t-role">${t.rol}</span>
+
+                    </div>
+
                 </div>`;
-                return;
-            }
 
-            filtered.forEach(t => {
-                const dia = t.fecha.getDate();
-                const mes = t.fecha.toLocaleString('es-ES', { month: 'short' });
-                const hora = t.fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const nombreMostrar = (t.data.modalidad === 'individual') ? 'Individual' : (t.equipo.nombre_equipo || "Mi Equipo");
+          });
 
-                container.innerHTML += `
-                    <div class="ticket ${t.esPasado ? 'past' : ''}" onclick="verDetalles('${t.id}')">
-                        <div class="ticket-color-bar" style="background:${t.color}"></div>
-                        <div class="ticket-body">
-                            <div class="date-badge">
-                                <span class="d-day">${dia}</span>
-                                <span class="d-month">${mes}</span>
-                            </div>
-                            <div class="t-title">${t.titulo}</div>
-                            <div class="t-info"><span class="material-symbols-outlined" style="font-size:16px">schedule</span> ${hora}</div>
-                            <div class="t-info"><span class="material-symbols-outlined" style="font-size:16px">group</span> ${nombreMostrar}</div>
-                            
-                            <div class="role-badge" style="background:${t.color}20; color:${t.color}">
-                                ${t.rol}
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        }
+      }
 
-        window.verDetalles = (id) => {
-            const ticket = allTickets.find(t => t.id === id);
-            if(!ticket) return;
 
-            // Header Color
-            document.querySelector(".modal-header-color").style.background = ticket.color;
-            document.querySelector(".modal-icon").style.color = ticket.color;
-            document.querySelector(".modal-icon").innerHTML = `<span class="material-symbols-outlined">confirmation_number</span>`;
 
-            // Textos
-            document.getElementById("m-title").innerText = ticket.titulo;
-            document.getElementById("m-fecha").innerText = ticket.fecha.toLocaleString([], {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
-            document.getElementById("m-lugar").innerText = ticket.data.lugar || "Ubicación por definir";
+      // --- VER DETALLES (ESTILO PREMIUM) ---
 
-            // Participantes
-            const listDiv = document.getElementById("participants-list");
-            listDiv.innerHTML = "";
-            
-            // Si es individual solo salgo yo
-            if(ticket.data.modalidad === 'individual') {
-                listDiv.innerHTML = `<div class="list-item"><span>Participante</span><b>${ticket.equipo.capitan || currentUser.displayName}</b></div>`;
-            } else {
-                // Si es equipo
-                listDiv.innerHTML += `<div class="list-item"><span>Nombre Equipo</span><b>${ticket.equipo.nombre_equipo}</b></div>`;
-                listDiv.innerHTML += `<div class="list-item"><span>Capitán</span><b>${ticket.equipo.capitan}</b></div>`;
-                if(ticket.equipo.miembros) {
-                    ticket.equipo.miembros.forEach(m => {
-                        listDiv.innerHTML += `<div class="list-item"><span>Miembro</span><span>${m.nombre}</span></div>`;
-                    });
-                }
-            }
+      window.verDetalles = (ticketId) => {
 
-            // Botones
-            const actionsDiv = document.getElementById("modal-actions");
-            actionsDiv.innerHTML = `
-                <button class="btn-action btn-chat" onclick="window.location.href='chat.html?id=${ticket.id}'">
-                    <span class="material-symbols-outlined">chat</span> Chat del Evento
-                </button>
-                <button class="btn-action btn-danger" onclick="salirDeActividad('${ticket.id}', '${ticket.rolReal}')">
-                    <span class="material-symbols-outlined">logout</span> Darse de baja
-                </button>
-            `;
+          const ticket = allTickets.find(t => t.id === ticketId);
 
-            // Botón editar SOLO si es capitán de EQUIPO (no individual)
-            if(ticket.rolReal === 'Capitán' && ticket.data.modalidad !== 'individual') {
-                actionsDiv.innerHTML += `
-                <button class="btn-action btn-edit" onclick="abrirEdicion('${ticket.id}')">
-                    <span class="material-symbols-outlined">edit</span> Editar Miembros
-                </button>`;
-            }
+          if(!ticket) return;
 
-            document.getElementById("modal-detalles").style.display = "flex";
-        }
+          const act = ticket.data; 
 
-        window.cerrarModal = () => {
-            document.getElementById("modal-detalles").style.display = "none";
-            document.getElementById("modal-edit").style.display = "none";
-        }
 
-        // --- SALIR Y EDITAR (Igual que antes pero optimizado) ---
-        window.salirDeActividad = async (actId, rolTecnico) => {
-            if(!confirm("¿Seguro que quieres borrarte?")) return;
-            try {
-                const actRef = doc(db, "actividades", actId);
-                const snap = await getDoc(actRef);
-                const data = snap.data();
-                let inscritos = data.inscritos;
-                let nuevosInscritos = [];
 
-                if (rolTecnico === 'Capitán') {
-                    nuevosInscritos = inscritos.filter(e => e.capitan_uid !== currentUser.uid);
-                } else {
-                    nuevosInscritos = inscritos.map(eq => {
-                        if (eq.miembros && eq.miembros.some(m => m.uid === currentUser.uid)) {
-                            eq.miembros = eq.miembros.filter(m => m.uid !== currentUser.uid);
-                        }
-                        return eq;
-                    });
-                }
-                await updateDoc(actRef, { inscritos: nuevosInscritos });
-                alert("Hecho. Te has dado de baja.");
-                cerrarModal();
-            } catch(e) { alert("Error: " + e.message); }
-        }
+          const modal = document.getElementById("modal-detalles");
 
-        // --- EDICIÓN ---
-        let editActId = "";
-        window.abrirEdicion = (actId) => {
-            cerrarModal();
-            editActId = actId;
-            const ticket = allTickets.find(t => t.id === actId);
-            const inputsDiv = document.getElementById("edit-inputs");
-            inputsDiv.innerHTML = "";
-            
-            // Input style
-            const inputStyle = "width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;";
+          const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString([], {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
 
-            if(ticket.equipo.miembros) {
-                ticket.equipo.miembros.forEach(m => {
-                    inputsDiv.innerHTML += `<input type="text" class="mate-input" value="${m.nombre}" style="${inputStyle}">`;
-                });
-            }
-            document.getElementById("modal-edit").style.display = "flex";
-        }
 
-        window.guardarEdicion = async () => {
-            try {
-                const actRef = doc(db, "actividades", editActId);
-                const snap = await getDoc(actRef);
-                const inscritos = snap.data().inscritos;
-                
-                const nuevosMiembros = [];
-                document.querySelectorAll(".mate-input").forEach(inp => {
-                    if(inp.value.trim()) nuevosMiembros.push({ nombre: inp.value.trim(), uid: null });
-                });
 
-                const nuevosInscritos = inscritos.map(insc => {
-                    if(insc.capitan_uid === currentUser.uid) return { ...insc, miembros: nuevosMiembros };
-                    return insc;
-                });
+          let participantsHTML = "";
 
-                await updateDoc(actRef, { inscritos: nuevosInscritos });
-                alert("Equipo actualizado"); cerrarModal();
-            } catch(e) { alert(e.message); }
-        }
+          const inscritos = act.inscritos || [];
+
+          
+
+          inscritos.forEach(equipo => {
+
+              let membersNames = equipo.miembros ? equipo.miembros.map(m => m.nombre).join(", ") : "";
+
+              // ✅ CORRECCIÓN UNDEFINED EN MODAL
+
+              const nombreMostrar = equipo.nombre_equipo || equipo.capitan || "Usuario"; 
+
+              
+
+              participantsHTML += `
+
+                <div class="p-group">
+
+                    <div class="p-cap">⭐ ${nombreMostrar}</div>
+
+                    ${membersNames ? `<div class="p-members">${membersNames}</div>` : ''}
+
+                </div>`;
+
+          });
+
+
+
+          // Imagen por defecto si no hay
+
+          const imgUrl = act.imagen || 'https://via.placeholder.com/600x300?text=Evento';
+
+          document.getElementById("d-img").src = imgUrl;
+
+          
+
+          document.getElementById("d-title").innerText = act.titulo;
+
+          document.getElementById("d-meta").innerHTML = `
+
+            <span>📅 ${fechaStr}</span>
+
+            <span>📍 ${act.lugar || 'Ubicación sin definir'}</span>
+
+          `;
+
+          
+
+          const desc = act.descripcion ? `<div class="detail-desc">${act.descripcion}</div>` : "";
+
+          document.getElementById("d-desc").innerHTML = desc;
+
+          document.getElementById("d-list").innerHTML = participantsHTML;
+
+
+
+          // BOTONES
+
+          const btnArea = document.getElementById("d-actions");
+
+          btnArea.innerHTML = `
+
+            <button class="btn-action btn-chat" onclick="window.location.href='chat.html?id=${ticket.id}'">
+
+                <span class="material-symbols-outlined">chat</span> Chat del Grupo
+
+            </button>
+
+            <button class="btn-action btn-leave" onclick="salirDeActividad('${ticket.id}', '${ticket.rol}')">
+
+                <span class="material-symbols-outlined">delete</span> Desapuntarse
+
+            </button>
+
+            ${ticket.rol === 'Capitán' && act.modalidad !== 'individual' ? 
+
+                `<button class="btn-action btn-edit-eq" onclick="abrirEdicion('${ticket.id}')">
+
+                    <span class="material-symbols-outlined">edit</span> Editar Equipo
+
+                 </button>` : ''}
+
+          `;
+
+
+
+          modal.style.display = "flex";
+
+      }
+
+
+
+      window.cerrarDetalles = () => document.getElementById("modal-detalles").style.display = "none";
+
+
+
+      // --- SALIR DE ACTIVIDAD ---
+
+      window.salirDeActividad = async (actId, miRol) => {
+
+          if(!confirm("⚠️ ¿Seguro que quieres borrarte?\n\nSi eres capitán, se borrará todo tu equipo.")) return;
+
+          try {
+
+              const actRef = doc(db, "actividades", actId);
+
+              const snap = await getDoc(actRef);
+
+              const data = snap.data();
+
+              let inscritos = data.inscritos;
+
+              let nuevosInscritos = [];
+
+
+
+              if (miRol === 'Capitán') {
+
+                  nuevosInscritos = inscritos.filter(e => e.capitan_uid !== currentUser.uid);
+
+              } else {
+
+                  nuevosInscritos = inscritos.map(equipo => {
+
+                      if (equipo.miembros && equipo.miembros.some(m => m.uid === currentUser.uid)) {
+
+                          equipo.miembros = equipo.miembros.filter(m => m.uid !== currentUser.uid);
+
+                      }
+
+                      return equipo;
+
+                  });
+
+              }
+
+              await updateDoc(actRef, { inscritos: nuevosInscritos });
+
+              alert("✅ Te has dado de baja correctamente.");
+
+              cerrarDetalles();
+
+          } catch(e) { alert("Error: " + e.message); }
+
+      }
+
+
+
+      // --- EDICIÓN DE EQUIPO ---
+
+      let editActId = "";
+
+      window.abrirEdicion = (actId) => {
+
+          document.getElementById("modal-detalles").style.display = "none";
+
+          editActId = actId;
+
+          const ticket = allTickets.find(t => t.id === actId);
+
+          const modal = document.getElementById("modal-edit");
+
+          const inputsDiv = document.getElementById("edit-inputs");
+
+          inputsDiv.innerHTML = "";
+
+          
+
+          if(ticket.equipo.miembros) {
+
+              ticket.equipo.miembros.forEach((m, idx) => {
+
+                 inputsDiv.innerHTML += `
+
+                    <input type="text" class="mate-input" 
+
+                           value="${m.nombre}" 
+
+                           data-uid="${m.uid || ''}" 
+
+                           placeholder="Compañero ${idx+1}" 
+
+                           onkeyup="verificarUsuario(this)">`;
+
+              });
+
+          }
+
+          modal.style.display = "flex";
+
+      }
+
+
+
+      window.verificarUsuario = async (input) => {
+
+          const val = input.value.trim();
+
+          if(val.length < 2) { input.classList.remove('mate-found'); input.removeAttribute('data-uid'); return; }
+
+          const q = query(collection(db, "usuarios"), where("username", "==", val));
+
+          const snap = await getDocs(q);
+
+          if(!snap.empty) { input.classList.add('mate-found'); input.setAttribute('data-uid', snap.docs[0].id); } 
+
+      }
+
+
+
+      window.guardarEdicion = async () => {
+
+          const btn = document.getElementById("btn-save-edit"); btn.innerText="Guardando..."; btn.disabled=true;
+
+          try {
+
+              const actRef = doc(db, "actividades", editActId);
+
+              const actSnap = await getDoc(actRef);
+
+              const newMembers = [];
+
+              document.querySelectorAll(".mate-input").forEach(inp => {
+
+                  if(inp.value.trim()) newMembers.push({ nombre: inp.value.trim(), uid: inp.getAttribute('data-uid') || null, vinculado: !!inp.getAttribute('data-uid') });
+
+              });
+
+              const newInscritos = actSnap.data().inscritos.map(insc => {
+
+                  if(insc.capitan_uid === currentUser.uid) return { ...insc, miembros: newMembers };
+
+                  return insc;
+
+              });
+
+              await updateDoc(actRef, { inscritos: newInscritos });
+
+              alert("✅ Equipo actualizado"); document.getElementById("modal-edit").style.display = "none";
+
+          } catch(e) { alert(e.message); }
+
+          btn.innerText="Guardar Cambios"; btn.disabled=false;
+
+      }
+
+      
+
+      window.cerrarModal = () => document.getElementById("modal-edit").style.display = "none";
 
     </script>
+
 </head>
+
 <body>
 
     <div class="container">
-        <div class="header-area">
+
+        <div class="header-tools">
+
             <h1>Mis Tickets</h1>
-            <label class="toggle-wrapper">
+
+            <label class="toggle-container">
+
                 <span>Ocultar Pasados</span>
+
                 <div class="switch">
+
                     <input type="checkbox" id="toggle-past" checked onchange="renderTickets()">
+
                     <span class="slider"></span>
+
                 </div>
+
             </label>
+
         </div>
 
-        <div id="tickets-list" class="tickets-list">
-            <p style="text-align:center; margin-top:40px;">Cargando tus eventos...</p>
+
+
+        <div id="tickets-grid" class="tickets-grid">
+
+            <p style="text-align:center; margin-top:50px;">Cargando tus entradas...</p>
+
         </div>
+
     </div>
 
-    <div id="modal-detalles" class="modal-overlay" onclick="if(event.target===this) cerrarModal()">
-        <div class="modal">
-            <button class="close-btn" onclick="cerrarModal()"><span class="material-symbols-outlined">close</span></button>
-            
-            <div class="modal-header-color"></div>
-            <div class="modal-icon"></div>
 
-            <div id="m-title" class="m-title">...</div>
-            <div class="m-sub">
-                <span id="m-fecha">...</span> <br>
-                📍 <span id="m-lugar">...</span>
+
+    <div id="modal-detalles" class="modal-overlay" onclick="if(event.target === this) cerrarDetalles()">
+
+        <div class="modal">
+
+            <button class="btn-close-float" onclick="cerrarDetalles()">
+
+                <span class="material-symbols-outlined">close</span>
+
+            </button>
+
+            
+
+            <img id="d-img" class="modal-header-img" src="">
+
+            
+
+            <div class="modal-content">
+
+                <h2 id="d-title" class="detail-title">...</h2>
+
+                <div id="d-meta" class="detail-meta"></div>
+
+                <div id="d-desc"></div>
+
+                <div id="d-actions"></div>
+
+                
+
+                <div class="participants-list">
+
+                    <div style="font-weight:800; margin-bottom:15px; font-size:1.1rem;">Tu Grupo / Equipo</div>
+
+                    <div id="d-list"></div>
+
+                </div>
+
             </div>
 
-            <div class="list-group" id="participants-list"></div>
-            <div id="modal-actions"></div>
         </div>
+
     </div>
+
+
 
     <div id="modal-edit" class="modal-overlay">
-        <div class="modal" style="max-width:400px; margin: auto;">
-            <h2 style="margin-top:0">Editar Compañeros</h2>
-            <div id="edit-inputs"></div>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="cerrarModal()" class="btn-action" style="background:#eee; color:gray;">Cancelar</button>
-                <button onclick="guardarEdicion()" class="btn-action" style="background:#FF5722; color:white;">Guardar</button>
+
+        <div class="modal">
+
+            <div class="modal-edit-container">
+
+                <h2 style="margin-top:0">Editar Equipo</h2>
+
+                <div id="edit-inputs"></div>
+
+                <div style="margin-top:20px; display:flex; gap:10px;">
+
+                    <button onclick="cerrarModal()" class="btn-action" style="background:#f5f5f5; color:gray; font-weight:normal; width:50%;">Cancelar</button>
+
+                    <button onclick="guardarEdicion()" id="btn-save-edit" class="btn-action" style="background:var(--accent); color:white; width:50%;">Guardar</button>
+
+                </div>
+
             </div>
+
         </div>
+
     </div>
 
+
+
     <nav class="bottom-nav">
+
         <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
+
         <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
+
         <a href="#" class="nav-item active"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
+
         <a href="perfil.html" class="nav-item"><span class="material-symbols-outlined">person</span>Perfil</a>
+
     </nav>
 
 </body>
+
 </html>
