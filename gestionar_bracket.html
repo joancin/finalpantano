@@ -12,25 +12,25 @@
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --win-bg: #1b5e20; --win-text: #a5d6a7; }
         
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; overflow-x: auto; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 100%; overflow-x: auto; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); min-width: fit-content; }
         h1 { margin-top: 0; text-align: center; }
 
-        /* ESTILOS DEL CUADRO (BRACKET) */
-        .bracket-container { display: flex; padding: 20px 0; gap: 30px; }
-        .round { display: flex; flex-direction: column; justify-content: center; gap: 20px; min-width: 200px; }
-        .round-title { text-align: center; font-weight: bold; margin-bottom: 10px; color: var(--accent); }
+        .bracket-container { display: flex; padding: 20px 0; gap: 40px; }
+        .round { display: flex; flex-direction: column; justify-content: space-around; gap: 20px; min-width: 220px; }
+        .round-title { text-align: center; font-weight: bold; margin-bottom: 10px; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 5px; }
 
-        .match { background: rgba(0,0,0,0.03); border-radius: 10px; padding: 10px; border: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 5px; position: relative; }
-        .team { padding: 8px 12px; background: var(--card); border: 2px solid #ddd; border-radius: 6px; cursor: pointer; text-align: center; font-weight: bold; transition: all 0.2s; user-select: none; }
+        .match { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 8px; position: relative; }
+        
+        /* Líneas conectoras */
+        .round:not(:last-child) .match::after {
+            content: ''; position: absolute; right: -40px; top: 50%; width: 40px; height: 2px; background: #ccc; z-index: -1;
+        }
+
+        .team { padding: 10px; background: var(--card); border: 2px solid #ddd; border-radius: 6px; cursor: pointer; text-align: center; font-weight: bold; transition: all 0.2s; user-select: none; font-size: 0.9rem; }
         .team:hover { border-color: var(--accent); }
         .team.winner { background: var(--win-bg); border-color: var(--win-text); color: var(--win-text); }
-        .team.bye { opacity: 0.6; border-style: dashed; cursor: default; }
-
-        /* LÍNEAS CONECTORAS (BÁSICAS) */
-        .round:not(:last-child) .match::after {
-            content: ''; position: absolute; right: -30px; top: 50%; width: 30px; height: 2px; background: #ccc;
-        }
+        .team.bye { opacity: 0.6; border-style: dashed; cursor: default; background: #eee; }
 
         .btn-gen { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-reset { width: 100%; padding: 10px; background: transparent; color: #ff5252; border: 2px solid #ff5252; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
@@ -62,7 +62,8 @@
             currentData = snap.data();
             document.getElementById("titulo").innerText = currentData.titulo;
             
-            if(currentData.bracket && currentData.bracket.length > 0) {
+            // Verificamos si existe bracket y si tiene la estructura nueva (rounds)
+            if(currentData.bracket && currentData.bracket.rounds && currentData.bracket.rounds.length > 0) {
                 renderBracket(currentData.bracket);
                 document.getElementById("btn-gen").style.display = "none";
                 document.getElementById("btn-reset").style.display = "block";
@@ -81,19 +82,24 @@
             const teams = inscritos.map(i => i.nombre_equipo || i.capitan || "Participante").filter(n => n);
             teams.sort(() => Math.random() - 0.5);
 
-            let round1 = [];
+            let round1Matches = [];
             for(let i=0; i < teams.length; i += 2) {
                 if(i + 1 < teams.length) {
-                    round1.push({ team1: teams[i], team2: teams[i+1], winner: null });
+                    round1Matches.push({ team1: teams[i], team2: teams[i+1], winner: null });
                 } else {
-                    round1.push({ team1: teams[i], team2: null, winner: teams[i], bye: true });
+                    round1Matches.push({ team1: teams[i], team2: null, winner: teams[i], bye: true });
                 }
             }
 
-            const newBracket = [ round1 ]; // El bracket es ahora un array de rondas
+            // ESTRUCTURA CORREGIDA: Objeto con propiedad 'rounds'
+            const bracketStructure = {
+                rounds: [
+                    { matches: round1Matches }
+                ]
+            };
 
             try {
-                await updateDoc(doc(db, "actividades", actId), { bracket: newBracket });
+                await updateDoc(doc(db, "actividades", actId), { bracket: bracketStructure });
                 alert("✅ Cuadro generado");
                 location.reload();
             } catch(e) { alert("Error: " + e.message); }
@@ -103,9 +109,10 @@
             const container = document.getElementById("bracket-view");
             container.innerHTML = "";
 
-            bracketData.forEach((round, roundIndex) => {
+            bracketData.rounds.forEach((round, roundIndex) => {
                 let roundHtml = `<div class="round"><div class="round-title">Ronda ${roundIndex + 1}</div>`;
-                round.forEach((match, matchIndex) => {
+                
+                round.matches.forEach((match, matchIndex) => {
                     if(match.bye) {
                          roundHtml += `
                             <div class="match">
@@ -125,30 +132,41 @@
         }
 
         window.setWinner = async (roundIndex, matchIndex, winnerName) => {
-            if(!confirm(`¿Gana ${winnerName}?`)) return;
+            let bracket = currentData.bracket; // Copia local
+            const currentMatch = bracket.rounds[roundIndex].matches[matchIndex];
 
-            let bracket = [...currentData.bracket];
-            bracket[roundIndex][matchIndex].winner = winnerName;
+            // Si ya hay ganador, preguntar si se quiere cambiar
+            if(currentMatch.winner && currentMatch.winner !== winnerName) {
+                if(!confirm(`¿Cambiar ganador de ${currentMatch.winner} a ${winnerName}?`)) return;
+            } else if (!currentMatch.winner) {
+                if(!confirm(`¿Confirmar que gana ${winnerName}?`)) return;
+            }
 
-            // Comprobar si la ronda ha terminado
-            const currentRound = bracket[roundIndex];
-            const roundComplete = currentRound.every(m => m.winner !== null);
+            // Establecer ganador
+            bracket.rounds[roundIndex].matches[matchIndex].winner = winnerName;
 
-            if (roundComplete) {
-                // Generar siguiente ronda
-                const winners = currentRound.map(m => m.winner);
-                let nextRound = [];
+            // Lógica para avanzar de ronda
+            const currentRoundMatches = bracket.rounds[roundIndex].matches;
+            const roundComplete = currentRoundMatches.every(m => m.winner !== null);
+
+            // Si la ronda está completa y no es la última ya generada
+            if (roundComplete && roundIndex === bracket.rounds.length - 1) {
+                const winners = currentRoundMatches.map(m => m.winner);
+                
                 if (winners.length > 1) {
+                    let nextRoundMatches = [];
                     for(let i=0; i < winners.length; i += 2) {
                          if(i + 1 < winners.length) {
-                            nextRound.push({ team1: winners[i], team2: winners[i+1], winner: null });
+                            nextRoundMatches.push({ team1: winners[i], team2: winners[i+1], winner: null });
                         } else {
-                            nextRound.push({ team1: winners[i], team2: null, winner: winners[i], bye: true });
+                            nextRoundMatches.push({ team1: winners[i], team2: null, winner: winners[i], bye: true });
                         }
                     }
-                    bracket.push(nextRound);
-                } else if (winners.length === 1 && roundIndex === bracket.length - 1) {
-                     alert(`¡TORNEO FINALIZADO! 🏆 Ganador: ${winners[0]}`);
+                    // Añadimos nueva ronda al array de rounds
+                    bracket.rounds.push({ matches: nextRoundMatches });
+                    alert("¡Nueva ronda generada!");
+                } else {
+                    alert(`🏆 ¡TORNEO FINALIZADO! GANADOR: ${winners[0]} 🏆`);
                 }
             }
 
@@ -157,8 +175,8 @@
         }
 
         window.resetSorteo = async () => {
-            if(confirm("¿Borrar cuadro y empezar de cero?")) {
-                await updateDoc(doc(db, "actividades", actId), { bracket: [] });
+            if(confirm("⚠ ¿Borrar todo el cuadro y empezar de cero?")) {
+                await updateDoc(doc(db, "actividades", actId), { bracket: null });
                 location.reload();
             }
         }
@@ -169,7 +187,7 @@
         <button class="btn-back" onclick="window.history.back()">⬅ Volver</button>
         <div class="card">
             <h1 id="titulo">...</h1>
-            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">🎲 GENERAR CUADRO DEL TORNEO</button>
+            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">🎲 GENERAR CUADRO</button>
             <div id="bracket-view" class="bracket-container"></div>
             <button id="btn-reset" class="btn-reset" onclick="resetSorteo()">♻️ REINICIAR CUADRO</button>
         </div>
