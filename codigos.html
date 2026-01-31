@@ -50,7 +50,7 @@
         import { getFirestore, collection, addDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // TU CONFIG
+        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -67,7 +67,16 @@
             }
         });
 
-        // GENERAR CÓDIGO ALEATORIO
+        // --- FUNCIÓN PARA GENERAR 8 CARACTERES ALFANUMÉRICOS ---
+        function generateRandomString(length) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
         window.generarCodigo = async () => {
             if(!currentUser) {
                 alert("Error: No estás identificado.");
@@ -78,21 +87,20 @@
             btn.disabled = true; 
             btn.innerText = "Creando...";
 
-            // Crea un código tipo "FIESTA-XY12"
-            const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-            const nuevoCodigo = `FIESTA-${randomStr}`;
+            // 1. Generamos código de 8 caracteres
+            const nuevoCodigo = generateRandomString(8);
 
             try {
-                // Usamos new Date() en vez de serverTimestamp para evitar problemas de reglas
+                // 2. Guardamos en Firebase AÑADIENDO EL CAMPO ROL
                 await addDoc(collection(db, "invitaciones"), {
                     codigo: nuevoCodigo,
+                    rol: "festero", // <--- ¡ESTO ES LO QUE FALTABA!
                     creado_por: currentUser.uid,
                     creado_email: currentUser.email,
                     estado: "libre", 
                     fecha: new Date().toISOString() 
                 });
                 
-                // Feedback visual rápido
                 alert(`✅ Código creado: ${nuevoCodigo}`);
 
             } catch (e) {
@@ -105,8 +113,7 @@
         }
 
         function cargarMisCodigos() {
-            // CORRECCIÓN: Quitamos el orderBy de la consulta a Firebase para evitar el error de Índice Compuesto.
-            // Ordenaremos en Javascript.
+            // Consulta simple para evitar problemas de índices
             const q = query(
                 collection(db, "invitaciones"), 
                 where("creado_por", "==", currentUser.uid)
@@ -126,7 +133,7 @@
                     invitaciones.push(doc.data());
                 });
 
-                // Ordenamos aquí (el más nuevo primero)
+                // Ordenamos por fecha (del más nuevo al más viejo) en el navegador
                 invitaciones.sort((a, b) => {
                     return (b.fecha || "").localeCompare(a.fecha || "");
                 });
@@ -140,6 +147,7 @@
                             <div>
                                 <div class="code-text">${data.codigo}</div>
                                 <span class="badge ${estadoClass}">${estadoText}</span>
+                                <span style="font-size:0.7rem; color:gray; margin-left:5px;">Rol: ${data.rol || 'festero'}</span>
                             </div>
                             ${data.estado === 'libre' ? 
                                 `<button class="btn-copy" onclick="copiar('${data.codigo}')">
@@ -167,7 +175,7 @@
         </div>
 
         <div class="card-generator">
-            <p style="margin-bottom: 20px;">Genera un código único para invitar a alguien.</p>
+            <p style="margin-bottom: 20px;">Genera un código único de 8 caracteres.</p>
             <button id="btn-gen" class="big-btn" onclick="generarCodigo()">
                 <span class="material-symbols-outlined">auto_fix_high</span>
                 Generar Nuevo Código
