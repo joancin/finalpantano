@@ -16,16 +16,20 @@
         .card { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: inherit; box-sizing: border-box; }
+        textarea { resize: vertical; min-height: 80px; }
         
-        .btn-create { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-create { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
+        .btn-cancel { background: #9e9e9e; display: none; margin-top: 10px; } /* Oculto por defecto */
         
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); }
         .item-info { flex: 1; }
         .item-actions { display: flex; gap: 8px; }
         
-        .btn-del { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-manage { background: #ff9800; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .btn-icon { border: none; border-radius: 8px; cursor: pointer; font-weight: bold; padding: 8px 12px; display: flex; align-items: center; justify-content: center; }
+        .btn-del { background: #ff4444; color: white; }
+        .btn-edit { background: #2196f3; color: white; }
+        .btn-manage { background: #ff9800; color: white; gap: 5px; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
         .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
@@ -35,13 +39,16 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, addDoc, updateDoc, query, orderBy, onSnapshot, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
       const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
+      
+      let editMode = false;
+      let editId = "";
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
@@ -50,24 +57,37 @@
           escucharActividades();
       });
 
-      window.crearActividad = async () => {
+      window.guardarActividad = async () => {
           const titulo = document.getElementById("act-title").value;
-          const fecha = document.getElementById("act-date").value;
+          const fechaStr = document.getElementById("act-date").value;
           const lugar = document.getElementById("act-place").value;
+          const descripcion = document.getElementById("act-desc").value; // NUEVO
           const genero = document.getElementById("act-genre").value;
           const audiencia = document.getElementById("act-audience").value;
           const modalidad = document.getElementById("act-modality").value;
           const tamano = document.getElementById("act-size").value;
 
-          if(!titulo || !fecha) return alert("Faltan datos");
+          if(!titulo || !fechaStr) return alert("Faltan datos obligatorios");
+          const fecha = new Date(fechaStr);
+
+          const data = { 
+              titulo, fecha, lugar, descripcion, genero, audiencia, modalidad, 
+              tamano_equipo: parseInt(tamano)
+          };
 
           try {
-              await addDoc(collection(db, "actividades"), {
-                  titulo, fecha: new Date(fecha), lugar, genero, audiencia, modalidad, 
-                  tamano_equipo: parseInt(tamano), inscritos: []
-              });
-              alert("✅ Actividad Creada");
-              document.getElementById("act-title").value = "";
+              if (editMode) {
+                  // MODO EDICIÓN
+                  await updateDoc(doc(db, "actividades", editId), data);
+                  alert("✅ Actividad Actualizada");
+                  cancelarEdicion();
+              } else {
+                  // MODO CREACIÓN
+                  data.inscritos = []; // Solo al crear iniciamos array vacío
+                  await addDoc(collection(db, "actividades"), data);
+                  alert("✅ Actividad Creada");
+                  limpiarForm();
+              }
           } catch(e) { alert("Error: " + e.message); }
       }
 
@@ -80,13 +100,12 @@
                   const act = d.data();
                   const fecha = act.fecha.toDate ? act.fecha.toDate().toLocaleDateString() : '';
                   
-                  // LÓGICA DEL BOTÓN GESTIONAR
                   let btnGestion = "";
-                  if (act.genero === 'torneo') {
-                      btnGestion = `<button class="btn-manage" onclick="window.location.href='gestionar_bracket.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">emoji_events</span> Torneo</button>`;
-                  } else if (act.genero === 'carrera' || act.genero === 'concurso') {
-                      btnGestion = `<button class="btn-manage" onclick="window.location.href='gestionar_podio.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">podium</span> Podio</button>`;
-                  }
+                  if (act.genero === 'torneo') btnGestion = `<button class="btn-icon btn-manage" onclick="window.location.href='gestionar_bracket.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">emoji_events</span></button>`;
+                  else if (act.genero === 'carrera' || act.genero === 'concurso') btnGestion = `<button class="btn-icon btn-manage" onclick="window.location.href='gestionar_podio.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">podium</span></button>`;
+
+                  // Guardamos datos en JSON string para pasarlos al editar (truco rápido)
+                  const safeData = encodeURIComponent(JSON.stringify({id: d.id, ...act, fecha: act.fecha.toDate().toISOString().slice(0,16)}));
 
                   lista.innerHTML += `
                     <div class="list-item">
@@ -96,23 +115,70 @@
                         </div>
                         <div class="item-actions">
                             ${btnGestion}
-                            <button class="btn-del" onclick="borrar('${d.id}')">🗑️</button>
+                            <button class="btn-icon btn-edit" onclick="cargarParaEditar('${safeData}')">✏️</button>
+                            <button class="btn-icon btn-del" onclick="borrar('${d.id}')">🗑️</button>
                         </div>
                     </div>`;
               });
           });
       }
-      window.borrar = async (id) => { if(confirm("¿Borrar evento?")) await deleteDoc(doc(db, "actividades", id)); }
+
+      window.cargarParaEditar = (dataStr) => {
+          const data = JSON.parse(decodeURIComponent(dataStr));
+          editMode = true;
+          editId = data.id;
+
+          document.getElementById("form-title").innerText = "Editar Actividad";
+          document.getElementById("btn-submit").innerText = "Guardar Cambios";
+          document.getElementById("btn-cancel").style.display = "block";
+
+          document.getElementById("act-title").value = data.titulo;
+          document.getElementById("act-date").value = data.fecha;
+          document.getElementById("act-place").value = data.lugar || "";
+          document.getElementById("act-desc").value = data.descripcion || "";
+          document.getElementById("act-genre").value = data.genero;
+          document.getElementById("act-audience").value = data.audiencia || "todos";
+          document.getElementById("act-modality").value = data.modalidad;
+          document.getElementById("act-size").value = data.tamano_equipo || 5;
+
+          document.getElementById("size-group").style.display = data.modalidad==='equipos' ? 'block' : 'none';
+          
+          window.scrollTo(0,0); // Subir para ver el form
+      }
+
+      window.cancelarEdicion = () => {
+          editMode = false; editId = "";
+          document.getElementById("form-title").innerText = "Crear Actividad";
+          document.getElementById("btn-submit").innerText = "Publicar";
+          document.getElementById("btn-cancel").style.display = "none";
+          limpiarForm();
+      }
+
+      function limpiarForm() {
+          document.getElementById("act-title").value = "";
+          document.getElementById("act-date").value = "";
+          document.getElementById("act-place").value = "";
+          document.getElementById("act-desc").value = "";
+          document.getElementById("act-size").value = 5;
+      }
+
+      window.borrar = async (id) => { if(confirm("¿Borrar evento? Se perderán los inscritos.")) await deleteDoc(doc(db, "actividades", id)); }
     </script>
 </head>
 <body>
     <div class="container">
         <h1>🛠️ Gestión</h1>
         <div class="card">
-            <h2>Crear Actividad</h2>
+            <h2 id="form-title">Crear Actividad</h2>
             <div class="form-group"><label>Título</label><input type="text" id="act-title"></div>
             <div class="form-group"><label>Fecha</label><input type="datetime-local" id="act-date"></div>
             <div class="form-group"><label>Lugar</label><input type="text" id="act-place"></div>
+            
+            <div class="form-group">
+                <label>Descripción / Normas</label>
+                <textarea id="act-desc" placeholder="Detalles, normas, premios..."></textarea>
+            </div>
+
             <div class="form-group">
                 <label>Tipo</label>
                 <select id="act-genre">
@@ -121,7 +187,7 @@
                     <option value="comida">🥘 Comida</option>
                     <option value="fiesta">🎉 Fiesta</option>
                     <option value="carrera">🏃 Carrera</option>
-                    <option value="torneo">🎾 Torneo (Bracket)</option>
+                    <option value="torneo">🎾 Torneo</option>
                     <option value="otro">🎲 Otro</option>
                 </select>
             </div>
@@ -145,10 +211,12 @@
                 <label>Miembros por Equipo</label>
                 <input type="number" id="act-size" value="5">
             </div>
-            <button class="btn-create" onclick="crearActividad()">Publicar</button>
+            
+            <button id="btn-submit" class="btn-create" onclick="guardarActividad()">Publicar</button>
+            <button id="btn-cancel" class="btn-create btn-cancel" onclick="cancelarEdicion()">Cancelar Edición</button>
         </div>
         <div class="card">
-            <h2>Actividades Activas</h2>
+            <h2>Activas</h2>
             <div id="admin-list">Cargando...</div>
         </div>
     </div>
