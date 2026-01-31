@@ -20,16 +20,25 @@
         textarea { resize: vertical; min-height: 80px; }
         
         .btn-create { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
-        .btn-cancel { background: #9e9e9e; display: none; margin-top: 10px; } /* Oculto por defecto */
+        .btn-cancel { background: #9e9e9e; display: none; margin-top: 10px; }
         
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); }
         .item-info { flex: 1; }
-        .item-actions { display: flex; gap: 8px; }
+        .item-actions { display: flex; gap: 5px; }
         
         .btn-icon { border: none; border-radius: 8px; cursor: pointer; font-weight: bold; padding: 8px 12px; display: flex; align-items: center; justify-content: center; }
         .btn-del { background: #ff4444; color: white; }
         .btn-edit { background: #2196f3; color: white; }
-        .btn-manage { background: #ff9800; color: white; gap: 5px; }
+        .btn-manage { background: #ff9800; color: white; }
+        .btn-users { background: #673ab7; color: white; } /* BOTÓN NUEVO */
+
+        .img-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; background: #eee; }
+
+        /* MODAL LISTA */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal { background: var(--card); padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; color: var(--text); }
+        .participant-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border); }
+        .add-row { display: flex; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid var(--border); }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
         .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
@@ -49,6 +58,7 @@
       
       let editMode = false;
       let editId = "";
+      let currentParticipantsActId = ""; // ID de la actividad que estamos gestionando participantes
 
       onAuthStateChanged(auth, async (user) => {
           if (!user) window.location.href = "index.html";
@@ -57,11 +67,18 @@
           escucharActividades();
       });
 
+      window.previewImage = () => {
+          const url = document.getElementById("act-image").value;
+          const img = document.getElementById("img-preview");
+          if(url) { img.src = url; img.style.display = "block"; } else { img.style.display = "none"; }
+      }
+
       window.guardarActividad = async () => {
           const titulo = document.getElementById("act-title").value;
           const fechaStr = document.getElementById("act-date").value;
           const lugar = document.getElementById("act-place").value;
-          const descripcion = document.getElementById("act-desc").value; // NUEVO
+          const descripcion = document.getElementById("act-desc").value;
+          const imagen = document.getElementById("act-image").value;
           const genero = document.getElementById("act-genre").value;
           const audiencia = document.getElementById("act-audience").value;
           const modalidad = document.getElementById("act-modality").value;
@@ -70,20 +87,15 @@
           if(!titulo || !fechaStr) return alert("Faltan datos obligatorios");
           const fecha = new Date(fechaStr);
 
-          const data = { 
-              titulo, fecha, lugar, descripcion, genero, audiencia, modalidad, 
-              tamano_equipo: parseInt(tamano)
-          };
+          const data = { titulo, fecha, lugar, descripcion, imagen, genero, audiencia, modalidad, tamano_equipo: parseInt(tamano) };
 
           try {
               if (editMode) {
-                  // MODO EDICIÓN
                   await updateDoc(doc(db, "actividades", editId), data);
                   alert("✅ Actividad Actualizada");
                   cancelarEdicion();
               } else {
-                  // MODO CREACIÓN
-                  data.inscritos = []; // Solo al crear iniciamos array vacío
+                  data.inscritos = []; 
                   await addDoc(collection(db, "actividades"), data);
                   alert("✅ Actividad Creada");
                   limpiarForm();
@@ -104,16 +116,17 @@
                   if (act.genero === 'torneo') btnGestion = `<button class="btn-icon btn-manage" onclick="window.location.href='gestionar_bracket.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">emoji_events</span></button>`;
                   else if (act.genero === 'carrera' || act.genero === 'concurso') btnGestion = `<button class="btn-icon btn-manage" onclick="window.location.href='gestionar_podio.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">podium</span></button>`;
 
-                  // Guardamos datos en JSON string para pasarlos al editar (truco rápido)
                   const safeData = encodeURIComponent(JSON.stringify({id: d.id, ...act, fecha: act.fecha.toDate().toISOString().slice(0,16)}));
 
                   lista.innerHTML += `
                     <div class="list-item">
+                        <img src="${act.imagen || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; object-fit:cover; border-radius:5px; margin-right:10px;">
                         <div class="item-info">
                             <strong>${act.titulo}</strong><br>
-                            <small>${fecha} - ${act.genero}</small>
+                            <small>${fecha} - ${act.genero} (${act.inscritos ? act.inscritos.length : 0} apuntados)</small>
                         </div>
                         <div class="item-actions">
+                            <button class="btn-icon btn-users" onclick="abrirParticipantes('${d.id}')">👥</button>
                             ${btnGestion}
                             <button class="btn-icon btn-edit" onclick="cargarParaEditar('${safeData}')">✏️</button>
                             <button class="btn-icon btn-del" onclick="borrar('${d.id}')">🗑️</button>
@@ -123,27 +136,101 @@
           });
       }
 
+      // --- LÓGICA DE GESTIÓN DE PARTICIPANTES ---
+      window.abrirParticipantes = async (actId) => {
+          currentParticipantsActId = actId;
+          const modal = document.getElementById("modal-participantes");
+          const snap = await getDoc(doc(db, "actividades", actId));
+          const data = snap.data();
+          
+          document.getElementById("p-title").innerText = "Inscritos: " + data.titulo;
+          renderListaParticipantes(data.inscritos || []);
+          modal.style.display = "flex";
+      }
+
+      function renderListaParticipantes(inscritos) {
+          const lista = document.getElementById("p-list");
+          lista.innerHTML = "";
+          
+          if(inscritos.length === 0) { lista.innerHTML = "<p style='color:gray; text-align:center;'>Nadie apuntado aún.</p>"; return; }
+
+          inscritos.forEach((insc, idx) => {
+              const nombre = insc.nombre_equipo || insc.capitan || "Sin Nombre";
+              const miembros = insc.miembros && insc.miembros.length > 0 ? ` (+${insc.miembros.length})` : "";
+              
+              lista.innerHTML += `
+                <div class="participant-row">
+                    <div>
+                        <strong>${nombre}</strong> <small>${miembros}</small>
+                        <div style="font-size:0.75rem; color:gray;">${insc.capitan_uid === 'manual' ? '📝 Añadido a mano' : '📱 App'}</div>
+                    </div>
+                    <button class="btn-icon btn-del" style="padding:5px;" onclick="borrarParticipante(${idx})">×</button>
+                </div>`;
+          });
+      }
+
+      window.agregarParticipanteManual = async () => {
+          const nombre = document.getElementById("manual-name").value.trim();
+          if(!nombre) return alert("Escribe un nombre");
+
+          // Creamos una inscripción manual
+          const nuevaInscripcion = {
+              capitan: nombre,
+              nombre_equipo: nombre,
+              capitan_uid: 'manual', // Marcamos que no es un usuario de la app
+              fecha: new Date(),
+              miembros: []
+          };
+
+          try {
+              const actRef = doc(db, "actividades", currentParticipantsActId);
+              const snap = await getDoc(actRef);
+              const inscritos = snap.data().inscritos || [];
+              
+              inscritos.push(nuevaInscripcion);
+              
+              await updateDoc(actRef, { inscritos: inscritos });
+              document.getElementById("manual-name").value = "";
+              renderListaParticipantes(inscritos);
+          } catch(e) { alert("Error: " + e.message); }
+      }
+
+      window.borrarParticipante = async (index) => {
+          if(!confirm("¿Borrar a este participante?")) return;
+          try {
+              const actRef = doc(db, "actividades", currentParticipantsActId);
+              const snap = await getDoc(actRef);
+              let inscritos = snap.data().inscritos || [];
+              
+              inscritos.splice(index, 1); // Borrar por posición
+              
+              await updateDoc(actRef, { inscritos: inscritos });
+              renderListaParticipantes(inscritos);
+          } catch(e) { alert("Error: " + e.message); }
+      }
+
+      window.cerrarParticipantes = () => document.getElementById("modal-participantes").style.display = "none";
+
+      // --- FIN LÓGICA PARTICIPANTES ---
+
       window.cargarParaEditar = (dataStr) => {
           const data = JSON.parse(decodeURIComponent(dataStr));
-          editMode = true;
-          editId = data.id;
-
+          editMode = true; editId = data.id;
           document.getElementById("form-title").innerText = "Editar Actividad";
           document.getElementById("btn-submit").innerText = "Guardar Cambios";
           document.getElementById("btn-cancel").style.display = "block";
-
           document.getElementById("act-title").value = data.titulo;
           document.getElementById("act-date").value = data.fecha;
           document.getElementById("act-place").value = data.lugar || "";
           document.getElementById("act-desc").value = data.descripcion || "";
+          document.getElementById("act-image").value = data.imagen || "";
           document.getElementById("act-genre").value = data.genero;
           document.getElementById("act-audience").value = data.audiencia || "todos";
           document.getElementById("act-modality").value = data.modalidad;
           document.getElementById("act-size").value = data.tamano_equipo || 5;
-
+          previewImage();
           document.getElementById("size-group").style.display = data.modalidad==='equipos' ? 'block' : 'none';
-          
-          window.scrollTo(0,0); // Subir para ver el form
+          window.scrollTo(0,0);
       }
 
       window.cancelarEdicion = () => {
@@ -159,6 +246,8 @@
           document.getElementById("act-date").value = "";
           document.getElementById("act-place").value = "";
           document.getElementById("act-desc").value = "";
+          document.getElementById("act-image").value = "";
+          document.getElementById("img-preview").style.display = "none";
           document.getElementById("act-size").value = 5;
       }
 
@@ -173,12 +262,12 @@
             <div class="form-group"><label>Título</label><input type="text" id="act-title"></div>
             <div class="form-group"><label>Fecha</label><input type="datetime-local" id="act-date"></div>
             <div class="form-group"><label>Lugar</label><input type="text" id="act-place"></div>
-            
+            <div class="form-group"><label>Descripción / Normas</label><textarea id="act-desc"></textarea></div>
             <div class="form-group">
-                <label>Descripción / Normas</label>
-                <textarea id="act-desc" placeholder="Detalles, normas, premios..."></textarea>
+                <label>Imagen (URL)</label>
+                <input type="text" id="act-image" oninput="previewImage()">
+                <img id="img-preview" class="img-preview">
             </div>
-
             <div class="form-group">
                 <label>Tipo</label>
                 <select id="act-genre">
@@ -208,18 +297,33 @@
                 </select>
             </div>
             <div class="form-group" id="size-group" style="display:none;">
-                <label>Miembros por Equipo</label>
-                <input type="number" id="act-size" value="5">
+                <label>Miembros</label><input type="number" id="act-size" value="5">
             </div>
-            
             <button id="btn-submit" class="btn-create" onclick="guardarActividad()">Publicar</button>
-            <button id="btn-cancel" class="btn-create btn-cancel" onclick="cancelarEdicion()">Cancelar Edición</button>
+            <button id="btn-cancel" class="btn-create btn-cancel" onclick="cancelarEdicion()">Cancelar</button>
         </div>
         <div class="card">
             <h2>Activas</h2>
             <div id="admin-list">Cargando...</div>
         </div>
     </div>
+
+    <div id="modal-participantes" class="modal-overlay">
+        <div class="modal">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 id="p-title" style="margin:0;">Inscritos</h3>
+                <button onclick="cerrarParticipantes()" style="background:transparent; border:none; font-size:1.5rem; cursor:pointer;">×</button>
+            </div>
+            
+            <div class="add-row">
+                <input type="text" id="manual-name" placeholder="Nombre (Ej: La Tía Paqui)">
+                <button class="btn-create" style="margin:0; width:auto; padding:10px 20px;" onclick="agregarParticipanteManual()">Añadir</button>
+            </div>
+
+            <div id="p-list">Cargando...</div>
+        </div>
+    </div>
+
     <nav class="bottom-nav">
         <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
         <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
