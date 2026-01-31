@@ -22,7 +22,7 @@
         
         h1 { margin-bottom: 20px; font-weight: 800; }
 
-        /* --- CARNET DIGITAL (LIMPIO) --- */
+        /* CARNET DIGITAL */
         .carnet {
             background: var(--gradient);
             color: white;
@@ -40,17 +40,8 @@
         }
         .carnet:active { transform: scale(0.98); }
 
-        /* Decoración de fondo */
-        .carnet::before {
-            content: ''; position: absolute; top: -50px; right: -50px;
-            width: 180px; height: 180px;
-            background: rgba(255,255,255,0.1); border-radius: 50%;
-        }
-        .carnet::after {
-            content: ''; position: absolute; bottom: -30px; left: -30px;
-            width: 120px; height: 120px;
-            background: rgba(255,255,255,0.1); border-radius: 50%;
-        }
+        .carnet::before { content: ''; position: absolute; top: -50px; right: -50px; width: 180px; height: 180px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .carnet::after { content: ''; position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; }
 
         .carnet-header { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
         .app-name { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.8; text-transform: uppercase; font-weight: bold; }
@@ -60,10 +51,10 @@
         .user-name { font-size: 2rem; font-weight: 800; margin: 0; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .user-id { font-family: 'Share Tech Mono', monospace; font-size: 1rem; opacity: 0.85; margin-top: 8px; letter-spacing: 1px; }
 
-        /* --- SECCIONES --- */
-        .section-title { font-size: 0.9rem; color: gray; margin-bottom: 10px; font-weight: 600; margin-left: 5px; }
+        /* SECCIONES MENU */
+        .section-title { font-size: 0.9rem; color: gray; margin-bottom: 10px; font-weight: 600; margin-left: 5px; margin-top: 20px; }
         
-        .action-list { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 25px; }
+        .action-list { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
         
         .action-item { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: background 0.2s; }
         .action-item:last-child { border-bottom: none; }
@@ -74,6 +65,7 @@
         
         .i-admin { background: #673ab7; }
         .i-theme { background: #2196f3; }
+        .i-legal { background: #607d8b; }
         .i-logout { background: #ff5252; }
 
         /* SWITCH */
@@ -189,7 +181,35 @@
                     <span class="slider"></span>
                 </label>
             </div>
+        </div>
 
+        <div class="section-title">LEGAL</div>
+        <div class="action-list">
+            <div class="action-item" onclick="window.location.href='terminos.html'">
+                <div class="a-left">
+                    <div class="icon-box i-legal"><span class="material-symbols-outlined">gavel</span></div>
+                    Términos y Condiciones
+                </div>
+                <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
+            </div>
+            <div class="action-item" onclick="window.location.href='privacidad.html'">
+                <div class="a-left">
+                    <div class="icon-box i-legal"><span class="material-symbols-outlined">policy</span></div>
+                    Política de Privacidad
+                </div>
+                <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
+            </div>
+            <div class="action-item" onclick="window.location.href='cookies.html'">
+                <div class="a-left">
+                    <div class="icon-box i-legal"><span class="material-symbols-outlined">cookie</span></div>
+                    Política de Cookies
+                </div>
+                <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
+            </div>
+        </div>
+
+        <div class="section-title">CUENTA</div>
+        <div class="action-list">
             <div class="action-item" onclick="cerrarSesion()">
                 <div class="a-left">
                     <div class="icon-box i-logout"><span class="material-symbols-outlined">logout</span></div>
