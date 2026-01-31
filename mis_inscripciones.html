@@ -8,72 +8,57 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --border: #ddd; --success: #4caf50; --danger: #d32f2f; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
+        /* Mismo estilo visual que actividades para coherencia */
+        :root { --bg: #f4f7f6; --text: #333; --card: white; --accent: #ff5722; --border: #e0e0e0; --shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --border: #333; --shadow: 0 4px 12px rgba(0,0,0,0.3); }
         
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
         .container { max-width: 800px; margin: 0 auto; }
         
-        .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        h1 { margin: 0; font-size: 1.5rem; }
+        h1 { margin: 0 0 20px 0; font-size: 1.8rem; }
 
-        .toggle-container { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: bold; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(18px); }
+        .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
-        .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-
-        .ticket { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer; }
+        .ticket { background: var(--card); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); position: relative; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer; display: flex; }
         .ticket:active { transform: scale(0.98); }
-        .ticket.past { opacity: 0.6; filter: grayscale(1); }
         
-        .ticket-head { background: var(--accent); padding: 10px; height: 40px; position: relative; display: flex; justify-content: flex-end; }
-        .ticket.past .ticket-head { background: gray; }
+        .ticket-left { width: 10px; background: var(--accent); }
+        .ticket-content { padding: 20px; flex: 1; }
         
-        /* Botón Editar Equipo (Flotante en tarjeta) */
-        .btn-edit { background: rgba(255,255,255,0.3); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background 0.2s; }
-        .btn-edit:hover { background: rgba(255,255,255,0.5); }
+        .t-title { font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 800; line-height: 1.2; }
+        .t-meta { display: flex; align-items: center; gap: 8px; color: gray; font-size: 0.9rem; margin-bottom: 5px; }
+        .t-role { display: inline-block; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: var(--text); margin-top: 10px; }
 
-        .ticket-body { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding-top: 10px; }
-        .t-title { font-size: 0.95rem; margin: 0; margin-bottom: 5px; line-height: 1.2; font-weight: 800; }
-        .t-date { font-size: 0.8rem; color: gray; display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
-        .t-badge { display: inline-block; padding: 3px 8px; background: rgba(0,0,0,0.05); border-radius: 10px; font-size: 0.7rem; font-weight: bold; color: var(--text); border: 1px solid var(--border); width: fit-content; }
+        /* MODAL DETALLES (IGUAL QUE ACTIVIDADES) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 2000; backdrop-filter: blur(5px); }
+        .modal { background: var(--card); padding: 0; border-radius: 25px 25px 0 0; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; animation: slideUp 0.3s; }
+        .modal-header-img { width: 100%; height: 200px; object-fit: cover; }
+        .modal-content { padding: 25px; padding-bottom: 40px; }
+        .btn-close-float { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.3); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+        
+        .detail-title { font-size: 1.5rem; margin: 0 0 10px 0; }
+        .detail-desc { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 10px; margin: 20px 0; line-height: 1.5; }
+        
+        .participants-list { background: var(--bg); border-radius: 12px; padding: 15px; margin-top: 20px; }
+        .p-group { padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .p-cap { font-weight: bold; }
+        .p-members { font-size: 0.85rem; color: gray; }
 
-        /* MODAL DETALLES (ESTILO IDENTICO A ACTIVIDADES) */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: flex-end; z-index: 2000; backdrop-filter: blur(3px); }
-        .modal { background: var(--card); padding: 25px; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px; color: var(--text); max-height: 90vh; overflow-y: auto; position: relative; animation: slideUp 0.3s; }
+        .btn-action { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
+        .btn-chat { background: #e3f2fd; color: #1565c0; }
+        .btn-leave { background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; }
+
+        /* MODAL EDITAR */
+        .modal-edit-container { padding: 30px; }
+        .modal input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; }
+        .mate-found { border-color: #4caf50 !important; }
+
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        .detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
-        .detail-title { font-size: 1.5rem; margin: 0 0 10px 0; line-height: 1.2; }
-        .detail-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: gray; }
-        .detail-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); }
-        .detail-header { font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
-
-        .participants-list { background: var(--bg); border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; }
-        .p-group { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .p-group:last-child { border: none; margin: 0; padding: 0; }
-        .p-cap { font-weight: bold; font-size: 0.9rem; color: var(--text); }
-        .p-members { font-size: 0.85rem; color: gray; margin-left: 10px; }
-
-        .btn-close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.1); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; }
-        
-        .btn-mini { padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .btn-full { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; }
-        .btn-leave-lg { background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
-
-        /* INPUTS EDICIÓN */
-        .modal input { width: 100%; padding: 12px; margin-bottom: 8px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; }
-        .mate-found { border-color: var(--success) !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234caf50' width='18px' height='18px'%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: max(15px, env(safe-area-inset-bottom)); }
+        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.2s; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-        .material-symbols-outlined { font-size: 24px; }
+        .nav-item span { font-size: 26px; margin-bottom: 4px; }
     </style>
 
     <script type="module">
@@ -104,7 +89,6 @@
                   let miRol = null;
                   let miEquipo = null;
 
-                  // 1. Buscamos vinculación
                   const soyCapitan = inscritos.find(e => e.capitan_uid === user.uid);
                   const soyMiembroUID = inscritos.find(e => e.miembros && e.miembros.some(m => m.uid === user.uid));
                   
@@ -114,7 +98,7 @@
                   if (miEquipo) {
                       allTickets.push({
                           id: docSnap.id,
-                          data: act, // Guardamos TODO el evento para mostrar detalles
+                          data: act, 
                           titulo: act.titulo,
                           fecha: fechaEvento,
                           rol: miRol,
@@ -129,82 +113,67 @@
 
       window.renderTickets = () => {
           const container = document.getElementById("tickets-grid");
-          const hidePast = document.getElementById("toggle-past").checked;
           container.innerHTML = "";
-          const filtered = allTickets.filter(t => hidePast ? !t.esPasado : true);
+          
+          // Ocultar pasados por defecto
+          const filtered = allTickets.filter(t => !t.esPasado);
 
           if(filtered.length === 0) {
-              container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:gray; margin-top:40px;">No hay tickets que mostrar.</p>`;
+              container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:gray; margin-top:40px;">No tienes tickets activos.</p>`;
               return;
           }
 
           filtered.forEach(t => {
               const fechaStr = t.fecha.toLocaleString([], {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-              const puedeEditar = t.rol === "Capitán" && !t.esPasado && t.equipo.miembros && t.equipo.miembros.length > 0;
+              const nombreEquipo = t.equipo.nombre_equipo || t.equipo.capitan || "Participante";
 
-              // IMPORTANTE: onclick en el padre, y stopPropagation en el hijo (editar)
               container.innerHTML += `
-                <div class="ticket ${t.esPasado ? 'past' : ''}" onclick="verDetalles('${t.id}')">
-                    <div class="ticket-head">
-                        ${puedeEditar ? 
-                            `<button class="btn-edit" onclick="event.stopPropagation(); abrirEdicion('${t.id}')">
-                                <span class="material-symbols-outlined" style="font-size:18px">edit</span>
-                             </button>` : ''}
-                    </div>
-                    <div class="ticket-body">
-                        <div>
-                            <h3 class="t-title">${t.titulo}</h3>
-                            <div class="t-date"><span class="material-symbols-outlined" style="font-size:16px">event</span> ${fechaStr}</div>
-                            <div class="t-date"><span class="material-symbols-outlined" style="font-size:16px">group</span> ${t.equipo.nombre_equipo}</div>
-                        </div>
-                        <div style="margin-top:10px;">
-                            <span class="t-badge" style="${t.rol === 'Capitán' ? 'background:#e3f2fd; color:#1565c0' : 'background:#f3e5f5; color:#7b1fa2'}">${t.rol}</span>
-                            ${t.esPasado ? '<span class="t-badge" style="background:#eee; color:gray">FINALIZADO</span>' : ''}
-                        </div>
+                <div class="ticket" onclick="verDetalles('${t.id}')">
+                    <div class="ticket-left"></div>
+                    <div class="ticket-content">
+                        <div class="t-title">${t.titulo}</div>
+                        <div class="t-meta"><span class="material-symbols-outlined">schedule</span> ${fechaStr}</div>
+                        <div class="t-meta"><span class="material-symbols-outlined">group</span> ${nombreEquipo}</div>
+                        <span class="t-role">${t.rol}</span>
                     </div>
                 </div>`;
           });
       }
 
-      // --- MOSTRAR DETALLES COMPLETOS (NUEVO) ---
+      // --- VER DETALLES (IGUAL QUE ACTIVIDADES PERO MAS SIMPLE) ---
       window.verDetalles = (ticketId) => {
           const ticket = allTickets.find(t => t.id === ticketId);
           if(!ticket) return;
-          const act = ticket.data; // Datos completos del evento
+          const act = ticket.data; 
 
           const modal = document.getElementById("modal-detalles");
           const fechaStr = new Date(act.fecha.toDate ? act.fecha.toDate() : act.fecha).toLocaleString([], {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
 
-          // Generar lista de participantes (TODOS)
           let participantsHTML = "";
           const inscritos = act.inscritos || [];
-          if(inscritos.length === 0) participantsHTML = "<p>Nadie apuntado</p>";
-          else {
-              inscritos.forEach(equipo => {
-                  let membersNames = equipo.miembros ? equipo.miembros.map(m => m.nombre).join(", ") : "";
-                  participantsHTML += `
-                    <div class="p-group">
-                        <div class="p-cap">⭐ ${equipo.nombre_equipo} (Capitán)</div>
-                        ${membersNames ? `<div class="p-members">Compañeros: ${membersNames}</div>` : ''}
-                    </div>`;
-              });
-          }
+          
+          inscritos.forEach(equipo => {
+              let membersNames = equipo.miembros ? equipo.miembros.map(m => m.nombre).join(", ") : "";
+              const nombreMostrar = equipo.nombre_equipo || equipo.capitan || "Usuario"; // CORRECCIÓN UNDEFINED
+              participantsHTML += `
+                <div class="p-group">
+                    <div class="p-cap">⭐ ${nombreMostrar}</div>
+                    ${membersNames ? `<div class="p-members">${membersNames}</div>` : ''}
+                </div>`;
+          });
 
-          document.getElementById("d-img").src = act.imagen || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
+          document.getElementById("d-img").src = act.imagen || 'https://via.placeholder.com/600x300';
           document.getElementById("d-title").innerText = act.titulo;
-          document.getElementById("d-date").innerHTML = `<span class="material-symbols-outlined">schedule</span> ${fechaStr}`;
-          document.getElementById("d-place").innerHTML = `<span class="material-symbols-outlined">location_on</span> ${act.lugar || 'Ubicación por definir'}`;
+          document.getElementById("d-meta").innerHTML = `${fechaStr} • ${act.lugar || ''}`;
+          document.getElementById("d-desc").innerHTML = act.descripcion || "";
           document.getElementById("d-list").innerHTML = participantsHTML;
 
-          // Botones de acción
+          // BOTONES
           const btnArea = document.getElementById("d-actions");
           btnArea.innerHTML = `
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <button class="btn-mini" style="background:#e0f7fa; color:#006064; flex:1; justify-content:center;" onclick="window.location.href='chat.html?id=${ticket.id}'">💬 Chat</button>
-                ${(act.genero === 'carrera' || act.genero === 'concurso') ? `<button class="btn-mini" style="background:#fff8e1; color:#ff6f00; flex:1; justify-content:center;" onclick="window.location.href='ver_carrera.html?id=${ticket.id}'">📊 Podio</button>` : ''}
-                ${act.genero === 'torneo' ? `<button class="btn-mini" style="background:#fce4ec; color:#880e4f; flex:1; justify-content:center;" onclick="window.location.href='ver_torneo.html?id=${ticket.id}'">🏆 Cuadro</button>` : ''}
-            </div>
-            ${!ticket.esPasado ? `<button class="btn-full btn-leave-lg" onclick="salirDeActividad('${ticket.id}', '${ticket.rol}')">🗑️ Desapuntarse</button>` : ''}
+            <button class="btn-action btn-chat" onclick="window.location.href='chat.html?id=${ticket.id}'">💬 Chat del Grupo</button>
+            <button class="btn-action btn-leave" onclick="salirDeActividad('${ticket.id}', '${ticket.rol}')">🗑️ Desapuntarse</button>
+            ${ticket.rol === 'Capitán' ? `<button class="btn-action" style="background:#e0e0e0; color:#333;" onclick="abrirEdicion('${ticket.id}')">✏️ Editar Equipo</button>` : ''}
           `;
 
           modal.style.display = "flex";
@@ -238,24 +207,26 @@
           } catch(e) { alert("Error: " + e.message); }
       }
 
-      // --- EDICIÓN DE EQUIPO (Mismo que antes) ---
+      // --- EDICIÓN (SIMPLIFICADA) ---
       let editActId = "";
       window.abrirEdicion = (actId) => {
+          document.getElementById("modal-detalles").style.display = "none";
           editActId = actId;
           const ticket = allTickets.find(t => t.id === actId);
           const modal = document.getElementById("modal-edit");
           const inputsDiv = document.getElementById("edit-inputs");
           inputsDiv.innerHTML = "";
           
-          ticket.equipo.miembros.forEach((m, idx) => {
-             inputsDiv.innerHTML += `
-                <input type="text" class="mate-input" 
-                       value="${m.nombre}" 
-                       data-uid="${m.uid || ''}" 
-                       placeholder="Compañero ${idx+1}" 
-                       onkeyup="verificarUsuario(this)">`;
-          });
-          setTimeout(() => { document.querySelectorAll('.mate-input').forEach(inp => { if(inp.getAttribute('data-uid')) inp.classList.add('mate-found'); }); }, 100);
+          if(ticket.equipo.miembros) {
+              ticket.equipo.miembros.forEach((m, idx) => {
+                 inputsDiv.innerHTML += `
+                    <input type="text" class="mate-input" 
+                           value="${m.nombre}" 
+                           data-uid="${m.uid || ''}" 
+                           placeholder="Compañero ${idx+1}" 
+                           onkeyup="verificarUsuario(this)">`;
+              });
+          }
           modal.style.display = "flex";
       }
 
@@ -265,11 +236,9 @@
           const q = query(collection(db, "usuarios"), where("username", "==", val));
           const snap = await getDocs(q);
           if(!snap.empty) { input.classList.add('mate-found'); input.setAttribute('data-uid', snap.docs[0].id); } 
-          else { input.classList.remove('mate-found'); input.removeAttribute('data-uid'); }
       }
 
       window.guardarEdicion = async () => {
-          if(!confirm("¿Guardar cambios?")) return;
           const btn = document.getElementById("btn-save-edit"); btn.innerText="..."; btn.disabled=true;
           try {
               const actRef = doc(db, "actividades", editActId);
@@ -293,45 +262,38 @@
 </head>
 <body>
     <div class="container">
-        <div class="header-tools">
-            <h1>Mis Tickets</h1>
-            <label class="toggle-container">
-                Ocultar Pasados
-                <div class="switch">
-                    <input type="checkbox" id="toggle-past" checked onchange="renderTickets()">
-                    <span class="slider"></span>
-                </div>
-            </label>
-        </div>
+        <h1>Mis Tickets</h1>
         <div id="tickets-grid" class="tickets-grid">Cargando...</div>
     </div>
 
     <div id="modal-detalles" class="modal-overlay" onclick="if(event.target === this) cerrarDetalles()">
         <div class="modal">
-            <button class="btn-close-modal" onclick="cerrarDetalles()">×</button>
-            
-            <img id="d-img" class="detail-img" src="">
-            <h2 id="d-title" class="detail-title">...</h2>
-            
-            <div id="d-date" class="detail-row"></div>
-            <div id="d-place" class="detail-row"></div>
-
-            <div id="d-actions" style="margin-top:20px;"></div>
-
-            <div class="detail-section">
-                <div class="detail-header">Lista de Asistentes</div>
-                <div id="d-list" class="participants-list"></div>
+            <button class="btn-close-float" onclick="cerrarDetalles()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <img id="d-img" class="modal-header-img" src="">
+            <div class="modal-content">
+                <h2 id="d-title" class="detail-title">...</h2>
+                <div id="d-meta" style="color:gray; margin-bottom:15px;"></div>
+                <div id="d-desc" class="detail-desc"></div>
+                <div id="d-actions"></div>
+                <div class="participants-list">
+                    <div style="font-weight:bold; margin-bottom:10px;">Asistentes</div>
+                    <div id="d-list"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="modal-edit" class="modal-overlay">
         <div class="modal">
-            <h2 style="margin-top:0">Editar Equipo</h2>
-            <div id="edit-inputs"></div>
-            <div style="margin-top:20px; display:flex; gap:10px;">
-                <button onclick="cerrarModal()" style="flex:1; padding:12px; background:transparent; border:1px solid #ccc; border-radius:10px;">Cancelar</button>
-                <button onclick="guardarEdicion()" id="btn-save-edit" style="flex:1; padding:12px; background:var(--accent); color:white; border:none; border-radius:10px; font-weight:bold;">Guardar</button>
+            <div class="modal-edit-container">
+                <h2 style="margin-top:0">Editar Equipo</h2>
+                <div id="edit-inputs"></div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button onclick="cerrarModal()" class="btn-action" style="background:#f5f5f5; color:gray; width:50%;">Cancelar</button>
+                    <button onclick="guardarEdicion()" id="btn-save-edit" class="btn-action" style="background:var(--accent); color:white; width:50%;">Guardar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -339,7 +301,7 @@
     <nav class="bottom-nav">
         <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
         <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
-        <a href="#" class="nav-item active"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
+        <a href="mis_inscripciones.html" class="nav-item active"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
         <a href="perfil.html" class="nav-item"><span class="material-symbols-outlined">person</span>Perfil</a>
     </nav>
 </body>
