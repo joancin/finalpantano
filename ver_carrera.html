@@ -3,178 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clasificación en Vivo</title>
-    <script>
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
-    </script>
+    <title>Resultados</title>
+    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #4caf50; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --gold: #ffd700; --silver: #c0c0c0; --bronze: #cd7f32; }
         html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-
-        /* PODIO PÚBLICO (Más grande y espectacular) */
-        .podium-container { display: flex; gap: 15px; margin: 40px 0; justify-content: center; align-items: flex-end; height: 200px; }
-        .podium-slot { flex: 1; max-width: 120px; border-radius: 15px 15px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 15px 5px; color: white; text-align: center; position: relative; transition: height 0.5s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
+        .container { max-width: 600px; margin: 0 auto; }
         
-        .slot-1 { background: linear-gradient(45deg, #ffd700, #ffc107); height: 100%; z-index: 2; transform: scale(1.1); } 
-        .slot-2 { background: linear-gradient(45deg, #e0e0e0, #bdbdbd); height: 75%; z-index: 1; } 
-        .slot-3 { background: linear-gradient(45deg, #cd7f32, #a1887f); height: 60%; z-index: 0; } 
+        h1 { text-align: center; font-size: 1.8rem; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: gray; margin-bottom: 40px; font-size: 0.9rem; }
 
-        .medal-icon { font-size: 2rem; margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .winner-name { font-weight: bold; font-size: 1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.3); line-height: 1.2; }
-        .empty-slot { opacity: 0.5; font-size: 0.8rem; font-style: italic; }
-
-        /* LISTA CLASIFICACIÓN */
-        .rank-list { list-style: none; padding: 0; margin-top: 40px; }
-        .rank-item { background: var(--card); padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        /* PODIUM */
+        .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 10px; height: 250px; margin-bottom: 40px; }
         
-        .rank-pos { font-weight: bold; font-size: 1.2rem; color: gray; width: 30px; text-align: center; }
-        .rank-name { font-weight: 500; font-size: 1.1rem; flex: 1; }
+        .podium-place { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 30%; position: relative; }
         
-        .highlight-gold { border-left: 5px solid #ffd700; background: #fffde7; }
-        .highlight-silver { border-left: 5px solid #c0c0c0; background: #f5f5f5; }
-        .highlight-bronze { border-left: 5px solid #cd7f32; background: #fff3e0; }
+        .winner-name { font-weight: bold; font-size: 0.9rem; text-align: center; margin-bottom: 10px; text-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .block { width: 100%; border-radius: 10px 10px 0 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 10px; color: rgba(0,0,0,0.4); font-weight: 900; font-size: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        
+        /* ALTURAS Y COLORES */
+        .p-1 .block { height: 140px; background: var(--gold); }
+        .p-2 .block { height: 100px; background: var(--silver); }
+        .p-3 .block { height: 70px; background: var(--bronze); }
+        
+        .p-1 { order: 2; z-index: 10; } /* El 1º va en medio */
+        .p-2 { order: 1; } /* El 2º a la izquierda */
+        .p-3 { order: 3; } /* El 3º a la derecha */
 
-        .live-badge { background: #ff4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; animation: pulse 2s infinite; vertical-align: middle; margin-left: 10px; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        /* LISTA DE PARTICIPANTES */
+        .list-card { background: var(--card); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .list-title { font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px; }
+        .participant { padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px; }
+        .participant:last-child { border: none; }
+        
+        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; }
+
+        .pending { color: gray; font-style: italic; font-size: 0.8rem; }
     </style>
 
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
-        authDomain: "fiestas-pantano.firebaseapp.com",
-        projectId: "fiestas-pantano",
-        storageBucket: "fiestas-pantano.firebasestorage.app",
-        messagingSenderId: "801380435613",
-        appId: "1:801380435613:web:a842572cf7cee93ac57674",
-        measurementId: "G-EG2MZGBT1B"
-      };
+        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const auth = getAuth(app);
-      let activityId = "";
+        const params = new URLSearchParams(window.location.search);
+        const actId = params.get("id");
 
-      onAuthStateChanged(auth, (user) => {
-          if (!user) window.location.href = "index.html";
-          aplicarTema();
-          const params = new URLSearchParams(window.location.search);
-          activityId = params.get("id");
-          if(!activityId) { window.location.href = "actividades.html"; }
-          escucharDatos();
-      });
+        if(!actId) window.location.href = "actividades.html";
 
-      function escucharDatos() {
-          onSnapshot(doc(db, "actividades", activityId), (docSnap) => {
-              if(!docSnap.exists()) return;
-              const data = docSnap.data();
-              
-              document.getElementById("page-title").innerText = data.titulo;
-              renderPodio(data.podio);
-              renderLista(data.inscritos, data.podio);
-          });
-      }
+        onSnapshot(doc(db, "actividades", actId), (docSnap) => {
+            if(!docSnap.exists()) return;
+            const data = docSnap.data();
+            
+            document.getElementById("titulo").innerText = data.titulo;
+            renderPodium(data.ganadores || {});
+            renderLista(data.inscritos || []);
+        });
 
-      function renderPodio(podio) {
-          const p = podio || { p1: null, p2: null, p3: null };
-          updateSlot("slot-1", p.p1);
-          updateSlot("slot-2", p.p2);
-          updateSlot("slot-3", p.p3);
-      }
+        function renderPodium(ganadores) {
+            // Si hay dato, lo mostramos. Si no, "..."
+            document.getElementById("name-1").innerText = ganadores.oro || "...";
+            document.getElementById("name-2").innerText = ganadores.plata || "...";
+            document.getElementById("name-3").innerText = ganadores.bronce || "...";
+            
+            // Si no hay ganadores aún, mostramos mensaje visual
+            if(!ganadores.oro && !ganadores.plata && !ganadores.bronce) {
+                document.querySelectorAll('.winner-name').forEach(el => {
+                    el.innerHTML = "<span class='pending'>Pendiente</span>";
+                });
+            }
+        }
 
-      function updateSlot(id, winner) {
-          const el = document.getElementById(id).querySelector(".winner-name");
-          if(winner) {
-              el.innerText = winner.nombre;
-              el.classList.remove("empty-slot");
-          } else {
-              el.innerText = "Esperando...";
-              el.classList.add("empty-slot");
-          }
-      }
+        function renderLista(inscritos) {
+            const container = document.getElementById("full-list");
+            container.innerHTML = "";
+            if(inscritos.length === 0) {
+                container.innerHTML = "<p style='color:gray'>No hay inscritos.</p>";
+                return;
+            }
 
-      function renderLista(inscritos, podio) {
-          const lista = document.getElementById("rank-list");
-          lista.innerHTML = "";
-          
-          if(!inscritos) return;
-          const p = podio || {};
-
-          // Crear un Set para identificar rápido a los ganadores
-          const winners = new Set();
-          if(p.p1) winners.add(p.p1.nombre);
-          if(p.p2) winners.add(p.p2.nombre);
-          if(p.p3) winners.add(p.p3.nombre);
-
-          // Filtrar: Los que NO han ganado (para ponerlos abajo)
-          const resto = inscritos.filter(i => {
-              const name = i.nombre_equipo || i.capitan;
-              return !winners.has(name);
-          });
-
-          // Renderizar 1º, 2º, 3º si existen
-          if(p.p1) renderItem(lista, 1, p.p1.nombre, "highlight-gold", "🥇");
-          if(p.p2) renderItem(lista, 2, p.p2.nombre, "highlight-silver", "🥈");
-          if(p.p3) renderItem(lista, 3, p.p3.nombre, "highlight-bronze", "🥉");
-
-          // Renderizar el resto sin posición numérica específica
-          resto.forEach(participant => {
-              const name = participant.nombre_equipo || participant.capitan;
-              renderItem(lista, "-", name, "", "");
-          });
-      }
-
-      function renderItem(container, pos, name, cssClass, icon) {
-          const li = document.createElement("li");
-          li.className = `rank-item ${cssClass}`;
-          li.innerHTML = `
-              <span class="rank-pos">${icon || pos}</span>
-              <span class="rank-name">${name}</span>
-          `;
-          container.appendChild(li);
-      }
-
-      function aplicarTema() { if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+            inscritos.forEach(i => {
+                // Usamos el nombre del equipo o del capitán
+                const nombre = i.nombre_equipo || i.capitan || "Participante";
+                container.innerHTML += `
+                    <div class="participant">
+                        <span class="material-symbols-outlined" style="color:gray; font-size:18px;">person</span>
+                        ${nombre}
+                    </div>`;
+            });
+        }
     </script>
 </head>
 <body>
+
     <div class="container">
-        <div class="header">
-            <div>
-                <h1 style="display:inline; margin:0; font-size:1.5rem;" id="page-title">Cargando...</h1>
-                <span class="live-badge">EN VIVO</span>
-            </div>
-            <button class="btn-back" onclick="window.location.href='actividades.html'">Volver</button>
-        </div>
+        <h1 id="titulo">Cargando...</h1>
+        <p class="subtitle">Clasificación Oficial</p>
 
         <div class="podium-container">
-            <div id="slot-2" class="podium-slot slot-2">
-                <span class="medal-icon">🥈</span>
-                <span class="winner-name empty-slot">Esperando...</span>
+            <div class="podium-place p-2">
+                <div id="name-2" class="winner-name">...</div>
+                <div class="block">2</div>
             </div>
-            <div id="slot-1" class="podium-slot slot-1">
-                <span class="medal-icon">🥇</span>
-                <span class="winner-name empty-slot">Esperando...</span>
+            
+            <div class="podium-place p-1">
+                <span style="font-size:2rem; margin-bottom:-10px;">👑</span>
+                <div id="name-1" class="winner-name">...</div>
+                <div class="block">1</div>
             </div>
-            <div id="slot-3" class="podium-slot slot-3">
-                <span class="medal-icon">🥉</span>
-                <span class="winner-name empty-slot">Esperando...</span>
+            
+            <div class="podium-place p-3">
+                <div id="name-3" class="winner-name">...</div>
+                <div class="block">3</div>
             </div>
         </div>
 
-        <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Clasificación General</h3>
-        <ul id="rank-list" class="rank-list">
-            </ul>
+        <div class="list-card">
+            <div class="list-title">Lista de Participantes</div>
+            <div id="full-list"></div>
+        </div>
     </div>
+
+    <button class="btn-back-float" onclick="window.history.back()">
+        <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+
 </body>
 </html>
