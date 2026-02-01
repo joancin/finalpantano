@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://pantano2026.es/sitemap.xml
