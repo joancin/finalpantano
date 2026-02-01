@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info El Pantano</title>
+    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --bg: #f4f7f6; --text: #333; --card: white; --accent: #ff5722; --gradient: linear-gradient(135deg, #ff5722, #ff9800); }
+        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --gradient: linear-gradient(135deg, #d84315, #f57c00); }
+
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; padding-bottom: 90px; }
+
+        /* HERO SECTION CON FOTO O DEGRADADO */
+        .hero {
+            background: var(--gradient);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
+            margin-bottom: 30px;
+        }
+        .hero h1 { margin: 0; font-size: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .hero p { opacity: 0.9; margin-top: 5px; font-weight: 600; }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 0 20px; }
+
+        /* TARJETAS DE HISTORIA */
+        .story-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--accent);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .story-title { font-size: 1.2rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .story-text { line-height: 1.6; font-size: 0.95rem; opacity: 0.8; }
+
+        /* BOTONES DE UBICACIÓN */
+        .location-grid { display: grid; gap: 15px; margin-top: 10px; }
+        
+        .location-btn {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            text-decoration: none; color: var(--text);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .location-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        
+        .loc-icon { 
+            background: rgba(255, 87, 34, 0.1); color: var(--accent); 
+            width: 50px; height: 50px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            margin-right: 15px; font-size: 24px;
+        }
+        .loc-info h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+        .loc-info p { margin: 0; font-size: 0.8rem; opacity: 0.6; }
+
+        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; text-decoration: none; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 10px;">landscape</span>
+        <h1>El Pantano</h1>
+        <p>Torrent, Valencia</p>
+    </div>
+
+    <div class="container">
+        <div class="story-card">
+            <div class="story-title">
+                <span class="material-symbols-outlined">church</span>
+                Tradición y Fiesta
+            </div>
+            <div class="story-text">
+                Nuestras fiestas se celebran tradicionalmente en honor a la <strong>Asunción de la Virgen María</strong> (15 de Agosto). <br><br>
+                Esta fecha tan señalada marca el punto culminante y el <strong>final de nuestras fiestas</strong>, reuniendo a todos los vecinos en una celebración de hermandad.
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 15px; text-align: center; opacity: 0.7;">📍 Puntos de Encuentro</h3>
+
+        <div class="location-grid">
+            <a href="https://share.google/FB0pxqIVyVGD0GU3X" target="_blank" class="location-btn">
+                <div style="display:flex; align-items:center;">
+                    <div class="loc-icon"><span class="material-symbols-outlined">park</span></div>
+                    <div class="loc-info">
+                        <h3>Área Recreativa</h3>
+                        <p>Zona de juegos y reuniones</p>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined" style="opacity:0.5;">open_in_new</span>
+            </a>
+
+            <a href="https://share.google/RUzRObZXDFYo4hyTa" target="_blank" class="location-btn">
+                <div style="display:flex; align-items:center;">
+                    <div class="loc-icon"><span class="material-symbols-outlined">location_on</span></div>
+                    <div class="loc-info">
+                        <h3>La Ermita</h3>
+                        <p>Corazón de la urbanización</p>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined" style="opacity:0.5;">open_in_new</span>
+            </a>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center; opacity: 0.5; font-size: 0.8rem;">
+            <p>Urbanización El Pantano © 2026</p>
+        </div>
+    </div>
+
+    <a href="panel.html" class="btn-back-float">
+        <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+
+</body>
+</html>
