@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --admin: #673ab7; --success: #4caf50; }
+        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --admin: #673ab7; --success: #4caf50; --info: #2196f3; }
         html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; }
 
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 20px; padding-bottom: 90px; max-width: 600px; margin: 0 auto; }
@@ -43,7 +43,7 @@
             list-style: none;
             user-select: none;
         }
-        summary::-webkit-details-marker { display: none; } /* Ocultar flecha por defecto */
+        summary::-webkit-details-marker { display: none; }
 
         summary:hover { background: rgba(0,0,0,0.02); }
 
@@ -64,7 +64,7 @@
             padding-top: 15px;
         }
 
-        /* ELEMENTOS VISUALES DENTRO DE LA RESPUESTA */
+        /* ELEMENTOS VISUALES */
         .step { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
         .step-num { background: var(--accent); color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; flex-shrink: 0; margin-top: 3px; }
         
@@ -74,6 +74,7 @@
         }
         .btn-sim.green { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
         .btn-sim.orange { background: #fff3e0; color: #ef6c00; border-color: #ffcc80; }
+        .btn-sim.blue { background: #e3f2fd; color: #1976d2; border-color: #90caf9; }
 
         /* ESTILOS DE ADMIN */
         .admin-details { border-left: 4px solid var(--admin); }
@@ -125,20 +126,46 @@
         </summary>
         <div class="answer">
             <div class="step"><span class="step-num">1</span> Ve a la pestaña de abajo llamada <strong>Fiestas</strong>.</div>
-            <div class="step"><span class="step-num">2</span> Verás el calendario. Toca en el evento que te interese (ej: "Paellas").</div>
+            <div class="step"><span class="step-num">2</span> Verás el calendario. Toca en el evento que te interese.</div>
             <div class="step"><span class="step-num">3</span> Pulsa el botón verde <span class="btn-sim green">Inscribirse</span>.</div>
-            <div class="step"><span class="step-num">4</span> ¡Listo! Ya tienes tu plaza.</div>
+            <div class="step"><span class="step-num">4</span> ¡Listo! Ya tienes tu plaza confirmada.</div>
         </div>
     </details>
 
     <details>
         <summary>
-            <div class="q-content"><span class="material-symbols-outlined icon">confirmation_number</span> ¿Dónde veo mis inscripciones?</div>
+            <div class="q-content"><span class="material-symbols-outlined icon" style="color:#2196f3">group_add</span> ¿Cómo vinculo a amigos/pareja?</div>
+            <span class="material-symbols-outlined arrow">expand_more</span>
+        </summary>
+        <div class="answer">
+            Al apuntarte a eventos de equipo (como torneos de pádel o grupos), te pedirá el nombre de tu compañero.
+            <br><br>
+            <strong>✨ Truco Mágico:</strong><br>
+            Si escribes su <strong>Nombre de Usuario</strong> exacto (el que usan en la App), ¡la inscripción aparecerá automáticamente en su móvil también! Así no tenéis que apuntaros dos veces.
+        </div>
+    </details>
+
+    <details>
+        <summary>
+            <div class="q-content"><span class="material-symbols-outlined icon" style="color:#ff9800">edit</span> ¿Puedo editar mi inscripción?</div>
+            <span class="material-symbols-outlined arrow">expand_more</span>
+        </summary>
+        <div class="answer">
+            ¡Sí! Si te has equivocado de nombre o quieres cambiar algo:
+            <div class="step"><span class="step-num">1</span> Ve a la pestaña <strong>Tickets</strong>.</div>
+            <div class="step"><span class="step-num">2</span> Busca el evento y pulsa en <span class="btn-sim blue">Editar</span> (lápiz).</div>
+            <p style="font-size:0.8rem; margin-top:5px;"><em>Nota: También puedes borrarte y volver a apuntarte si lo prefieres.</em></p>
+        </div>
+    </details>
+
+    <details>
+        <summary>
+            <div class="q-content"><span class="material-symbols-outlined icon">confirmation_number</span> ¿Dónde veo mis tickets?</div>
             <span class="material-symbols-outlined arrow">expand_more</span>
         </summary>
         <div class="answer">
             En la barra de abajo, pulsa en <strong>Tickets</strong>. <br><br>
-            Ahí verás una lista de todo a lo que te has apuntado. Si ya no puedes ir, puedes pulsar el botón rojo de <span class="material-symbols-outlined" style="font-size:12px; vertical-align:middle; color:red">delete</span> borrar para liberar tu plaza.
+            Ahí verás una lista de todo a lo que te has apuntado tú (o a lo que te han vinculado tus amigos).
         </div>
     </details>
 
@@ -149,20 +176,9 @@
         </summary>
         <div class="answer">
             <p>Si te apuntas a un torneo (Pádel, Truc, Parchís...), aparecerás en la lista de jugadores.</p>
-            <div class="step"><span class="step-num">1</span> Apúntate tú (y tu pareja si es necesario).</div>
+            <div class="step"><span class="step-num">1</span> Apúntate tú (y vincula a tu pareja si es necesario).</div>
             <div class="step"><span class="step-num">2</span> Cuando empiece el torneo, el Festero generará el sorteo.</div>
             <div class="step"><span class="step-num">3</span> Podrás ver contra quién te toca pulsando en el botón <span class="btn-sim orange">Ver Cuadro</span> dentro de la actividad.</div>
-        </div>
-    </details>
-
-    <details>
-        <summary>
-            <div class="q-content"><span class="material-symbols-outlined icon">local_activity</span> ¿Y la Rifa?</div>
-            <span class="material-symbols-outlined arrow">expand_more</span>
-        </summary>
-        <div class="answer">
-            En el <strong>Inicio</strong> (botón casa 🏠), hay un acceso directo a la <strong>Rifa</strong>. <br><br>
-            Entra ahí para comprobar qué número ha salido ganador en el último sorteo y cuáles son los premios disponibles.
         </div>
     </details>
 
@@ -178,21 +194,9 @@
                 Ve a tu <strong>Perfil</strong> ➜ <strong>Gestionar Eventos</strong>.
                 <br><br>
                 <ul>
-                    <li><strong>Crear:</strong> Pulsa el botón grande <span class="btn-sim">Nueva Actividad</span>. Rellena título, fecha, hora y tipo (fiesta, torneo...).</li>
+                    <li><strong>Crear:</strong> Pulsa el botón grande <span class="btn-sim">Nueva Actividad</span>. Rellena título, fecha, hora y tipo.</li>
                     <li><strong>Borrar:</strong> En la lista, usa el icono de basura 🗑️. ¡Cuidado! Esto borra a todos los inscritos también.</li>
                 </ul>
-            </div>
-        </details>
-
-        <details class="admin-details">
-            <summary>
-                <div class="q-content"><span class="material-symbols-outlined icon">group</span> Gestionar Inscritos</div>
-                <span class="material-symbols-outlined arrow">expand_more</span>
-            </summary>
-            <div class="answer">
-                Dentro de la gestión de una actividad, pulsa en ella para entrar.
-                <br><br>
-                Verás la lista de vecinos apuntados. Puedes <strong>eliminarlos manualmente</strong> si alguien se ha equivocado o te lo pide en persona.
             </div>
         </details>
 
