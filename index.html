@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fiestas Pantano</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <meta name="description" content="Web oficial de las Fiestas de la Urbanización El Pantano de Torrent (2026). Calendario, inscripciones, rifas, fotos y toda la información de los festeros.">
     
-    <meta name="keywords" content="Fiestas Pantano, Torrent, Urbanización El Pantano, Festeros 2026, Valencia, Eventos, Pantano de Torrent, Pantano de Torrente, El Pantá, Mas del Jutge">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
+    
+    <meta name="description" content="Web oficial de las Fiestas de la Urbanización El Pantano de Torrent (2026).">
+    <meta name="keywords" content="Fiestas Pantano, Torrent, Valencia, Eventos">
     
     <meta property="og:title" content="Fiestas Pantano 2026">
     <meta property="og:description" content="Entra para ver eventos, rifas e información de las fiestas.">
@@ -15,7 +16,6 @@
     <meta property="og:url" content="https://pantano2026.es">
     <meta property="og:type" content="website">
 
-    
     <script>
         if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
     </script>
@@ -29,29 +29,52 @@
 
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; transition: background 0.3s; }
         
+        /* BOTÓN FLOTANTE MODO OSCURO */
+        .theme-toggle-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: var(--card); color: var(--text);
+            border: none; border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s; z-index: 10;
+        }
+        .theme-toggle-btn:hover { transform: scale(1.1); }
+
         .hero { text-align: center; margin-bottom: 30px; padding-top: 20px; }
         .logo-icon { font-size: 4rem; color: var(--accent); margin-bottom: 10px; animation: bounce 2s infinite; }
         h1 { margin: 0; font-size: 2.5rem; line-height: 1.1; }
         p { color: gray; margin-top: 5px; }
 
-        .public-grid { display: grid; gap: 15px; max-width: 500px; margin: 0 auto; width: 100%; }
-        .public-card { background: var(--card); padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: inherit; transition: transform 0.2s; }
-        .public-card:hover { transform: translateY(-3px); }
-        .card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; flex-shrink: 0; }
+        /* GRID DE TARJETAS */
+        .public-grid { display: grid; gap: 15px; max-width: 500px; margin: 0 auto; width: 100%; grid-template-columns: 1fr; }
         
+        @media (min-width: 400px) {
+            .public-grid { grid-template-columns: 1fr 1fr; }
+            .card-full { grid-column: 1 / -1; } /* Tarjeta que ocupa todo el ancho */
+        }
+
+        .public-card { background: var(--card); padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: inherit; transition: transform 0.2s; position: relative; overflow: hidden; }
+        .public-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        
+        .card-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; flex-shrink: 0; }
+        
+        /* COLORES */
         .c-festeros { background: linear-gradient(135deg, #FF6B6B, #EE5253); }
         .c-migany { background: linear-gradient(135deg, #FDCB6E, #E17055); }
         .c-rifa { background: linear-gradient(135deg, #0984e3, #6c5ce7); }
-        /* NUEVO COLOR PARA EL PANTANO */
         .c-pantano { background: linear-gradient(135deg, #673ab7, #9c27b0); }
+        
+        /* COLOR NUEVO PARA REDES SOCIALES (Multicolor Instargam-ish) */
+        .c-social { background: linear-gradient(135deg, #E1306C, #FD1D1D, #F56040); }
 
-        .card-info h3 { margin: 0; font-size: 1.1rem; }
-        .card-info span { font-size: 0.8rem; color: gray; }
+        .card-info h3 { margin: 0; font-size: 1rem; font-weight: 800; }
+        .card-info span { font-size: 0.75rem; color: gray; display: block; line-height: 1.2; margin-top: 2px; }
 
-        .login-section { margin-top: auto; padding-top: 40px; text-align: center; }
-        .btn-login-toggle { background: white; border: 1px solid #ccc; padding: 12px 30px; border-radius: 30px; cursor: pointer; color: #333; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .login-section { margin-top: 40px; text-align: center; padding-bottom: 20px; }
+        .btn-login-toggle { background: white; border: 1px solid #ccc; padding: 12px 30px; border-radius: 30px; cursor: pointer; color: #333; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s; width: 100%; max-width: 300px; }
         .btn-login-toggle:active { transform: scale(0.95); }
 
+        /* VENTANA MODAL DE LOGIN */
         #login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         
@@ -64,15 +87,14 @@
         input:focus { border-color: var(--accent); outline: none; }
         
         .toggle-pass { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray; user-select: none; }
-
+        
         .btn-action { background: var(--accent); color: white; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; transition: background 0.3s; }
         .btn-action:hover { background: #e64a19; }
+        .btn-action:disabled { background: #ccc; cursor: not-allowed; }
         
         .btn-close { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
         .hidden { display: none; }
-
         .danger-note { background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; font-size: 0.8rem; margin-top: 15px; border: 1px solid #ef9a9a; font-weight: bold; line-height: 1.4; }
-
         .legal-footer { margin-top: 25px; font-size: 0.75rem; color: gray; opacity: 0.8; border-top: 1px solid #eee; padding-top: 15px; }
         .legal-footer a { color: gray; text-decoration: none; margin: 0 5px; }
         .legal-footer a:hover { text-decoration: underline; color: var(--accent); }
@@ -83,6 +105,7 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDocs, query, collection, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // TUS DATOS DE CONEXIÓN
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
         
         const app = initializeApp(firebaseConfig);
@@ -90,12 +113,33 @@
         const db = getFirestore(app);
         let isRegistering = false;
 
+        // Si ya está logueado, vamos al panel
         onAuthStateChanged(auth, (user) => {
             if (user && !isRegistering) window.location.href = "panel.html";
         });
 
         window.abrirLogin = () => document.getElementById("login-modal").style.display = "flex";
         window.cerrarLogin = () => document.getElementById("login-modal").style.display = "none";
+
+        // --- FUNCIÓN MODO OSCURO (BOTÓN FLOTANTE) ---
+        window.toggleThemeIndex = () => {
+            const html = document.documentElement;
+            if(html.classList.contains('dark-mode')) {
+                html.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('theme-icon').innerText = 'dark_mode'; // Icono luna
+            } else {
+                html.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('theme-icon').innerText = 'light_mode'; // Icono sol
+            }
+        }
+        
+        // Poner icono correcto al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+             const icon = localStorage.getItem('theme') === 'dark' ? 'light_mode' : 'dark_mode';
+             if(document.getElementById('theme-icon')) document.getElementById('theme-icon').innerText = icon;
+        });
 
         window.switchTab = (tab) => {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -127,11 +171,22 @@
             const user = document.getElementById("log-user").value.trim();
             const pass = document.getElementById("log-pass").value;
             if(!user || !pass) return alert("Rellena todo");
+            
             const fakeEmail = user.toLowerCase().replace(/\s+/g, '') + "@fiestaspantano.com";
+            
             const btn = document.getElementById("btn-login-action");
-            btn.innerText = "Entrando..."; btn.disabled = true;
-            try { await signInWithEmailAndPassword(auth, fakeEmail, pass); } 
-            catch (e) { console.error(e); alert("Usuario o contraseña incorrectos"); btn.innerText = "Entrar"; btn.disabled = false; }
+            btn.innerText = "Entrando..."; 
+            btn.disabled = true;
+
+            try { 
+                await signInWithEmailAndPassword(auth, fakeEmail, pass);
+                // El onAuthStateChanged redirigirá
+            } catch (e) { 
+                console.error(e); 
+                alert("Usuario o contraseña incorrectos"); 
+                btn.innerText = "Entrar"; 
+                btn.disabled = false; 
+            }
         }
 
         window.registro = async () => {
@@ -146,7 +201,8 @@
             if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres");
 
             const btn = document.getElementById("btn-reg-action");
-            btn.innerText = "Procesando..."; btn.disabled = true;
+            btn.innerText = "Procesando..."; 
+            btn.disabled = true;
             isRegistering = true;
 
             try {
@@ -169,11 +225,14 @@
                 }
 
                 if (!codigoValido) {
-                    isRegistering = false; btn.innerText = "Crear Cuenta"; btn.disabled = false;
+                    isRegistering = false; 
+                    btn.innerText = "Crear Cuenta"; 
+                    btn.disabled = false;
                     return alert("⛔ Código INVÁLIDO o YA USADO.");
                 }
 
                 const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
+                
                 await setDoc(doc(db, "usuarios", cred.user.uid), {
                     username: user, email: fakeEmail, rol: rolAsignado, codigo_usado: code, fecha_registro: new Date()
                 });
@@ -183,19 +242,29 @@
                         usado: true, usado_por: user, fecha_uso: new Date()
                     });
                 }
-                alert("¡Bienvenido/a! 🎉"); window.location.href = "panel.html";
+                
+                alert("¡Bienvenido/a! 🎉"); 
+                window.location.href = "panel.html";
 
             } catch (e) { 
-                console.error(e); isRegistering = false;
+                console.error(e); 
+                isRegistering = false;
                 if (auth.currentUser) await signOut(auth);
+                
                 if(e.code === 'auth/email-already-in-use') alert("Ese usuario ya existe.");
                 else alert("Error: " + e.message);
-                btn.innerText = "Crear Cuenta"; btn.disabled = false;
+                
+                btn.innerText = "Crear Cuenta"; 
+                btn.disabled = false;
             }
         }
     </script>
 </head>
 <body>
+    <button class="theme-toggle-btn" onclick="toggleThemeIndex()">
+        <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+    </button>
+
     <div class="hero">
         <span class="material-symbols-outlined logo-icon">celebration</span>
         <h1>Fiestas<br>Pantano</h1>
@@ -205,20 +274,27 @@
     <div class="public-grid">
         <a href="festeros.html" class="public-card">
             <div class="card-icon c-festeros"><span class="material-symbols-outlined">diversity_3</span></div>
-            <div class="card-info"><h3>Los Festeros</h3><span>Conoce al equipo</span></div>
+            <div class="card-info"><h3>Festeros</h3><span>Conoce al equipo</span></div>
         </a>
-        <a href="migany.html" class="public-card">
-            <div class="card-icon c-migany"><span class="material-symbols-outlined">stars</span></div>
-            <div class="card-info"><h3>Mig Any</h3><span>Información fiesta</span></div>
+
+        <a href="info.html" class="public-card">
+            <div class="card-icon c-pantano"><span class="material-symbols-outlined">map</span></div>
+            <div class="card-info"><h3>El Pantano</h3><span>Ubicación e Historia</span></div>
         </a>
+
         <a href="rifa.html" class="public-card">
             <div class="card-icon c-rifa"><span class="material-symbols-outlined">confirmation_number</span></div>
             <div class="card-info"><h3>Rifa</h3><span>Ver número ganador</span></div>
         </a>
+
+        <a href="migany.html" class="public-card">
+            <div class="card-icon c-migany"><span class="material-symbols-outlined">stars</span></div>
+            <div class="card-info"><h3>Mig Any</h3><span>Información fiesta</span></div>
+        </a>
         
-        <a href="info.html" class="public-card">
-            <div class="card-icon c-pantano"><span class="material-symbols-outlined">map</span></div>
-            <div class="card-info"><h3>El Pantano</h3><span>Ubicación e Historia</span></div>
+        <a href="social.html" class="public-card card-full">
+            <div class="card-icon c-social"><span class="material-symbols-outlined">share</span></div>
+            <div class="card-info"><h3>Síguenos</h3><span>Insta, TikTok, WhatsApp...</span></div>
         </a>
     </div>
 
