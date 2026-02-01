@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   <url>
+      <loc>https://pantano2026.es/</loc>
+      <priority>1.0</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/index.html</loc>
+      <priority>0.8</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/info.html</loc>
+      <priority>0.8</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/festeros.html</loc>
+      <priority>0.7</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/migany.html</loc>
+      <priority>0.7</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/rifa.html</loc>
+      <priority>0.6</priority>
+   </url>
+</urlset>
