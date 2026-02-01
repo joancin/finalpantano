@@ -53,7 +53,7 @@
         .user-id { font-family: 'Share Tech Mono', monospace; font-size: 1rem; opacity: 0.85; margin-top: 8px; letter-spacing: 1px; }
 
         /* SECCIONES MENU */
-        .section-title { font-size: 0.9rem; color: gray; margin-bottom: 10px; font-weight: 600; margin-left: 5px; margin-top: 20px; }
+        .section-title { font-size: 0.8rem; color: gray; margin-bottom: 8px; font-weight: 700; margin-left: 5px; margin-top: 25px; letter-spacing: 0.5px; }
         
         .action-list { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
         
@@ -65,6 +65,7 @@
         .icon-box { width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; }
         
         .i-admin { background: #673ab7; }
+        .i-help { background: #00bcd4; } /* NUEVO ICONO AYUDA */
         .i-theme { background: #2196f3; }
         .i-legal { background: #607d8b; }
         .i-logout { background: #ff5252; }
@@ -138,20 +139,15 @@
             }
         }
 
-        // ✅ FUNCIÓN PARA BORRAR CUENTA
         window.eliminarCuenta = async () => {
             if(!confirm("⚠️ ¿ESTÁS SEGURO? \n\nEsta acción borrará todos tus datos y no se puede deshacer.")) return;
             
             const promptName = prompt("Para confirmar, escribe tu nombre de usuario:");
-            if(!promptName) return; // Si cancela el prompt
+            if(!promptName) return; 
 
             try {
-                // 1. Borrar datos de Firestore
                 await deleteDoc(doc(db, "usuarios", currentUser.uid));
-                
-                // 2. Borrar autenticación
                 await deleteUser(currentUser);
-                
                 alert("Cuenta eliminada correctamente. Adiós 👋");
                 window.location.href = "index.html";
             } catch(e) {
@@ -195,6 +191,17 @@
                     </div>
                     <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
                 </div>
+            </div>
+        </div>
+
+        <div class="section-title">AYUDA</div>
+        <div class="action-list">
+            <div class="action-item" onclick="window.location.href='guia.html'">
+                <div class="a-left">
+                    <div class="icon-box i-help"><span class="material-symbols-outlined">help</span></div>
+                    Guía de la App
+                </div>
+                <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
             </div>
         </div>
 
@@ -254,7 +261,7 @@
         </div>
         
         <p style="text-align:center; color:gray; font-size:0.75rem; margin-top:20px;">
-            Fiestas Pantano App v2.1
+            Fiestas Pantano App v2.2
         </p>
     </div>
 
