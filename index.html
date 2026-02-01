@@ -27,9 +27,13 @@
         .public-card { background: var(--card); padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: inherit; transition: transform 0.2s; }
         .public-card:hover { transform: translateY(-3px); }
         .card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; flex-shrink: 0; }
+        
         .c-festeros { background: linear-gradient(135deg, #FF6B6B, #EE5253); }
         .c-migany { background: linear-gradient(135deg, #FDCB6E, #E17055); }
         .c-rifa { background: linear-gradient(135deg, #0984e3, #6c5ce7); }
+        /* NUEVO COLOR PARA EL PANTANO */
+        .c-pantano { background: linear-gradient(135deg, #673ab7, #9c27b0); }
+
         .card-info h3 { margin: 0; font-size: 1.1rem; }
         .card-info span { font-size: 0.8rem; color: gray; }
 
@@ -44,7 +48,6 @@
         .tab { flex: 1; padding: 10px; cursor: pointer; color: gray; font-weight: bold; transition: color 0.3s; }
         .tab.active { color: var(--accent); border-bottom: 3px solid var(--accent); margin-bottom: -2px; }
         
-        /* ESTILOS DE INPUT Y CONTRASEÑA */
         .input-group { position: relative; margin-bottom: 10px; }
         input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 1rem; transition: border 0.3s; }
         input:focus { border-color: var(--accent); outline: none; }
@@ -57,10 +60,8 @@
         .btn-close { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
         .hidden { display: none; }
 
-        /* AVISO IMPORTANTE */
         .danger-note { background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; font-size: 0.8rem; margin-top: 15px; border: 1px solid #ef9a9a; font-weight: bold; line-height: 1.4; }
 
-        /* ESTILOS LEGALES (NUEVO) */
         .legal-footer { margin-top: 25px; font-size: 0.75rem; color: gray; opacity: 0.8; border-top: 1px solid #eee; padding-top: 15px; }
         .legal-footer a { color: gray; text-decoration: none; margin: 0 5px; }
         .legal-footer a:hover { text-decoration: underline; color: var(--accent); }
@@ -97,18 +98,16 @@
             }
         }
 
-        // FUNCIÓN PARA VER CONTRASEÑA
         window.togglePass = () => {
             const passInputs = document.querySelectorAll(".pass-input");
             const icon = document.getElementById("eye-icon");
-            
             passInputs.forEach(input => {
                 if (input.type === "password") {
                     input.type = "text";
-                    icon.innerText = "visibility_off"; // Ojo cerrado
+                    icon.innerText = "visibility_off";
                 } else {
                     input.type = "password";
-                    icon.innerText = "visibility"; // Ojo abierto
+                    icon.innerText = "visibility";
                 }
             });
         }
@@ -132,7 +131,6 @@
 
             if (!user || !pass || !code || !passConf) return alert("¡Todo es obligatorio!");
             
-            // VALIDACIÓN DE CONTRASEÑA
             if (pass !== passConf) return alert("❌ LAS CONTRASEÑAS NO COINCIDEN");
             if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres");
 
@@ -205,6 +203,11 @@
         <a href="rifa.html" class="public-card">
             <div class="card-icon c-rifa"><span class="material-symbols-outlined">confirmation_number</span></div>
             <div class="card-info"><h3>Rifa</h3><span>Ver número ganador</span></div>
+        </a>
+        
+        <a href="info.html" class="public-card">
+            <div class="card-icon c-pantano"><span class="material-symbols-outlined">map</span></div>
+            <div class="card-info"><h3>El Pantano</h3><span>Ubicación e Historia</span></div>
         </a>
     </div>
 
