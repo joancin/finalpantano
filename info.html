@@ -3,99 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Info El Pantano</title>
+    <title>El Pantano - Info</title>
     <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --bg: #f4f7f6; --text: #333; --card: white; --accent: #ff5722; --gradient: linear-gradient(135deg, #ff5722, #ff9800); }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --gradient: linear-gradient(135deg, #d84315, #f57c00); }
+        :root { --bg: #f4f7f6; --text: #333; --card: white; --accent: #673ab7; --gradient: linear-gradient(135deg, #673ab7, #9c27b0); }
+        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --gradient: linear-gradient(135deg, #4527a0, #7b1fa2); }
 
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; padding-bottom: 90px; }
 
-        /* HERO SECTION CON FOTO O DEGRADADO */
+        /* HERO SECTION */
         .hero {
             background: var(--gradient);
             color: white;
-            padding: 40px 20px;
+            padding: 50px 20px;
             text-align: center;
-            border-bottom-left-radius: 30px;
-            border-bottom-right-radius: 30px;
-            box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
-            margin-bottom: 30px;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            box-shadow: 0 10px 30px rgba(103, 58, 183, 0.4);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
         }
-        .hero h1 { margin: 0; font-size: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .hero p { opacity: 0.9; margin-top: 5px; font-weight: 600; }
+        .hero h1 { margin: 0; font-size: 2.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .hero p { opacity: 0.9; margin-top: 5px; font-weight: 600; font-size: 0.9rem; }
+        
+        /* DECORACIÓN FONDO HERO */
+        .hero::before { content: ''; position: absolute; top: -50px; left: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .hero::after { content: ''; position: absolute; bottom: -30px; right: -30px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
 
-        .container { max-width: 600px; margin: 0 auto; padding: 0 20px; }
+        .container { max-width: 700px; margin: 0 auto; padding: 0 20px; }
 
-        /* TARJETAS DE HISTORIA */
+        /* SECCIÓN FESTEROS */
+        .festeros-section { text-align: center; margin-bottom: 40px; }
+        .festeros-text { font-size: 1rem; line-height: 1.6; color: var(--text); margin-bottom: 20px; opacity: 0.9; }
+        
+        /* GALERÍA DE FOTOS */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .gallery-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .gallery-img:hover { transform: scale(1.05); }
+
+        /* TARJETA HISTORIA */
         .story-card {
             background: var(--card);
             border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border-left: 5px solid var(--accent);
-            animation: fadeIn 0.5s ease-in-out;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border-left: 6px solid #ff9800;
         }
-        .story-title { font-size: 1.2rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .story-text { line-height: 1.6; font-size: 0.95rem; opacity: 0.8; }
+        .story-title { font-size: 1.3rem; font-weight: 800; color: #ff9800; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .story-text { line-height: 1.7; font-size: 0.95rem; opacity: 0.8; }
 
-        /* BOTONES DE UBICACIÓN */
+        /* BOTONES UBICACIÓN */
         .location-grid { display: grid; gap: 15px; margin-top: 10px; }
         
         .location-btn {
             background: var(--card);
             padding: 20px;
-            border-radius: 15px;
+            border-radius: 18px;
             display: flex; align-items: center; justify-content: space-between;
             text-decoration: none; color: var(--text);
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             transition: transform 0.2s, box-shadow 0.2s;
             border: 1px solid rgba(0,0,0,0.05);
         }
-        .location-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .location-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         
         .loc-icon { 
-            background: rgba(255, 87, 34, 0.1); color: var(--accent); 
-            width: 50px; height: 50px; border-radius: 50%; 
+            background: rgba(103, 58, 183, 0.1); color: var(--accent); 
+            width: 55px; height: 55px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            margin-right: 15px; font-size: 24px;
+            margin-right: 15px; font-size: 26px;
         }
-        .loc-info h3 { margin: 0; font-size: 1rem; font-weight: 700; }
-        .loc-info p { margin: 0; font-size: 0.8rem; opacity: 0.6; }
+        .loc-info h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+        .loc-info p { margin: 0; font-size: 0.85rem; opacity: 0.6; }
 
-        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; text-decoration: none; }
+        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; text-decoration: none; transition: transform 0.2s; }
+        .btn-back-float:active { transform: scale(0.9); }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .divider { height: 1px; background: rgba(0,0,0,0.1); margin: 40px 0; }
+        
+        .section-header { font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: gray; margin-bottom: 15px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="hero">
-        <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 10px;">landscape</span>
+        <span class="material-symbols-outlined" style="font-size: 56px; margin-bottom: 10px;">landscape</span>
         <h1>El Pantano</h1>
         <p>Torrent, Valencia</p>
     </div>
 
     <div class="container">
-        <div class="story-card">
-            <div class="story-title">
-                <span class="material-symbols-outlined">church</span>
-                Tradición y Fiesta
+        
+        <div class="festeros-section">
+            <h2 style="font-size: 1.8rem; margin-bottom: 15px;">¡Hacemos Historia! 🎉</h2>
+            <div class="festeros-text">
+                Somos un grupo grande de vecinos, amigos y festeros unidos por una única pasión: 
+                <strong>hacer de estas fiestas algo inolvidable</strong>. 
+                <br><br>
+                Con ilusión, esfuerzo y muchas ganas de pasarlo bien, trabajamos todo el año para llenar nuestras calles de alegría, música y tradición. ¡Porque El Pantano sois vosotros!
             </div>
-            <div class="story-text">
-                Nuestras fiestas se celebran tradicionalmente en honor a la <strong>Asunción de la Virgen María</strong> (15 de Agosto). <br><br>
-                Esta fecha tan señalada marca el punto culminante y el <strong>final de nuestras fiestas</strong>, reuniendo a todos los vecinos en una celebración de hermandad.
+
+            <div class="gallery">
+                <img src="https://i.postimg.cc/CMPWVhp0/d.jpg" class="gallery-img" alt="Festeros">
+                <img src="https://i.postimg.cc/BZYdGSfG/n.jpg" class="gallery-img" alt="Festeros">
+                <img src="https://i.postimg.cc/05WLqk1s/r.jpg" class="gallery-img" alt="Festeros">
+                <img src="https://i.postimg.cc/VsG3cfP1/Whats-App-Image-2026-02-01-at-12-23-56.jpg" class="gallery-img" alt="Festeros">
             </div>
         </div>
 
-        <h3 style="margin-bottom: 15px; text-align: center; opacity: 0.7;">📍 Puntos de Encuentro</h3>
+        <div class="divider"></div>
+
+        <div class="section-header">Tradición y Cultura</div>
+
+        <div class="story-card">
+            <div class="story-title">
+                <span class="material-symbols-outlined">church</span>
+                La Asunción
+            </div>
+            <div class="story-text">
+                Nuestras fiestas culminan con honor y devoción en el día de la <strong>Asunción de la Virgen María</strong> (15 de Agosto). <br><br>
+                Es el momento más emotivo del año, donde la tradición se une con la fiesta para despedir el verano por todo lo alto.
+            </div>
+        </div>
+
+        <div class="section-header">Ubicaciones Clave</div>
 
         <div class="location-grid">
-            <a href="https://share.google/FB0pxqIVyVGD0GU3X" target="_blank" class="location-btn">
+            <a href="https://maps.app.goo.gl/FB0pxqIVyVGD0GU3X" target="_blank" class="location-btn">
                 <div style="display:flex; align-items:center;">
                     <div class="loc-icon"><span class="material-symbols-outlined">park</span></div>
                     <div class="loc-info">
@@ -106,7 +158,7 @@
                 <span class="material-symbols-outlined" style="opacity:0.5;">open_in_new</span>
             </a>
 
-            <a href="https://share.google/RUzRObZXDFYo4hyTa" target="_blank" class="location-btn">
+            <a href="https://maps.app.goo.gl/RUzRObZXDFYo4hyTa" target="_blank" class="location-btn">
                 <div style="display:flex; align-items:center;">
                     <div class="loc-icon"><span class="material-symbols-outlined">location_on</span></div>
                     <div class="loc-info">
@@ -118,13 +170,13 @@
             </a>
         </div>
 
-        <div style="margin-top: 30px; text-align: center; opacity: 0.5; font-size: 0.8rem;">
+        <div style="margin-top: 40px; text-align: center; opacity: 0.5; font-size: 0.8rem;">
             <p>Urbanización El Pantano © 2026</p>
         </div>
     </div>
 
-    <a href="panel.html" class="btn-back-float">
-        <span class="material-symbols-outlined">arrow_back</span>
+    <a href="index.html" class="btn-back-float">
+        <span class="material-symbols-outlined">home</span>
     </a>
 
 </body>
