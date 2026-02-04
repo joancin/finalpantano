@@ -19,15 +19,20 @@
             min-height: 100vh; 
             display: flex; 
             align-items: center; 
-            justify-content: center;
+            justify-content: flex-start; /* Cambiado para permitir scroll */
             font-family: 'Roboto Mono', monospace;
             background-image: radial-gradient(#34495e 1px, transparent 1px);
             background-size: 20px 20px;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
+        /* --- TICKET PRINCIPAL --- */
         .ticket-container {
             perspective: 1000px;
+            margin-top: 60px; /* Espacio para el botón de volver */
+            margin-bottom: 50px;
+            z-index: 2;
         }
 
         .ticket {
@@ -99,13 +104,59 @@
         .loading-text { font-size: 1rem; color: #4e342e; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.5; } }
 
+        /* --- NUEVO: HISTORIAL DE RIFAS --- */
+        .history-section {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .history-title {
+            color: #f1c40f;
+            font-family: 'Abril Fatface', cursive;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+        }
+
+        .history-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding-bottom: 50px;
+        }
+
+        .history-item {
+            width: 140px; /* Tamaño de las imágenes */
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid #34495e;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            transform: scale(1.15) rotate(2deg);
+            border-color: #f1c40f;
+            z-index: 10;
+            box-shadow: 0 10px 25px rgba(241, 196, 15, 0.4);
+        }
+
         /* CONTROLES ADMIN */
         #admin-controls {
-            margin-top: 40px;
+            margin-top: 20px;
+            margin-bottom: 50px;
             background: rgba(255,255,255,0.9);
             padding: 20px;
             border-radius: 15px;
-            display: none; /* Oculto por defecto */
+            display: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             text-align: center;
             width: 300px;
@@ -186,6 +237,26 @@
                     Cargando fecha...
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h2 class="history-title">Historial de Sorteos</h2>
+        <div class="history-grid">
+            <img src="https://i.postimg.cc/dtCGFDWF/1.png" class="history-item" alt="Rifa 1">
+            <img src="https://i.postimg.cc/4xTVxZ0q/2.png" class="history-item" alt="Rifa 2">
+            <img src="https://i.postimg.cc/BnGHnsyq/3.png" class="history-item" alt="Rifa 3">
+            <img src="https://i.postimg.cc/qvdyv0F5/4.png" class="history-item" alt="Rifa 4">
+            <img src="https://i.postimg.cc/YCfg4ZKN/5.png" class="history-item" alt="Rifa 5">
+            <img src="https://i.postimg.cc/52qvHTdS/6.png" class="history-item" alt="Rifa 6">
+            <img src="https://i.postimg.cc/htbxJ6Wr/7.png" class="history-item" alt="Rifa 7">
+            <img src="https://i.postimg.cc/9QtT4K5J/8.png" class="history-item" alt="Rifa 8">
+            <img src="https://i.postimg.cc/6QWZCctH/9.png" class="history-item" alt="Rifa 9">
+            <img src="https://i.postimg.cc/d0sCG6wH/10.png" class="history-item" alt="Rifa 10">
+            <img src="https://i.postimg.cc/KYGTtfx6/11.png" class="history-item" alt="Rifa 11">
+            <img src="https://i.postimg.cc/yNLZjRN7/12.png" class="history-item" alt="Rifa 12">
+            <img src="https://i.postimg.cc/0NVwnSNj/13.png" class="history-item" alt="Rifa 13">
+            <img src="https://i.postimg.cc/BvmKpFvt/14.png" class="history-item" alt="Rifa 14">
         </div>
     </div>
 
