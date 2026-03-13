@@ -3,190 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generar Invitaciones</title>
+    <title>Invitaciones</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff5722">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
     <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --bg: #f4f7f6; --text: #333; --card: white; --accent: #673ab7; }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; }
-
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; }
-        
-        .header { text-align: center; margin-bottom: 30px; }
-        .btn-back { background: transparent; border: 1px solid var(--text); padding: 8px 15px; border-radius: 20px; cursor: pointer; color: var(--text); }
-        
-        .card-generator { background: var(--card); padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        
-        .big-btn {
-            background: linear-gradient(45deg, #673ab7, #9c27b0);
-            color: white; border: none; padding: 15px 30px; border-radius: 50px;
-            font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%;
-            transition: transform 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        :root {
+            --bg: #f4f7f6; --text: #333; --card: white;
+            --accent: #ff5722; --border: #e0e0e0;
+            --shadow: 0 4px 15px rgba(0,0,0,0.06);
         }
-        .big-btn:active { transform: scale(0.95); }
-        .big-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
-        .code-list { display: flex; flex-direction: column; gap: 10px; }
-        .code-item { 
-            background: var(--card); padding: 15px; border-radius: 10px; 
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid rgba(0,0,0,0.1);
+        html.dark-mode {
+            --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --border: #333;
+            --shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .code-text { font-family: monospace; font-size: 1.2rem; font-weight: bold; color: var(--accent); letter-spacing: 2px; }
-        
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
-        .badge.libre { background: #e8f5e9; color: #2e7d32; }
-        .badge.usado { background: #ffebee; color: #c62828; text-decoration: line-through; }
 
-        .btn-copy { background: #eee; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
-        .btn-copy:hover { background: #ddd; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 100px; }
+        .container { max-width: 600px; margin: 0 auto; }
+
+        /* HEADER */
+        .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; }
+        .back-btn { background: var(--card); border: 1px solid var(--border); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: var(--shadow); }
+        .page-header h1 { margin: 0; font-size: 1.5rem; font-weight: 800; }
+
+        /* TABS */
+        .tabs { display: flex; background: var(--card); border-radius: 14px; padding: 5px; margin-bottom: 25px; box-shadow: var(--shadow); gap: 4px; border: 1px solid var(--border); }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; background: transparent; color: gray; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .tab-btn.active { background: var(--accent); color: white; box-shadow: 0 2px 8px rgba(255,87,34,0.3); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* CARDS */
+        .gen-card { background: var(--card); border-radius: 18px; padding: 25px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border); }
+        .gen-card h2 { margin: 0 0 5px 0; font-size: 1.1rem; }
+        .gen-card p { margin: 0 0 20px 0; font-size: 0.85rem; color: gray; line-height: 1.5; }
+
+        /* INPUT ROW */
+        .input-row { display: flex; gap: 10px; }
+        .input-row input {
+            flex: 1; padding: 13px 15px; border: 2px solid var(--border); border-radius: 12px;
+            background: var(--bg); color: var(--text); font-family: inherit; font-size: 1rem;
+            text-transform: uppercase; font-weight: 700; letter-spacing: 1px;
+            transition: border-color 0.2s; outline: none;
+        }
+        .input-row input:focus { border-color: var(--accent); }
+        .input-row input::placeholder { text-transform: none; font-weight: 400; letter-spacing: 0; }
+
+        .btn-gen {
+            background: var(--accent); color: white; border: none;
+            padding: 13px 20px; border-radius: 12px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
+            font-size: 0.9rem; white-space: nowrap; transition: transform 0.15s, opacity 0.2s;
+            font-family: inherit; flex-shrink: 0;
+        }
+        .btn-gen:active { transform: scale(0.96); }
+        .btn-gen:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .btn-magic {
+            width: 100%; margin-top: 10px; padding: 12px; background: transparent;
+            border: 2px dashed var(--border); border-radius: 12px; color: gray;
+            font-family: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-magic:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,87,34,0.04); }
+
+        /* LISTA DE CÓDIGOS */
+        .codes-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .codes-title { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: gray; }
+        .codes-count { background: var(--accent); color: white; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+
+        .code-item {
+            background: var(--card); border-radius: 14px; padding: 14px 16px;
+            margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: var(--shadow); border: 1px solid var(--border);
+            animation: slideIn 0.25s ease;
+        }
+        @keyframes slideIn { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
+        .code-left { display: flex; align-items: center; gap: 12px; }
+        .code-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .dot-free { background: #4caf50; box-shadow: 0 0 6px rgba(76,175,80,0.5); }
+        .dot-used { background: #ccc; }
+
+        .code-text-wrap { display: flex; flex-direction: column; }
+        .code-text { font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 800; letter-spacing: 2px; line-height: 1; }
+        .code-meta { font-size: 0.72rem; color: gray; margin-top: 3px; }
+        .code-used-by { color: #e91e63; font-size: 0.72rem; margin-top: 3px; }
+
+        .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-right: 8px; }
+        .badge-free { background: #e8f5e9; color: #2e7d32; }
+        .badge-used { background: #fce4ec; color: #c62828; text-decoration: line-through; }
+        .badge-rol { background: rgba(255,87,34,0.1); color: var(--accent); }
+
+        .code-actions { display: flex; gap: 6px; align-items: center; }
+        .btn-copy { background: #e3f2fd; color: #1565c0; border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
+        .btn-copy:active { transform: scale(0.9); }
+        .btn-share { background: #f3e5f5; color: #7b1fa2; border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
+        .btn-share:active { transform: scale(0.9); }
+        .btn-del-small { background: #ffebee; color: #c62828; border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
+        .btn-del-small:active { transform: scale(0.9); }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #333; color: white; padding: 10px 20px; border-radius: 30px;
+            font-size: 0.85rem; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 9999;
+            pointer-events: none; white-space: nowrap;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 40px 20px; color: gray; }
+        .empty-state .material-symbols-outlined { font-size: 48px; opacity: 0.3; display: block; margin-bottom: 10px; }
+
+        /* STATS BAR */
+        .stats-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-item { background: var(--card); border-radius: 12px; padding: 14px; text-align: center; border: 1px solid var(--border); }
+        .stat-num { font-size: 1.5rem; font-weight: 800; display: block; }
+        .stat-label { font-size: 0.7rem; color: gray; font-weight: 600; text-transform: uppercase; }
+        .s-total { color: var(--accent); }
+        .s-free { color: #4caf50; }
+        .s-used { color: #e91e63; }
+
+        /* BOTTOM NAV */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+        .nav-item { text-decoration: none; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.72rem; flex: 1; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+        .nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 3px; }
     </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
         let currentUser = null;
+        let userRol = 'festero';
+        let allCodes = [];
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                cargarMisCodigos();
-            } else {
-                window.location.href = "index.html";
+        // ── AUTH ─────────────────────────────────────────────────────────
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            currentUser = user;
+
+            // Obtener rol del usuario
+            const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+            const uDoc = await getDoc(doc(db, "usuarios", user.uid));
+            if (uDoc.exists()) {
+                userRol = uDoc.data().rol;
+                // Solo festeros y admins pueden usar esta página
+                if (userRol !== 'festero' && userRol !== 'admin') {
+                    window.location.href = "panel.html"; return;
+                }
+                // Solo admins ven la tab de VIP
+                if (userRol === 'admin') {
+                    document.getElementById('tab-vip').style.display = 'flex';
+                }
             }
+            cargarCodigos();
         });
 
-        // --- FUNCIÓN PARA GENERAR 8 CARACTERES ALFANUMÉRICOS ---
-        function generateRandomString(length) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
+        // ── CARGAR TODOS LOS CÓDIGOS DEL FESTERO ─────────────────────────
+        function cargarCodigos() {
+            // Admins ven todos los códigos, festeros solo los suyos
+            const q = userRol === 'admin'
+                ? query(collection(db, "invitaciones"), orderBy("fecha_creacion", "desc"))
+                : query(collection(db, "invitaciones"), where("creado_por", "==", currentUser.uid), orderBy("fecha_creacion", "desc"));
+
+            onSnapshot(q, (snapshot) => {
+                allCodes = [];
+                snapshot.forEach(d => allCodes.push({ id: d.id, ...d.data() }));
+                renderTab(document.querySelector('.tab-btn.active')?.dataset.tab || 'usuario');
+                updateStats();
+            });
         }
 
-        window.generarCodigo = async () => {
-            if(!currentUser) {
-                alert("Error: No estás identificado.");
+        // ── STATS ─────────────────────────────────────────────────────────
+        function updateStats() {
+            const usuarioCodes = allCodes.filter(c => c.rol === 'usuario');
+            const libres = usuarioCodes.filter(c => !c.usado).length;
+            const usados = usuarioCodes.filter(c => c.usado).length;
+            document.getElementById('stat-total').innerText = usuarioCodes.length;
+            document.getElementById('stat-free').innerText = libres;
+            document.getElementById('stat-used').innerText = usados;
+        }
+
+        // ── RENDER TABS ───────────────────────────────────────────────────
+        window.renderTab = (tabName) => {
+            const listEl = document.getElementById('codes-list-' + tabName);
+            if (!listEl) return;
+
+            let filtered;
+            if (tabName === 'usuario') {
+                filtered = allCodes.filter(c => c.rol === 'usuario');
+            } else {
+                filtered = allCodes.filter(c => c.rol === 'festero' || c.rol === 'admin');
+            }
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-symbols-outlined">confirmation_number</span>
+                        <p>Aún no hay códigos aquí.<br>¡Crea el primero!</p>
+                    </div>`;
+                document.getElementById('count-' + tabName).innerText = '0';
                 return;
             }
 
-            const btn = document.getElementById('btn-gen');
-            btn.disabled = true; 
-            btn.innerText = "Creando...";
+            document.getElementById('count-' + tabName).innerText = filtered.length;
+            listEl.innerHTML = filtered.map(c => {
+                const libre = !c.usado;
+                const fecha = c.fecha_creacion?.toDate
+                    ? c.fecha_creacion.toDate().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+                    : (c.fecha ? new Date(c.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : '');
+                const usadoPor = c.usado_por ? `👤 Usado por: <strong>${c.usado_por}</strong>` : '';
+                const rolBadge = c.rol !== 'usuario' ? `<span class="badge badge-rol">${c.rol}</span>` : '';
 
-            // 1. Generamos código de 8 caracteres
-            const nuevoCodigo = generateRandomString(8);
+                return `
+                <div class="code-item">
+                    <div class="code-left">
+                        <div class="code-dot ${libre ? 'dot-free' : 'dot-used'}"></div>
+                        <div class="code-text-wrap">
+                            <div class="code-text ${!libre ? 'style="text-decoration:line-through; opacity:0.5;"' : ''}">${c.codigo}</div>
+                            <div class="code-meta">
+                                ${rolBadge}
+                                <span class="badge ${libre ? 'badge-free' : 'badge-used'}">${libre ? 'Libre' : 'Usado'}</span>
+                                ${fecha}
+                            </div>
+                            ${usadoPor ? `<div class="code-used-by">${usadoPor}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="code-actions">
+                        ${libre ? `
+                            <button class="btn-copy" onclick="copiarCodigo('${c.codigo}')" title="Copiar">
+                                <span class="material-symbols-outlined" style="font-size:18px">content_copy</span>
+                            </button>
+                            <button class="btn-share" onclick="compartirCodigo('${c.codigo}')" title="Compartir">
+                                <span class="material-symbols-outlined" style="font-size:18px">share</span>
+                            </button>
+                        ` : ''}
+                        <button class="btn-del-small" onclick="borrarCodigo('${c.id}')" title="Eliminar">
+                            <span class="material-symbols-outlined" style="font-size:18px">delete</span>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
 
-            try {
-                // 2. Guardamos en Firebase AÑADIENDO EL CAMPO ROL
-                await addDoc(collection(db, "invitaciones"), {
-                    codigo: nuevoCodigo,
-                    rol: "festero", // <--- ¡ESTO ES LO QUE FALTABA!
-                    creado_por: currentUser.uid,
-                    creado_email: currentUser.email,
-                    estado: "libre", 
-                    fecha: new Date().toISOString() 
-                });
-                
-                alert(`✅ Código creado: ${nuevoCodigo}`);
+        // ── CREAR CÓDIGO USUARIO (VECINO) ─────────────────────────────────
+        window.crearCodigoUsuario = async () => {
+            const input = document.getElementById('input-usuario');
+            let codigo = input.value.trim().toUpperCase();
 
-            } catch (e) {
-                console.error(e);
-                alert("Error al guardar: " + e.message);
+            // Si está vacío, generar automáticamente
+            if (!codigo) {
+                codigo = generarAleatorio(8);
             }
 
-            btn.disabled = false; 
-            btn.innerHTML = '<span class="material-symbols-outlined">auto_fix_high</span> Generar Nuevo Código';
+            if (codigo.length < 3) { mostrarToast('⚠️ El código es muy corto'); return; }
+
+            const btn = document.getElementById('btn-crear-usuario');
+            btn.disabled = true;
+
+            try {
+                // Verificar que no exista
+                const q = query(collection(db, "invitaciones"), where("codigo", "==", codigo));
+                const snap = await getDocs(q);
+                if (!snap.empty) { mostrarToast('⚠️ Ese código ya existe'); btn.disabled = false; return; }
+
+                await addDoc(collection(db, "invitaciones"), {
+                    codigo,
+                    rol: 'usuario',
+                    usado: false,
+                    creado_por: currentUser.uid,
+                    fecha_creacion: new Date(),
+                    nota: document.getElementById('nota-usuario').value.trim() || null
+                });
+
+                input.value = '';
+                document.getElementById('nota-usuario').value = '';
+                mostrarToast(`✅ Código ${codigo} creado`);
+            } catch (e) {
+                mostrarToast('❌ Error: ' + e.message);
+            }
+            btn.disabled = false;
         }
 
-        function cargarMisCodigos() {
-            // Consulta simple para evitar problemas de índices
-            const q = query(
-                collection(db, "invitaciones"), 
-                where("creado_por", "==", currentUser.uid)
-            );
+        // ── CREAR CÓDIGO VIP (solo admins, desde aquí) ────────────────────
+        window.crearCodigoVIP = async () => {
+            const codigo = document.getElementById('input-vip').value.trim().toUpperCase();
+            const rol = document.getElementById('select-vip').value;
+            if (!codigo || codigo.length < 3) { mostrarToast('⚠️ Escribe un código válido'); return; }
 
-            onSnapshot(q, (snapshot) => {
-                const lista = document.getElementById("lista");
-                lista.innerHTML = "";
-                
-                if(snapshot.empty) {
-                    lista.innerHTML = "<p style='text-align:center; opacity:0.6'>No has creado códigos aún.</p>";
-                    return;
-                }
+            const btn = document.getElementById('btn-crear-vip');
+            btn.disabled = true;
 
-                let invitaciones = [];
-                snapshot.forEach(doc => {
-                    invitaciones.push(doc.data());
+            try {
+                const q = query(collection(db, "invitaciones"), where("codigo", "==", codigo));
+                const snap = await getDocs(q);
+                if (!snap.empty) { mostrarToast('⚠️ Ese código ya existe'); btn.disabled = false; return; }
+
+                await addDoc(collection(db, "invitaciones"), {
+                    codigo, rol, usado: false,
+                    creado_por: currentUser.uid,
+                    fecha_creacion: new Date()
                 });
-
-                // Ordenamos por fecha (del más nuevo al más viejo) en el navegador
-                invitaciones.sort((a, b) => {
-                    return (b.fecha || "").localeCompare(a.fecha || "");
-                });
-
-                invitaciones.forEach(data => {
-                    const estadoClass = data.estado === 'libre' ? 'libre' : 'usado';
-                    const estadoText = data.estado === 'libre' ? 'LIBRE' : 'USADO';
-                    
-                    lista.innerHTML += `
-                        <div class="code-item">
-                            <div>
-                                <div class="code-text">${data.codigo}</div>
-                                <span class="badge ${estadoClass}">${estadoText}</span>
-                                <span style="font-size:0.7rem; color:gray; margin-left:5px;">Rol: ${data.rol || 'festero'}</span>
-                            </div>
-                            ${data.estado === 'libre' ? 
-                                `<button class="btn-copy" onclick="copiar('${data.codigo}')">
-                                    <span class="material-symbols-outlined">content_copy</span>
-                                </button>` : ''
-                            }
-                        </div>
-                    `;
-                });
-            });
+                document.getElementById('input-vip').value = '';
+                mostrarToast(`✅ Código VIP "${codigo}" creado para ${rol}`);
+            } catch (e) { mostrarToast('❌ Error: ' + e.message); }
+            btn.disabled = false;
         }
 
-        window.copiar = (texto) => {
-            navigator.clipboard.writeText(texto).then(() => {
-                alert("¡Copiado al portapapeles!");
-            });
+        // ── GENERAR ALEATORIO Y RELLENAR INPUT ───────────────────────────
+        window.generarAleatorioEnInput = () => {
+            document.getElementById('input-usuario').value = generarAleatorio(8);
+            document.getElementById('input-usuario').focus();
+        }
+
+        function generarAleatorio(len) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sin caracteres confusos (0,O,1,I)
+            return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        }
+
+        // ── ACCIONES CÓDIGOS ──────────────────────────────────────────────
+        window.copiarCodigo = async (codigo) => {
+            try {
+                await navigator.clipboard.writeText(codigo);
+                mostrarToast('📋 Copiado: ' + codigo);
+            } catch {
+                // Fallback para Safari
+                const el = document.createElement('input');
+                el.value = codigo; document.body.appendChild(el);
+                el.select(); document.execCommand('copy'); document.body.removeChild(el);
+                mostrarToast('📋 Copiado: ' + codigo);
+            }
+        }
+
+        window.compartirCodigo = async (codigo) => {
+            const texto = `🎉 ¡Te invito a las Fiestas del Pantano!\n\nEntra en pantano2026.es y usa el código:\n\n👉 ${codigo}\n\n¡Nos vemos en las fiestas! 🎊`;
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'Invitación Fiestas Pantano', text: texto, url: 'https://pantano2026.es' });
+                } catch {}
+            } else {
+                await navigator.clipboard.writeText(texto);
+                mostrarToast('📋 Mensaje copiado para compartir');
+            }
+        }
+
+        window.borrarCodigo = async (id) => {
+            if (!confirm('¿Borrar este código? Si alguien ya lo tiene apuntado, ya no podrá usarlo.')) return;
+            try {
+                await deleteDoc(doc(db, "invitaciones", id));
+                mostrarToast('🗑️ Código eliminado');
+            } catch (e) { mostrarToast('❌ Error al borrar'); }
+        }
+
+        // ── TABS UI ───────────────────────────────────────────────────────
+        window.switchTab = (tabName) => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+            renderTab(tabName);
+        }
+
+        // ── TOAST ─────────────────────────────────────────────────────────
+        function mostrarToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
         }
     </script>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <button class="btn-back" onclick="window.history.back()">⬅ Volver</button>
-            <h2>Gestor de Invitaciones 🎟️</h2>
-        </div>
+<div class="container">
 
-        <div class="card-generator">
-            <p style="margin-bottom: 20px;">Genera un código único de 8 caracteres.</p>
-            <button id="btn-gen" class="big-btn" onclick="generarCodigo()">
-                <span class="material-symbols-outlined">auto_fix_high</span>
-                Generar Nuevo Código
+    <div class="page-header">
+        <button class="back-btn" onclick="window.history.back()">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </button>
+        <h1>🎟️ Invitaciones</h1>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <span id="stat-total" class="stat-num s-total">0</span>
+            <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-item">
+            <span id="stat-free" class="stat-num s-free">0</span>
+            <span class="stat-label">Libres</span>
+        </div>
+        <div class="stat-item">
+            <span id="stat-used" class="stat-num s-used">0</span>
+            <span class="stat-label">Canjeados</span>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="usuario" onclick="switchTab('usuario')">
+            <span class="material-symbols-outlined" style="font-size:18px">group</span>
+            Vecinos
+        </button>
+        <button id="tab-vip" class="tab-btn" data-tab="vip" onclick="switchTab('vip')" style="display:none;">
+            <span class="material-symbols-outlined" style="font-size:18px">stars</span>
+            VIP / Admin
+        </button>
+    </div>
+
+    <!-- TAB VECINOS (usuarios normales) -->
+    <div id="tab-usuario" class="tab-content active">
+
+        <div class="gen-card">
+            <h2>Crear código para un vecino</h2>
+            <p>Escribe un nombre personalizado (ej: <strong>VECINO_PEPE</strong>) o pulsa el dado para generar uno automático. Comparte el código y el vecino podrá registrarse con él.</p>
+
+            <div class="input-row">
+                <input type="text" id="input-usuario" placeholder="Ej: FAMILIA_GARCIA" maxlength="20">
+                <button class="btn-gen" id="btn-crear-usuario" onclick="crearCodigoUsuario()">
+                    <span class="material-symbols-outlined" style="font-size:18px">add</span>
+                    Crear
+                </button>
+            </div>
+
+            <button class="btn-magic" onclick="generarAleatorioEnInput()">
+                <span class="material-symbols-outlined" style="font-size:18px">casino</span>
+                Generar código aleatorio
             </button>
         </div>
 
-        <h3 style="margin-bottom: 15px;">Mis códigos generados</h3>
-        <div id="lista" class="code-list">
-            <div style="text-align:center;">Cargando...</div>
+        <div class="codes-header">
+            <span class="codes-title">Códigos creados</span>
+            <span id="count-usuario" class="codes-count">0</span>
+        </div>
+        <div id="codes-list-usuario">
+            <div class="empty-state">
+                <span class="material-symbols-outlined">confirmation_number</span>
+                <p>Cargando...</p>
+            </div>
         </div>
     </div>
+
+    <!-- TAB VIP (solo admins) -->
+    <div id="tab-vip" class="tab-content">
+
+        <div class="gen-card" style="border-left: 4px solid #673ab7;">
+            <h2>⭐ Crear código VIP</h2>
+            <p>Solo para dar acceso a <strong>festeros</strong> u otros <strong>admins</strong>. Estos usuarios tendrán permisos de gestión.</p>
+
+            <div class="input-row">
+                <input type="text" id="input-vip" placeholder="Ej: FESTERO_MARIA" maxlength="20">
+                <select id="select-vip" style="padding:12px; border-radius:12px; border:2px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; font-weight:700;">
+                    <option value="festero">Festero</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button class="btn-gen" id="btn-crear-vip" onclick="crearCodigoVIP()" style="background:#673ab7;">
+                    <span class="material-symbols-outlined" style="font-size:18px">add</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="codes-header">
+            <span class="codes-title">Códigos VIP</span>
+            <span id="count-vip" class="codes-count">0</span>
+        </div>
+        <div id="codes-list-vip">
+            <div class="empty-state">
+                <span class="material-symbols-outlined">stars</span>
+                <p>No hay códigos VIP aún.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<nav class="bottom-nav">
+    <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
+    <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
+    <a href="mis_inscripciones.html" class="nav-item"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
+    <a href="perfil.html" class="nav-item"><span class="material-symbols-outlined">person</span>Perfil</a>
+</nav>
 </body>
 </html>

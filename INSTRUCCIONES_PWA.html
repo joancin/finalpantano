@@ -1,0 +1,51 @@
+<!-- ============================================================
+     INSTRUCCIONES DE INSTALACIÓN PWA
+     Añadir estas 2 líneas en el <head> de TODOS los HTML
+     ============================================================ -->
+
+<!-- 1. MANIFEST (instalar como app) -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#ff5722">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
+
+<!-- 2. SERVICE WORKER (pegar justo antes de </body> en index.html,
+        o en un script compartido) -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('[PWA] SW registrado:', reg.scope))
+        .catch(err => console.warn('[PWA] SW falló:', err));
+    });
+  }
+</script>
+
+<!-- ============================================================
+     RESUMEN DE ARCHIVOS NUEVOS
+     ============================================================
+
+  manifest.json  → Subir a la raíz del proyecto
+  sw.js          → Subir a la raíz del proyecto
+  codigos.html   → Reemplaza el codigos.html anterior
+
+  ============================================================
+  CAMBIOS EN codigos.html (NUEVAS FUNCIONES):
+  ============================================================
+
+  FESTEROS pueden ahora:
+  ✅ Crear códigos con nombre personalizado (ej: VECINO_PEPE)
+  ✅ Generar códigos aleatorios con el botón dado 🎲
+  ✅ Ver stats: total / libres / canjeados
+  ✅ Copiar código al portapapeles
+  ✅ Compartir código por WhatsApp/SMS con texto pregenerado
+  ✅ Ver quién ha canjeado cada código
+  ✅ Eliminar códigos
+
+  ADMINS además pueden:
+  ✅ Ver tab VIP oculta para crear códigos de festero/admin
+  ✅ Ver TODOS los códigos (no solo los suyos)
+
+  ============================================================ -->
