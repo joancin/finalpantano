@@ -3,282 +3,479 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Rifa Festera</title>
+    <title>La Rifa · Fiestas Pantano 2026</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ff5722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <style>
-        body { 
-            background: #2c3e50; 
-            margin: 0; 
-            padding: 20px; 
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: flex-start; /* Cambiado para permitir scroll */
-            font-family: 'Roboto Mono', monospace;
-            background-image: radial-gradient(#34495e 1px, transparent 1px);
-            background-size: 20px 20px;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
+    <meta name="theme-color" content="#e8400c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎟️</text></svg>">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
 
-        /* --- TICKET PRINCIPAL --- */
-        .ticket-container {
-            perspective: 1000px;
-            margin-top: 60px; /* Espacio para el botón de volver */
-            margin-bottom: 50px;
-            z-index: 2;
-        }
-
-        .ticket {
-            background: linear-gradient(135deg, #f1c40f, #f39c12);
-            width: 320px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            position: relative;
-            color: #4e342e;
-            transform-style: preserve-3d;
-            transition: transform 0.5s;
-        }
-        
-        .ticket:hover { transform: rotateY(10deg) rotateX(5deg); }
-
-        .ticket::before, .ticket::after {
-            content: ''; position: absolute; width: 40px; height: 40px; background: #2c3e50; border-radius: 50%; top: 50%; transform: translateY(-50%); z-index: 10;
-        }
-        .ticket::before { left: -20px; }
-        .ticket::after { right: -20px; }
-
-        .ticket-header {
-            text-align: center;
-            padding: 20px;
-            border-bottom: 2px dashed #4e342e;
-            position: relative;
-        }
-        .ticket-header h1 {
-            font-family: 'Abril Fatface', cursive;
-            font-size: 2.5rem;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        .subtitle { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; margin-top: 5px; }
-
-        .ticket-body {
-            padding: 30px 20px;
-            text-align: center;
-        }
-        
-        .win-label { font-size: 0.9rem; margin-bottom: 10px; display: block; opacity: 0.8; }
-        
-        .win-number {
-            font-size: 4rem;
-            font-weight: bold;
-            background: white;
-            color: #d35400;
-            padding: 10px;
-            border-radius: 10px;
-            display: inline-block;
-            letter-spacing: 5px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .date-info {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            border: 2px solid #4e342e;
-            padding: 5px;
-            border-radius: 50px;
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-        }
-
-        .btn-back { position: fixed; top: 20px; left: 20px; background: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-
-        .loading-text { font-size: 1rem; color: #4e342e; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
-
-        /* --- NUEVO: HISTORIAL DE RIFAS --- */
-        .history-section {
-            width: 100%;
-            max-width: 1200px; /* Aumentado para acomodar imágenes más grandes */
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .history-title {
-            color: #f1c40f;
-            font-family: 'Abril Fatface', cursive;
-            font-size: 2rem;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            letter-spacing: 1px;
-        }
-
-        .history-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 25px; /* Espacio aumentado entre imágenes */
-            padding-bottom: 50px;
-        }
-
-        .history-item {
-            width: 250px;  /* Ancho fijo más grande */
-            height: 180px; /* Alto fijo para cuadrar todas */
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 3px solid #34495e;
-            background: #fff;
-            cursor: pointer;
-            overflow: hidden; /* Importante para que la imagen no se salga */
-        }
-
-        .history-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Hace que la imagen llene el contenedor sin deformarse */
-            display: block;
-        }
-
-        .history-item:hover {
-            transform: scale(1.08) rotate(1deg); /* Efecto hover ligeramente ajustado */
-            border-color: #f1c40f;
-            z-index: 10;
-            box-shadow: 0 12px 30px rgba(241, 196, 15, 0.4);
-        }
-
-        /* CONTROLES ADMIN */
-        #admin-controls {
-            margin-top: 20px;
-            margin-bottom: 50px;
-            background: rgba(255,255,255,0.9);
-            padding: 20px;
-            border-radius: 15px;
-            display: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            text-align: center;
-            width: 300px;
-        }
-        .admin-input { padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 100px; font-size: 1.2rem; text-align: center; margin-right: 10px; }
-        .btn-save { background: #d35400; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    </style>
-
+    <!-- ═══ FIREBASE — IDÉNTICA AL ORIGINAL ═══════════════════════════ -->
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, doc, onSnapshot, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, doc, onSnapshot, getDoc, setDoc }
+          from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged }
+          from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
+      const firebaseConfig = {
+          apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+          authDomain:"fiestas-pantano.firebaseapp.com",
+          projectId:"fiestas-pantano",
+          storageBucket:"fiestas-pantano.firebasestorage.app",
+          messagingSenderId:"801380435613",
+          appId:"1:801380435613:web:a842572cf7cee93ac57674",
+          measurementId:"G-EG2MZGBT1B"
+      };
 
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
+      const app  = initializeApp(firebaseConfig);
+      const db   = getFirestore(app);
       const auth = getAuth(app);
 
-      // Escuchar cambios en la rifa en tiempo real
-      onSnapshot(doc(db, "config", "rifa"), (docSnap) => {
-          if (docSnap.exists()) {
-              const data = docSnap.data();
-              document.getElementById("win-num").innerText = data.numero || "???";
-              document.getElementById("draw-date").innerText = "📅 Sorteo: " + (data.fecha || "Próximamente");
+      onSnapshot(doc(db,"config","rifa"), (snap) => {
+          const numEl  = document.getElementById("win-num");
+          const dateEl = document.getElementById("draw-date");
+          if (snap.exists()) {
+              const d = snap.data();
+              numEl.innerText = d.numero || "???";
+              numEl.classList.remove('loading');
+              dateEl.innerText = "📅 Sorteo: " + (d.fecha || "Próximamente");
           } else {
-              document.getElementById("win-num").innerText = "---";
+              numEl.innerText = "---";
+              dateEl.innerText = "📅 Fecha por confirmar";
           }
       });
 
-      // Verificar rol para mostrar controles
       onAuthStateChanged(auth, async (user) => {
-          if(user) {
-              const uDoc = await getDoc(doc(db, "usuarios", user.uid));
-              if(uDoc.exists()) {
+          if (user) {
+              const uDoc = await getDoc(doc(db,"usuarios",user.uid));
+              if (uDoc.exists()) {
                   const rol = uDoc.data().rol;
-                  if(rol === 'admin' || rol === 'festero') {
+                  if (rol==='admin' || rol==='festero')
                       document.getElementById("admin-controls").style.display = "block";
-                  }
               }
           }
       });
 
       window.actualizarRifa = async () => {
-          const num = document.getElementById("admin-num").value;
+          const num   = document.getElementById("admin-num").value;
           const fecha = document.getElementById("admin-date").value;
-          if(!num) return alert("Escribe un número");
-
+          if (!num) return showToast("⚠️ Escribe un número");
+          const btn = document.getElementById("btn-publicar");
+          btn.disabled = true; btn.innerText = "Guardando…";
           try {
-              await setDoc(doc(db, "config", "rifa"), { numero: num, fecha: fecha || "Próximamente" }, { merge: true });
-              alert("✅ Rifa Actualizada");
-          } catch(e) { alert("Error: " + e.message); }
-      }
+              await setDoc(doc(db,"config","rifa"),
+                  { numero:num, fecha:fecha||"Próximamente" }, { merge:true });
+              showToast("✅ Rifa actualizada");
+          } catch(e) { showToast("❌ "+e.message); }
+          btn.disabled = false; btn.innerText = "Publicar número";
+      };
     </script>
+
+    <style>
+        /* ── VARIABLES ──────────────────────────────────────────────── */
+        :root {
+            --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550;
+            --card:#fff; --border:rgba(0,0,0,0.07);
+            --accent:#e8400c; --gold:#f59e0b;
+            --shadow:0 4px 20px rgba(0,0,0,0.08);
+        }
+        html.dark-mode {
+            --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070;
+            --card:#241c14; --border:rgba(255,255,255,0.08);
+            --shadow:0 4px 20px rgba(0,0,0,0.45);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body {
+            font-family:'Bricolage Grotesque',sans-serif;
+            background:var(--bg); color:var(--text);
+            min-height:100vh; overflow-x:hidden; padding-bottom:60px;
+        }
+
+        /* ── TOPBAR ─────────────────────────────────────────────────── */
+        .topbar {
+            display:flex; align-items:center; gap:12px;
+            padding:16px 18px; position:sticky; top:0; z-index:50;
+            background:var(--bg); border-bottom:1px solid var(--border);
+            backdrop-filter:blur(12px);
+        }
+        .btn-back {
+            background:var(--card); border:1px solid var(--border);
+            width:40px; height:40px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; color:var(--text); flex-shrink:0;
+            box-shadow:var(--shadow); transition:transform .15s;
+        }
+        .btn-back:active{transform:scale(.9);}
+        .topbar h1{font-size:1.2rem; font-weight:800;}
+
+        /* ── TICKET HERO ────────────────────────────────────────────── */
+        .ticket-section {
+            padding:28px 18px 0;
+            display:flex; flex-direction:column; align-items:center;
+        }
+        .ticket-wrap { width:100%; max-width:340px; position:relative; }
+
+        .ticket-glow {
+            position:absolute; inset:-8px; border-radius:30px;
+            background:linear-gradient(135deg,var(--accent),var(--gold));
+            opacity:.2; filter:blur(20px);
+            animation:glowPulse 3s ease-in-out infinite;
+        }
+        @keyframes glowPulse{0%,100%{opacity:.2}50%{opacity:.32}}
+
+        .ticket {
+            position:relative; z-index:1;
+            background:linear-gradient(145deg,#f59e0b 0%,#e8400c 100%);
+            border-radius:22px; overflow:hidden; color:white;
+            box-shadow:0 24px 60px rgba(232,64,12,.35);
+        }
+        .ticket-header {
+            padding:24px 24px 0;
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .t-logo{font-size:2rem; line-height:1;}
+        .t-header-right{text-align:right;}
+        .t-supra{font-size:.65rem; font-weight:800; text-transform:uppercase;
+                 letter-spacing:2px; opacity:.8;}
+        .t-title{font-family:'Abril Fatface',serif; font-size:1.7rem; line-height:1; letter-spacing:1px;}
+
+        .ticket-body{padding:18px 24px 8px; text-align:center;}
+        .win-label{font-size:.65rem; font-weight:800; text-transform:uppercase;
+                   letter-spacing:3px; opacity:.75; margin-bottom:10px; display:block;}
+
+        .win-number {
+            font-family:'Roboto Mono',monospace;
+            font-size:clamp(3.2rem,16vw,4.8rem); font-weight:700; line-height:1;
+            background:rgba(255,255,255,.95); color:#c0300a;
+            display:inline-block; padding:10px 24px; border-radius:14px;
+            letter-spacing:6px; box-shadow:inset 0 2px 8px rgba(0,0,0,.15);
+            min-width:200px; text-align:center; transition:all .4s ease;
+        }
+        .win-number.loading {
+            color:transparent;
+            background:linear-gradient(90deg,rgba(255,255,255,.3) 25%,rgba(255,255,255,.65) 50%,rgba(255,255,255,.3) 75%);
+            background-size:200% 100%;
+            animation:shimmer 1.5s infinite;
+        }
+        @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+        .ticket-notch{
+            display:flex; align-items:center; justify-content:space-between;
+            padding:14px 0 0;
+        }
+        .notch{width:24px; height:24px; border-radius:50%; background:var(--bg); flex-shrink:0;}
+        .notch-line{flex:1; border-top:2px dashed rgba(255,255,255,.35); margin:0 -2px;}
+
+        .ticket-footer{
+            padding:10px 24px 22px;
+            display:flex; flex-direction:column; align-items:center; gap:8px;
+        }
+        .draw-date{
+            background:rgba(255,255,255,.2); backdrop-filter:blur(6px);
+            padding:6px 16px; border-radius:30px;
+            font-size:.8rem; font-weight:700;
+        }
+        .ticket-serial{
+            font-size:.6rem; opacity:.45; letter-spacing:3px;
+            text-transform:uppercase; font-family:'Roboto Mono',monospace;
+        }
+
+        /* ── HISTORIAL ──────────────────────────────────────────────── */
+        .section-wrap{max-width:700px; margin:0 auto; padding:32px 18px 0;}
+
+        .section-label {
+            display:flex; align-items:center; gap:10px;
+            font-size:.72rem; font-weight:800; text-transform:uppercase;
+            letter-spacing:1.5px; color:var(--text2); margin-bottom:18px;
+        }
+        .section-label::after{content:''; flex:1; height:1px; background:var(--border);}
+
+        /* Grid masonry-feel: 3 columnas fijas, imágenes proporcionales */
+        .history-grid {
+            columns: 3;
+            column-gap: 10px;
+        }
+        @media(max-width:420px){ .history-grid{ columns:2; } }
+
+        .history-item {
+            break-inside: avoid;
+            margin-bottom: 10px;
+            border-radius: 12px; overflow: hidden;
+            border: 2px solid var(--border);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform .22s, border-color .22s, box-shadow .22s;
+            background: var(--bg2);
+            position: relative;
+            display: block;
+        }
+        .history-item img {
+            width:100%; height:auto; display:block;
+            transition: transform .3s;
+        }
+        .history-item:hover {
+            transform:scale(1.03) translateY(-2px);
+            border-color:var(--gold);
+            box-shadow:0 10px 28px rgba(245,158,11,.28);
+            z-index:2; position:relative;
+        }
+        .history-item:hover img{transform:scale(1.05);}
+
+        /* Overlay número en hover */
+        .history-item::after {
+            content: attr(data-n);
+            position:absolute; bottom:6px; right:8px;
+            background:rgba(0,0,0,.55); color:white;
+            font-size:.65rem; font-weight:800; letter-spacing:.5px;
+            padding:2px 7px; border-radius:8px;
+            opacity:0; transition:opacity .2s;
+        }
+        .history-item:hover::after{opacity:1;}
+
+        /* ── LIGHTBOX ───────────────────────────────────────────────── */
+        #lightbox {
+            position:fixed; inset:0; z-index:9000;
+            background:rgba(0,0,0,.92); backdrop-filter:blur(10px);
+            display:none; align-items:center; justify-content:center;
+            padding:20px;
+        }
+        #lightbox.open{display:flex; animation:lbIn .2s ease;}
+        @keyframes lbIn{from{opacity:0}to{opacity:1}}
+
+        #lightbox img {
+            max-width:min(500px,90vw); max-height:85vh;
+            border-radius:14px; box-shadow:0 30px 80px rgba(0,0,0,.7);
+            object-fit:contain;
+            animation:lbImgIn .25s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes lbImgIn{from{transform:scale(.88)}to{transform:scale(1)}}
+
+        .lb-close {
+            position:fixed; top:18px; right:18px;
+            background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+            color:white; width:42px; height:42px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; font-size:1.2rem; backdrop-filter:blur(6px);
+            transition:background .2s;
+        }
+        .lb-close:hover{background:rgba(255,255,255,.22);}
+
+        .lb-nav {
+            position:fixed; top:50%; transform:translateY(-50%);
+            background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+            color:white; width:44px; height:44px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; backdrop-filter:blur(6px); transition:background .2s;
+        }
+        .lb-nav:hover{background:rgba(255,255,255,.22);}
+        .lb-prev{left:12px;} .lb-next{right:12px;}
+
+        .lb-counter{
+            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+            color:rgba(255,255,255,.6); font-size:.8rem; font-weight:700;
+            letter-spacing:1px;
+        }
+
+        /* ── ADMIN PANEL ────────────────────────────────────────────── */
+        .admin-panel {
+            display:none;
+            max-width:400px; margin:28px auto 0;
+            background:var(--card); border:1px solid var(--border);
+            border-radius:18px; padding:22px; box-shadow:var(--shadow);
+        }
+        .admin-panel h3{font-size:.95rem; font-weight:800; margin-bottom:16px; display:flex; align-items:center; gap:8px;}
+        .admin-row{display:flex; gap:8px; margin-bottom:10px;}
+        .admin-inp{
+            flex:1; padding:12px 14px; border:2px solid var(--border);
+            border-radius:12px; background:var(--bg2); color:var(--text);
+            font-family:inherit; font-size:.95rem; font-weight:700;
+            text-align:center; outline:none; transition:border-color .2s;
+        }
+        .admin-inp:focus{border-color:var(--accent);}
+        .btn-publicar{
+            width:100%; padding:13px; border-radius:12px; border:none;
+            background:var(--accent); color:white; font-weight:800;
+            font-family:inherit; font-size:.9rem; cursor:pointer;
+            box-shadow:0 3px 12px rgba(232,64,12,.35); transition:transform .15s,opacity .2s;
+        }
+        .btn-publicar:active{transform:scale(.97);}
+        .btn-publicar:disabled{opacity:.6; cursor:not-allowed;}
+
+        /* ── TOAST ──────────────────────────────────────────────────── */
+        #toast{
+            position:fixed; bottom:24px; left:50%;
+            transform:translateX(-50%) translateY(14px);
+            background:#1a1208; color:white; padding:10px 22px;
+            border-radius:30px; font-size:.82rem; font-weight:700;
+            opacity:0; transition:all .26s; z-index:9999;
+            pointer-events:none; white-space:nowrap;
+            font-family:'Bricolage Grotesque',sans-serif;
+        }
+        #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+    </style>
 </head>
 <body>
 
-    <button class="btn-back" onclick="window.history.back()">
-        <span class="material-symbols-outlined">arrow_back</span>
-    </button>
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <button class="btn-back" onclick="window.history.back()" aria-label="Volver">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </button>
+        <h1>🎟️ La Rifa</h1>
+    </div>
 
-    <div class="ticket-container">
-        <div class="ticket">
-            <div class="ticket-header">
-                <h1>Sorteo</h1>
-                <div class="subtitle">Fiestas Pantano</div>
-            </div>
-            
-            <div class="ticket-body">
-                <span class="win-label">NÚMERO GANADOR</span>
-                <div id="win-num" class="win-number">
-                    <span class="loading-text">...</span>
+    <!-- TICKET -->
+    <div class="ticket-section">
+        <div class="ticket-wrap">
+            <div class="ticket-glow"></div>
+            <div class="ticket">
+                <div class="ticket-header">
+                    <div class="t-logo">🎉</div>
+                    <div class="t-header-right">
+                        <div class="t-supra">Fiestas Pantano</div>
+                        <div class="t-title">Sorteo</div>
+                    </div>
                 </div>
-                
-                <br>
-                
-                <div id="draw-date" class="date-info">
-                    Cargando fecha...
+                <div class="ticket-body">
+                    <span class="win-label">Número ganador</span>
+                    <div id="win-num" class="win-number loading">···</div>
+                </div>
+                <div class="ticket-notch">
+                    <div class="notch"></div>
+                    <div class="notch-line"></div>
+                    <div class="notch"></div>
+                </div>
+                <div class="ticket-footer">
+                    <div id="draw-date" class="draw-date">Cargando fecha…</div>
+                    <div class="ticket-serial">PANTANO · 2026 · SORTEO OFICIAL</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="history-section">
-        <h2 class="history-title">Historial de Sorteos</h2>
-        <div class="history-grid">
-            <div class="history-item"><img src="https://i.postimg.cc/dtCGFDWF/1.png" alt="Rifa 1"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/4xTVxZ0q/2.png" alt="Rifa 2"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/BnGHnsyq/3.png" alt="Rifa 3"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/qvdyv0F5/4.png" alt="Rifa 4"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/YCfg4ZKN/5.png" alt="Rifa 5"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/52qvHTdS/6.png" alt="Rifa 6"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/htbxJ6Wr/7.png" alt="Rifa 7"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/9QtT4K5J/8.png" alt="Rifa 8"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/6QWZCctH/9.png" alt="Rifa 9"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/d0sCG6wH/10.png" alt="Rifa 10"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/KYGTtfx6/11.png" alt="Rifa 11"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/yNLZjRN7/12.png" alt="Rifa 12"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/0NVwnSNj/13.png" alt="Rifa 13"></div>
-            <div class="history-item"><img src="https://i.postimg.cc/BvmKpFvt/14.png" alt="Rifa 14"></div>
+    <!-- HISTORIAL -->
+    <div class="section-wrap">
+        <div class="section-label">Historial de sorteos</div>
+
+        <div class="history-grid" id="history-grid">
+            <!-- generado por JS para poder asignar índices al lightbox -->
+        </div>
+
+        <!-- ADMIN -->
+        <div id="admin-controls" class="admin-panel">
+            <h3>🛠️ Actualizar rifa</h3>
+            <div class="admin-row">
+                <input id="admin-num"  class="admin-inp" type="number" placeholder="Nº ganador">
+                <input id="admin-date" class="admin-inp" type="text"   placeholder="Fecha">
+            </div>
+            <button id="btn-publicar" class="btn-publicar" onclick="actualizarRifa()">
+                Publicar número
+            </button>
         </div>
     </div>
 
-    <div id="admin-controls">
-        <h3 style="margin-top:0; color:#333;">🛠️ Panel de Control</h3>
-        <input type="number" id="admin-num" class="admin-input" placeholder="Nº">
-        <input type="text" id="admin-date" class="admin-input" placeholder="Fecha (ej: 24 Ago)" style="width:120px;">
-        <br><br>
-        <button class="btn-save" onclick="actualizarRifa()">Publicar</button>
+    <!-- LIGHTBOX -->
+    <div id="lightbox" onclick="if(event.target===this) closeLb()">
+        <button class="lb-close" onclick="closeLb()">✕</button>
+        <button class="lb-nav lb-prev" onclick="moveLb(-1)">
+            <span class="material-symbols-outlined" style="font-size:20px">chevron_left</span>
+        </button>
+        <img id="lb-img" src="" alt="">
+        <button class="lb-nav lb-next" onclick="moveLb(1)">
+            <span class="material-symbols-outlined" style="font-size:20px">chevron_right</span>
+        </button>
+        <div class="lb-counter" id="lb-counter"></div>
     </div>
 
+    <div id="toast"></div>
+
+    <script>
+        /* ── IMÁGENES — mismas URLs del original ─────────────────── */
+        const imgs = [
+            "https://i.postimg.cc/dtCGFDWF/1.png",
+            "https://i.postimg.cc/4xTVxZ0q/2.png",
+            "https://i.postimg.cc/BnGHnsyq/3.png",
+            "https://i.postimg.cc/qvdyv0F5/4.png",
+            "https://i.postimg.cc/YCfg4ZKN/5.png",
+            "https://i.postimg.cc/52qvHTdS/6.png",
+            "https://i.postimg.cc/htbxJ6Wr/7.png",
+            "https://i.postimg.cc/9QtT4K5J/8.png",
+            "https://i.postimg.cc/6QWZCctH/9.png",
+            "https://i.postimg.cc/d0sCG6wH/10.png",
+            "https://i.postimg.cc/KYGTtfx6/11.png",
+            "https://i.postimg.cc/yNLZjRN7/12.png",
+            "https://i.postimg.cc/0NVwnSNj/13.png",
+            "https://i.postimg.cc/BvmKpFvt/14.png",
+        ];
+
+        /* ── RENDER GRID ─────────────────────────────────────────── */
+        const grid = document.getElementById('history-grid');
+        imgs.forEach((src, i) => {
+            const el = document.createElement('div');
+            el.className = 'history-item';
+            el.dataset.n = 'Sorteo ' + (i + 1);
+            el.style.animationDelay = (i * 40) + 'ms';
+            el.innerHTML = `<img src="${src}" alt="Sorteo ${i+1}" loading="lazy">`;
+            el.addEventListener('click', () => openLb(i));
+            grid.appendChild(el);
+        });
+
+        /* ── LIGHTBOX ────────────────────────────────────────────── */
+        let lbIdx = 0;
+        const lb      = document.getElementById('lightbox');
+        const lbImg   = document.getElementById('lb-img');
+        const lbCount = document.getElementById('lb-counter');
+
+        function openLb(i) {
+            lbIdx = i;
+            lbImg.src = imgs[i];
+            lbCount.innerText = (i + 1) + ' / ' + imgs.length;
+            lb.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLb() {
+            lb.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        function moveLb(dir) {
+            lbIdx = (lbIdx + dir + imgs.length) % imgs.length;
+            lbImg.style.opacity = '0';
+            lbImg.style.transform = 'scale(.92)';
+            setTimeout(() => {
+                lbImg.src = imgs[lbIdx];
+                lbCount.innerText = (lbIdx + 1) + ' / ' + imgs.length;
+                lbImg.style.opacity = '';
+                lbImg.style.transform = '';
+            }, 120);
+        }
+
+        /* Swipe en móvil */
+        let tsx = 0;
+        lb.addEventListener('touchstart', e => tsx = e.touches[0].clientX, {passive:true});
+        lb.addEventListener('touchend',   e => {
+            const dx = e.changedTouches[0].clientX - tsx;
+            if (Math.abs(dx) > 40) moveLb(dx < 0 ? 1 : -1);
+        });
+
+        /* Teclado */
+        document.addEventListener('keydown', e => {
+            if (!lb.classList.contains('open')) return;
+            if (e.key === 'ArrowRight') moveLb(1);
+            if (e.key === 'ArrowLeft')  moveLb(-1);
+            if (e.key === 'Escape')     closeLb();
+        });
+
+        /* ── TOAST ───────────────────────────────────────────────── */
+        window.showToast = (msg) => {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.classList.add('show');
+            clearTimeout(t._t);
+            t._t = setTimeout(() => t.classList.remove('show'), 2800);
+        };
+    </script>
 </body>
 </html>
