@@ -3,500 +3,635 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invitaciones</title>
-    <link rel="manifest" href="manifest.json">
+    <title>Invitaciones · Fiestas Pantano</title>
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ff5722">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
+        /* ── VARIABLES ─────────────────────────────────────────────── */
         :root {
-            --bg: #f4f7f6; --text: #333; --card: white;
-            --accent: #ff5722; --border: #e0e0e0;
-            --shadow: 0 4px 15px rgba(0,0,0,0.06);
+            --bg:#f4f7f6; --text:#222; --text2:gray; --card:#fff;
+            --accent:#ff5722; --green:#16a34a; --purple:#673ab7;
+            --border:#e0e0e0; --shadow:0 4px 20px rgba(0,0,0,0.07);
         }
         html.dark-mode {
-            --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --border: #333;
-            --shadow: 0 4px 15px rgba(0,0,0,0.3);
+            --bg:#111; --text:#e8e8e8; --text2:#888; --card:#1c1c1c;
+            --border:#2a2a2a; --shadow:0 4px 20px rgba(0,0,0,0.45);
         }
 
-        * { box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 100px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
+             padding:20px 16px 110px;min-height:100vh;}
+        .wrap{max-width:600px;margin:0 auto;}
 
-        /* HEADER */
-        .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; }
-        .back-btn { background: var(--card); border: 1px solid var(--border); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: var(--shadow); }
-        .page-header h1 { margin: 0; font-size: 1.5rem; font-weight: 800; }
+        /* ── TOPBAR ─────────────────────────────────────────────────── */
+        .top-bar{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+        .btn-ico{background:var(--card);border:1px solid var(--border);width:40px;height:40px;
+            border-radius:50%;display:flex;align-items:center;justify-content:center;
+            cursor:pointer;box-shadow:var(--shadow);flex-shrink:0;color:var(--text);transition:transform .15s;}
+        .btn-ico:active{transform:scale(.9);}
+        .top-bar h1{font-size:1.5rem;font-weight:800;flex:1;}
 
-        /* TABS */
-        .tabs { display: flex; background: var(--card); border-radius: 14px; padding: 5px; margin-bottom: 25px; box-shadow: var(--shadow); gap: 4px; border: 1px solid var(--border); }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; background: transparent; color: gray; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .tab-btn.active { background: var(--accent); color: white; box-shadow: 0 2px 8px rgba(255,87,34,0.3); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        /* ── STATS ──────────────────────────────────────────────────── */
+        .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+        .stat{background:var(--card);border-radius:14px;padding:14px 10px;
+              text-align:center;border:1px solid var(--border);box-shadow:var(--shadow);}
+        .stat-n{display:block;font-size:1.9rem;font-weight:800;line-height:1;}
+        .stat-l{display:block;font-size:0.65rem;font-weight:700;text-transform:uppercase;
+                letter-spacing:.5px;color:var(--text2);margin-top:4px;}
+        .n-total{color:var(--accent);}
+        .n-free{color:var(--green);}
+        .n-used{color:#e91e63;}
 
-        /* CARDS */
-        .gen-card { background: var(--card); border-radius: 18px; padding: 25px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border); }
-        .gen-card h2 { margin: 0 0 5px 0; font-size: 1.1rem; }
-        .gen-card p { margin: 0 0 20px 0; font-size: 0.85rem; color: gray; line-height: 1.5; }
+        /* ── TABS ───────────────────────────────────────────────────── */
+        /* NOTA: los botones tienen id="tabBtn-xxx" y los paneles id="tabPanel-xxx"
+           para que NUNCA coincidan y no haya el bug de null .value */
+        .tabs{display:flex;background:var(--card);border-radius:14px;padding:5px;
+              gap:4px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:20px;}
+        .tab-btn{flex:1;padding:10px 8px;border:none;border-radius:10px;
+                 background:transparent;color:var(--text2);font-weight:700;font-size:0.82rem;
+                 cursor:pointer;transition:all .2s;font-family:inherit;
+                 display:flex;align-items:center;justify-content:center;gap:5px;}
+        .tab-btn.active{background:var(--accent);color:#fff;
+                        box-shadow:0 2px 10px rgba(255,87,34,.35);}
+        .tab-btn.active-vip{background:var(--purple);color:#fff;
+                        box-shadow:0 2px 10px rgba(103,58,183,.35);}
+        .tab-panel{display:none;}
+        .tab-panel.active{display:block;animation:fadeIn .2s ease;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-        /* INPUT ROW */
-        .input-row { display: flex; gap: 10px; }
-        .input-row input {
-            flex: 1; padding: 13px 15px; border: 2px solid var(--border); border-radius: 12px;
-            background: var(--bg); color: var(--text); font-family: inherit; font-size: 1rem;
-            text-transform: uppercase; font-weight: 700; letter-spacing: 1px;
-            transition: border-color 0.2s; outline: none;
-        }
-        .input-row input:focus { border-color: var(--accent); }
-        .input-row input::placeholder { text-transform: none; font-weight: 400; letter-spacing: 0; }
+        /* ── GEN CARD ───────────────────────────────────────────────── */
+        .gen-card{background:var(--card);border-radius:18px;padding:20px;
+                  border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:14px;}
+        .gen-card h2{font-size:1rem;font-weight:800;margin-bottom:4px;}
+        .gen-card p{font-size:0.81rem;color:var(--text2);line-height:1.55;margin-bottom:16px;}
+        .card-accent-left{border-left:4px solid var(--green);}
+        .card-accent-vip{border-left:4px solid var(--purple);}
 
-        .btn-gen {
-            background: var(--accent); color: white; border: none;
-            padding: 13px 20px; border-radius: 12px; font-weight: 700;
-            cursor: pointer; display: flex; align-items: center; gap: 6px;
-            font-size: 0.9rem; white-space: nowrap; transition: transform 0.15s, opacity 0.2s;
-            font-family: inherit; flex-shrink: 0;
-        }
-        .btn-gen:active { transform: scale(0.96); }
-        .btn-gen:disabled { opacity: 0.6; cursor: not-allowed; }
+        .row{display:flex;gap:8px;align-items:stretch;}
+        .inp{flex:1;padding:13px 14px;border:2px solid var(--border);border-radius:12px;
+             background:var(--bg);color:var(--text);font-family:inherit;font-size:0.95rem;
+             text-transform:uppercase;font-weight:700;letter-spacing:1px;
+             transition:border-color .2s;outline:none;min-width:0;}
+        .inp:focus{border-color:var(--accent);}
+        .inp::placeholder{text-transform:none;font-weight:400;letter-spacing:0;color:#bbb;}
+        .inp.lower{text-transform:none;font-weight:400;letter-spacing:0;}
 
-        .btn-magic {
-            width: 100%; margin-top: 10px; padding: 12px; background: transparent;
-            border: 2px dashed var(--border); border-radius: 12px; color: gray;
-            font-family: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer;
-            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .btn-magic:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,87,34,0.04); }
+        .btn-add{padding:13px 16px;border-radius:12px;border:none;font-weight:800;
+            font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:5px;
+            font-family:inherit;white-space:nowrap;flex-shrink:0;
+            transition:transform .15s,opacity .2s;}
+        .btn-add:active{transform:scale(.95);}
+        .btn-add:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+        .btn-add.orange{background:var(--accent);color:#fff;box-shadow:0 3px 12px rgba(255,87,34,.35);}
+        .btn-add.green{background:var(--green);color:#fff;box-shadow:0 3px 12px rgba(22,163,74,.3);}
+        .btn-add.purple{background:var(--purple);color:#fff;box-shadow:0 3px 12px rgba(103,58,183,.3);}
 
-        /* LISTA DE CÓDIGOS */
-        .codes-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .codes-title { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: gray; }
-        .codes-count { background: var(--accent); color: white; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+        .btn-dashed{width:100%;margin-top:10px;padding:11px;background:transparent;
+            border:2px dashed var(--border);border-radius:12px;color:var(--text2);
+            font-family:inherit;font-weight:600;font-size:0.81rem;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;}
+        .btn-dashed:hover{border-color:var(--accent);color:var(--accent);}
 
-        .code-item {
-            background: var(--card); border-radius: 14px; padding: 14px 16px;
-            margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: var(--shadow); border: 1px solid var(--border);
-            animation: slideIn 0.25s ease;
-        }
-        @keyframes slideIn { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+        .field-below{margin-top:10px;}
+        .field-below label{display:block;font-size:0.72rem;font-weight:700;
+                           color:var(--text2);text-transform:uppercase;margin-bottom:5px;}
+        .field-below input{width:100%;padding:10px 13px;border:1px solid var(--border);
+            border-radius:10px;background:var(--bg);color:var(--text);
+            font-family:inherit;font-size:0.85rem;outline:none;transition:border-color .2s;}
+        .field-below input:focus{border-color:var(--accent);}
 
-        .code-left { display: flex; align-items: center; gap: 12px; }
-        .code-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .dot-free { background: #4caf50; box-shadow: 0 0 6px rgba(76,175,80,0.5); }
-        .dot-used { background: #ccc; }
+        .bulk-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px;}
+        .bulk-row label{font-size:0.8rem;font-weight:700;color:var(--text2);white-space:nowrap;}
+        .bulk-num{width:68px;padding:10px;border:2px solid var(--border);border-radius:10px;
+            background:var(--bg);color:var(--text);font-family:inherit;
+            font-weight:800;font-size:1rem;text-align:center;outline:none;transition:border-color .2s;}
+        .bulk-num:focus{border-color:var(--green);}
 
-        .code-text-wrap { display: flex; flex-direction: column; }
-        .code-text { font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 800; letter-spacing: 2px; line-height: 1; }
-        .code-meta { font-size: 0.72rem; color: gray; margin-top: 3px; }
-        .code-used-by { color: #e91e63; font-size: 0.72rem; margin-top: 3px; }
+        /* ── LIST CONTROLS ──────────────────────────────────────────── */
+        .list-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+        .list-title{font-size:0.75rem;font-weight:800;text-transform:uppercase;
+                    letter-spacing:.6px;color:var(--text2);}
+        .list-count{padding:2px 9px;border-radius:20px;font-size:0.68rem;font-weight:800;color:#fff;}
+        .cnt-orange{background:var(--accent);}
+        .cnt-purple{background:var(--purple);}
 
-        .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-right: 8px; }
-        .badge-free { background: #e8f5e9; color: #2e7d32; }
-        .badge-used { background: #fce4ec; color: #c62828; text-decoration: line-through; }
-        .badge-rol { background: rgba(255,87,34,0.1); color: var(--accent); }
+        .search-inp{width:100%;padding:10px 14px 10px 38px;border:1px solid var(--border);
+            border-radius:12px;background:var(--card);color:var(--text);
+            font-family:inherit;font-size:0.88rem;margin-bottom:10px;outline:none;
+            transition:border-color .2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='18' viewBox='0 0 24 24' fill='%23aaa'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;background-position:12px center;}
+        .search-inp:focus{border-color:var(--accent);}
 
-        .code-actions { display: flex; gap: 6px; align-items: center; }
-        .btn-copy { background: #e3f2fd; color: #1565c0; border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
-        .btn-copy:active { transform: scale(0.9); }
-        .btn-share { background: #f3e5f5; color: #7b1fa2; border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
-        .btn-share:active { transform: scale(0.9); }
-        .btn-del-small { background: #ffebee; color: #c62828; border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
-        .btn-del-small:active { transform: scale(0.9); }
+        .filters{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+        .f-btn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);
+               background:var(--card);color:var(--text2);font-size:0.74rem;font-weight:700;
+               cursor:pointer;transition:all .15s;font-family:inherit;}
+        .f-btn.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 
-        /* TOAST */
-        .toast {
-            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
-            background: #333; color: white; padding: 10px 20px; border-radius: 30px;
-            font-size: 0.85rem; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 9999;
-            pointer-events: none; white-space: nowrap;
-        }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        /* ── CODE ITEM ──────────────────────────────────────────────── */
+        .code-item{background:var(--card);border-radius:14px;padding:13px 15px;
+            margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;
+            border:1px solid var(--border);box-shadow:var(--shadow);
+            animation:fadeIn .22s ease;gap:10px;}
+        .ci-left{display:flex;align-items:center;gap:11px;min-width:0;flex:1;}
+        .ci-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+        .dot-libre{background:#4caf50;box-shadow:0 0 7px rgba(76,175,80,.55);}
+        .dot-usado{background:#ccc;}
+        .ci-body{min-width:0;}
+        .ci-code{font-family:'Courier New',monospace;font-size:1.05rem;font-weight:800;
+                 letter-spacing:2px;line-height:1.2;}
+        .ci-code.usado{text-decoration:line-through;opacity:.4;}
+        .ci-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:4px;}
+        .badge{padding:2px 7px;border-radius:6px;font-size:0.63rem;font-weight:800;text-transform:uppercase;}
+        .b-libre{background:#e8f5e9;color:#2e7d32;}
+        .b-usado{background:#fce4ec;color:#c62828;}
+        .b-rol{background:rgba(255,87,34,.1);color:var(--accent);}
+        .b-vip{background:rgba(103,58,183,.12);color:var(--purple);}
+        .ci-date{font-size:0.68rem;color:var(--text2);}
+        .ci-nota{font-size:0.71rem;color:var(--accent);margin-top:3px;font-style:italic;}
+        .ci-who{font-size:0.71rem;color:#e91e63;margin-top:2px;font-weight:700;}
 
-        /* EMPTY STATE */
-        .empty-state { text-align: center; padding: 40px 20px; color: gray; }
-        .empty-state .material-symbols-outlined { font-size: 48px; opacity: 0.3; display: block; margin-bottom: 10px; }
+        .ci-actions{display:flex;gap:5px;flex-shrink:0;}
+        .act{border:none;width:34px;height:34px;border-radius:9px;cursor:pointer;
+             display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+        .act:active{transform:scale(.85);}
+        .act-cp{background:#e3f2fd;color:#1565c0;}
+        .act-sh{background:#f3e5f5;color:#7b1fa2;}
+        .act-del{background:#ffebee;color:#c62828;}
 
-        /* STATS BAR */
-        .stats-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-item { background: var(--card); border-radius: 12px; padding: 14px; text-align: center; border: 1px solid var(--border); }
-        .stat-num { font-size: 1.5rem; font-weight: 800; display: block; }
-        .stat-label { font-size: 0.7rem; color: gray; font-weight: 600; text-transform: uppercase; }
-        .s-total { color: var(--accent); }
-        .s-free { color: #4caf50; }
-        .s-used { color: #e91e63; }
+        /* ── EMPTY ──────────────────────────────────────────────────── */
+        .empty{text-align:center;padding:38px 20px;color:var(--text2);}
+        .empty .material-symbols-outlined{font-size:46px;opacity:.22;display:block;margin-bottom:10px;}
 
-        /* BOTTOM NAV */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
-        .nav-item { text-decoration: none; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.72rem; flex: 1; }
-        .nav-item.active { color: var(--accent); font-weight: bold; }
-        .nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 3px; }
+        /* ── TOAST ──────────────────────────────────────────────────── */
+        #toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(12px);
+               background:#1a1208;color:#fff;padding:10px 20px;border-radius:30px;
+               font-size:0.82rem;font-weight:700;opacity:0;transition:all .26s;
+               z-index:9999;pointer-events:none;white-space:nowrap;font-family:'Poppins',sans-serif;}
+        #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+        /* ── BOTTOM NAV ─────────────────────────────────────────────── */
+        .bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:var(--card);
+            border-top:1px solid var(--border);display:flex;justify-content:space-around;
+            padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:1000;}
+        .nav-item{text-decoration:none;color:var(--text2);display:flex;flex-direction:column;
+                  align-items:center;font-size:0.7rem;flex:1;transition:color .15s;}
+        .nav-item.active{color:var(--accent);font-weight:800;}
+        .nav-item .material-symbols-outlined{font-size:24px;margin-bottom:2px;}
     </style>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc,
+                 doc, getDoc, getDocs, query, where, orderBy, onSnapshot }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        /* ── INIT ────────────────────────────────────────────────── */
+        const FB = {
+            apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+            authDomain:"fiestas-pantano.firebaseapp.com",
+            projectId:"fiestas-pantano",
+            storageBucket:"fiestas-pantano.firebasestorage.app",
+            messagingSenderId:"801380435613",
+            appId:"1:801380435613:web:a842572cf7cee93ac57674"
+        };
+        const app  = initializeApp(FB);
         const auth = getAuth(app);
+        const db   = getFirestore(app);
 
-        let currentUser = null;
-        let userRol = 'festero';
+        let me = null, myRol = 'festero';
         let allCodes = [];
+        let activeTab = 'vecinos';   // 'vecinos' | 'vip'
+        let filtro    = 'todos';
+        let busqueda  = '';
 
-        // ── AUTH ─────────────────────────────────────────────────────────
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) { window.location.href = "index.html"; return; }
-            currentUser = user;
-
-            // Obtener rol del usuario
-            const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-            const uDoc = await getDoc(doc(db, "usuarios", user.uid));
-            if (uDoc.exists()) {
-                userRol = uDoc.data().rol;
-                // Solo festeros y admins pueden usar esta página
-                if (userRol !== 'festero' && userRol !== 'admin') {
-                    window.location.href = "panel.html"; return;
-                }
-                // Solo admins ven la tab de VIP
-                if (userRol === 'admin') {
-                    document.getElementById('tab-vip').style.display = 'flex';
-                }
+        /* ── AUTH ────────────────────────────────────────────────── */
+        onAuthStateChanged(auth, async user => {
+            if (!user) { location.href = 'index.html'; return; }
+            me = user;
+            const snap = await getDoc(doc(db, 'usuarios', user.uid));
+            if (!snap.exists()) { location.href = 'panel.html'; return; }
+            myRol = snap.data().rol;
+            if (myRol !== 'festero' && myRol !== 'admin') {
+                location.href = 'panel.html'; return;
             }
-            cargarCodigos();
+            if (myRol === 'admin') {
+                /* Mostrar tab VIP — el botón tiene id "tabBtn-vip", NO "tab-vip" */
+                document.getElementById('tabBtn-vip').style.display = 'flex';
+            }
+            listenCodigos();
         });
 
-        // ── CARGAR TODOS LOS CÓDIGOS DEL FESTERO ─────────────────────────
-        function cargarCodigos() {
-            // Admins ven todos los códigos, festeros solo los suyos
-            const q = userRol === 'admin'
-                ? query(collection(db, "invitaciones"), orderBy("fecha_creacion", "desc"))
-                : query(collection(db, "invitaciones"), where("creado_por", "==", currentUser.uid), orderBy("fecha_creacion", "desc"));
+        /* ── LISTENER FIRESTORE ──────────────────────────────────── */
+        function listenCodigos() {
+            const q = myRol === 'admin'
+                ? query(collection(db,'invitaciones'), orderBy('fecha_creacion','desc'))
+                : query(collection(db,'invitaciones'),
+                        where('creado_por','==', me.uid),
+                        orderBy('fecha_creacion','desc'));
 
-            onSnapshot(q, (snapshot) => {
-                allCodes = [];
-                snapshot.forEach(d => allCodes.push({ id: d.id, ...d.data() }));
-                renderTab(document.querySelector('.tab-btn.active')?.dataset.tab || 'usuario');
-                updateStats();
+            onSnapshot(q, snap => {
+                allCodes = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+                actualizarStats();
+                renderLista();
             });
         }
 
-        // ── STATS ─────────────────────────────────────────────────────────
-        function updateStats() {
-            const usuarioCodes = allCodes.filter(c => c.rol === 'usuario');
-            const libres = usuarioCodes.filter(c => !c.usado).length;
-            const usados = usuarioCodes.filter(c => c.usado).length;
-            document.getElementById('stat-total').innerText = usuarioCodes.length;
-            document.getElementById('stat-free').innerText = libres;
-            document.getElementById('stat-used').innerText = usados;
+        /* ── STATS ───────────────────────────────────────────────── */
+        function actualizarStats() {
+            const v = allCodes.filter(c => c.rol === 'usuario');
+            document.getElementById('st-total').innerText = v.length;
+            document.getElementById('st-free').innerText  = v.filter(c => !c.usado).length;
+            document.getElementById('st-used').innerText  = v.filter(c =>  c.usado).length;
         }
 
-        // ── RENDER TABS ───────────────────────────────────────────────────
-        window.renderTab = (tabName) => {
-            const listEl = document.getElementById('codes-list-' + tabName);
-            if (!listEl) return;
+        /* ── RENDER ──────────────────────────────────────────────── */
+        function renderLista() {
+            const esVip = activeTab === 'vip';
+            const listId  = esVip ? 'listVip'     : 'listVecinos';
+            const countId = esVip ? 'countVip'    : 'countVecinos';
 
-            let filtered;
-            if (tabName === 'usuario') {
-                filtered = allCodes.filter(c => c.rol === 'usuario');
-            } else {
-                filtered = allCodes.filter(c => c.rol === 'festero' || c.rol === 'admin');
+            let lista = allCodes.filter(c =>
+                esVip ? (c.rol === 'festero' || c.rol === 'admin') : c.rol === 'usuario'
+            );
+
+            if (filtro === 'libres') lista = lista.filter(c => !c.usado);
+            if (filtro === 'usados') lista = lista.filter(c =>  c.usado);
+
+            if (busqueda) {
+                const q = busqueda.toUpperCase();
+                lista = lista.filter(c =>
+                    c.codigo.includes(q) ||
+                    (c.nota||'').toLowerCase().includes(busqueda.toLowerCase()) ||
+                    (c.usado_por||'').toLowerCase().includes(busqueda.toLowerCase())
+                );
             }
 
-            if (filtered.length === 0) {
-                listEl.innerHTML = `
-                    <div class="empty-state">
+            document.getElementById(countId).innerText = lista.length;
+
+            if (!lista.length) {
+                document.getElementById(listId).innerHTML = `
+                    <div class="empty">
                         <span class="material-symbols-outlined">confirmation_number</span>
-                        <p>Aún no hay códigos aquí.<br>¡Crea el primero!</p>
+                        <p>${busqueda ? 'Sin resultados para "'+busqueda+'"' : 'Aún no hay códigos aquí.'}</p>
                     </div>`;
-                document.getElementById('count-' + tabName).innerText = '0';
                 return;
             }
 
-            document.getElementById('count-' + tabName).innerText = filtered.length;
-            listEl.innerHTML = filtered.map(c => {
+            document.getElementById(listId).innerHTML = lista.map(c => {
                 const libre = !c.usado;
                 const fecha = c.fecha_creacion?.toDate
-                    ? c.fecha_creacion.toDate().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
-                    : (c.fecha ? new Date(c.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : '');
-                const usadoPor = c.usado_por ? `👤 Usado por: <strong>${c.usado_por}</strong>` : '';
-                const rolBadge = c.rol !== 'usuario' ? `<span class="badge badge-rol">${c.rol}</span>` : '';
-
+                    ? c.fecha_creacion.toDate().toLocaleDateString('es-ES',{day:'2-digit',month:'short'})
+                    : '';
+                const rolBadge = c.rol !== 'usuario'
+                    ? `<span class="badge b-vip">${c.rol}</span>` : '';
                 return `
                 <div class="code-item">
-                    <div class="code-left">
-                        <div class="code-dot ${libre ? 'dot-free' : 'dot-used'}"></div>
-                        <div class="code-text-wrap">
-                            <div class="code-text ${!libre ? 'style="text-decoration:line-through; opacity:0.5;"' : ''}">${c.codigo}</div>
-                            <div class="code-meta">
-                                ${rolBadge}
-                                <span class="badge ${libre ? 'badge-free' : 'badge-used'}">${libre ? 'Libre' : 'Usado'}</span>
-                                ${fecha}
-                            </div>
-                            ${usadoPor ? `<div class="code-used-by">${usadoPor}</div>` : ''}
-                        </div>
+                  <div class="ci-left">
+                    <div class="ci-dot ${libre?'dot-libre':'dot-usado'}"></div>
+                    <div class="ci-body">
+                      <div class="ci-code ${libre?'':'usado'}">${c.codigo}</div>
+                      <div class="ci-meta">
+                        ${rolBadge}
+                        <span class="badge ${libre?'b-libre':'b-usado'}">${libre?'Libre':'Usado'}</span>
+                        <span class="ci-date">${fecha}</span>
+                      </div>
+                      ${c.nota    ? `<div class="ci-nota">📝 ${c.nota}</div>`         : ''}
+                      ${c.usado_por ? `<div class="ci-who">👤 ${c.usado_por}</div>` : ''}
                     </div>
-                    <div class="code-actions">
-                        ${libre ? `
-                            <button class="btn-copy" onclick="copiarCodigo('${c.codigo}')" title="Copiar">
-                                <span class="material-symbols-outlined" style="font-size:18px">content_copy</span>
-                            </button>
-                            <button class="btn-share" onclick="compartirCodigo('${c.codigo}')" title="Compartir">
-                                <span class="material-symbols-outlined" style="font-size:18px">share</span>
-                            </button>
-                        ` : ''}
-                        <button class="btn-del-small" onclick="borrarCodigo('${c.id}')" title="Eliminar">
-                            <span class="material-symbols-outlined" style="font-size:18px">delete</span>
-                        </button>
-                    </div>
+                  </div>
+                  <div class="ci-actions">
+                    ${libre ? `
+                    <button class="act act-cp" onclick="copiar('${c.codigo}')" title="Copiar">
+                        <span class="material-symbols-outlined" style="font-size:17px">content_copy</span>
+                    </button>
+                    <button class="act act-sh" onclick="compartir('${c.codigo}')" title="Compartir">
+                        <span class="material-symbols-outlined" style="font-size:17px">share</span>
+                    </button>` : ''}
+                    <button class="act act-del" onclick="borrar('${c.id}')" title="Eliminar">
+                        <span class="material-symbols-outlined" style="font-size:17px">delete</span>
+                    </button>
+                  </div>
                 </div>`;
             }).join('');
         }
 
-        // ── CREAR CÓDIGO USUARIO (VECINO) ─────────────────────────────────
-        window.crearCodigoUsuario = async () => {
-            const input = document.getElementById('input-usuario');
-            let codigo = input.value.trim().toUpperCase();
+        /* ── CREAR VECINO ────────────────────────────────────────── */
+        window.crearVecino = async () => {
+            /* Leer desde los IDs correctos: "inp-vecino" y "inp-nota" */
+            const inpCodigo = document.getElementById('inp-vecino');
+            const inpNota   = document.getElementById('inp-nota');
 
-            // Si está vacío, generar automáticamente
-            if (!codigo) {
-                codigo = generarAleatorio(8);
-            }
+            let codigo = inpCodigo.value.trim().toUpperCase();
+            if (!codigo) codigo = aleatorio(8);
+            if (codigo.length < 3) { toast('⚠️ Código muy corto'); return; }
 
-            if (codigo.length < 3) { mostrarToast('⚠️ El código es muy corto'); return; }
-
-            const btn = document.getElementById('btn-crear-usuario');
+            const nota = inpNota ? inpNota.value.trim() : '';
+            const btn  = document.getElementById('btnCrearVecino');
             btn.disabled = true;
 
             try {
-                // Verificar que no exista
-                const q = query(collection(db, "invitaciones"), where("codigo", "==", codigo));
-                const snap = await getDocs(q);
-                if (!snap.empty) { mostrarToast('⚠️ Ese código ya existe'); btn.disabled = false; return; }
-
-                await addDoc(collection(db, "invitaciones"), {
-                    codigo,
-                    rol: 'usuario',
-                    usado: false,
-                    creado_por: currentUser.uid,
-                    fecha_creacion: new Date(),
-                    nota: document.getElementById('nota-usuario').value.trim() || null
-                });
-
-                input.value = '';
-                document.getElementById('nota-usuario').value = '';
-                mostrarToast(`✅ Código ${codigo} creado`);
-            } catch (e) {
-                mostrarToast('❌ Error: ' + e.message);
-            }
+                await guardar(codigo, 'usuario', nota || null);
+                inpCodigo.value = '';
+                if (inpNota) inpNota.value = '';
+                toast(`✅ Código "${codigo}" creado`);
+            } catch(e) { toast('❌ ' + e.message); }
             btn.disabled = false;
-        }
+        };
 
-        // ── CREAR CÓDIGO VIP (solo admins, desde aquí) ────────────────────
-        window.crearCodigoVIP = async () => {
-            const codigo = document.getElementById('input-vip').value.trim().toUpperCase();
-            const rol = document.getElementById('select-vip').value;
-            if (!codigo || codigo.length < 3) { mostrarToast('⚠️ Escribe un código válido'); return; }
+        /* ── CREAR EN MASA ───────────────────────────────────────── */
+        window.crearBulk = async () => {
+            const qty = parseInt(document.getElementById('bulkQty').value) || 1;
+            if (qty < 1 || qty > 50) { toast('⚠️ Entre 1 y 50'); return; }
+            if (!confirm(`¿Generar ${qty} códigos aleatorios?`)) return;
 
-            const btn = document.getElementById('btn-crear-vip');
+            const btn = document.getElementById('btnBulk');
+            btn.disabled = true; btn.textContent = 'Creando…';
+
+            let ok = 0;
+            for (let i = 0; i < qty; i++) {
+                try { await guardar(aleatorio(8), 'usuario', null); ok++; } catch {}
+            }
+            toast(`✅ ${ok} de ${qty} códigos creados`);
+            btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:17px">auto_fix_high</span> Generar';
+        };
+
+        /* ── CREAR VIP ───────────────────────────────────────────── */
+        window.crearVIP = async () => {
+            /* IDs únicos: "inp-vip" y "sel-vip" — NUNCA coinciden con tabBtn-vip ni tabPanel-vip */
+            const inpVip = document.getElementById('inp-vip');
+            const selVip = document.getElementById('sel-vip');
+
+            const codigo = inpVip.value.trim().toUpperCase();
+            const rol    = selVip.value;
+
+            if (!codigo || codigo.length < 3) { toast('⚠️ Código muy corto'); return; }
+
+            const btn = document.getElementById('btnCrearVip');
             btn.disabled = true;
-
             try {
-                const q = query(collection(db, "invitaciones"), where("codigo", "==", codigo));
-                const snap = await getDocs(q);
-                if (!snap.empty) { mostrarToast('⚠️ Ese código ya existe'); btn.disabled = false; return; }
-
-                await addDoc(collection(db, "invitaciones"), {
-                    codigo, rol, usado: false,
-                    creado_por: currentUser.uid,
-                    fecha_creacion: new Date()
-                });
-                document.getElementById('input-vip').value = '';
-                mostrarToast(`✅ Código VIP "${codigo}" creado para ${rol}`);
-            } catch (e) { mostrarToast('❌ Error: ' + e.message); }
+                await guardar(codigo, rol, null);
+                inpVip.value = '';
+                toast(`⭐ VIP "${codigo}" creado para ${rol}`);
+            } catch(e) { toast('❌ ' + e.message); }
             btn.disabled = false;
+        };
+
+        /* ── HELPER GUARDAR ──────────────────────────────────────── */
+        async function guardar(codigo, rol, nota) {
+            const snap = await getDocs(
+                query(collection(db,'invitaciones'), where('codigo','==',codigo))
+            );
+            if (!snap.empty) throw new Error(`"${codigo}" ya existe`);
+            await addDoc(collection(db,'invitaciones'), {
+                codigo, rol, usado: false,
+                creado_por: me.uid,
+                fecha_creacion: new Date(),
+                ...(nota ? { nota } : {})
+            });
         }
 
-        // ── GENERAR ALEATORIO Y RELLENAR INPUT ───────────────────────────
-        window.generarAleatorioEnInput = () => {
-            document.getElementById('input-usuario').value = generarAleatorio(8);
-            document.getElementById('input-usuario').focus();
-        }
-
-        function generarAleatorio(len) {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sin caracteres confusos (0,O,1,I)
-            return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-        }
-
-        // ── ACCIONES CÓDIGOS ──────────────────────────────────────────────
-        window.copiarCodigo = async (codigo) => {
-            try {
-                await navigator.clipboard.writeText(codigo);
-                mostrarToast('📋 Copiado: ' + codigo);
-            } catch {
-                // Fallback para Safari
-                const el = document.createElement('input');
-                el.value = codigo; document.body.appendChild(el);
-                el.select(); document.execCommand('copy'); document.body.removeChild(el);
-                mostrarToast('📋 Copiado: ' + codigo);
+        /* ── ACCIONES LISTA ──────────────────────────────────────── */
+        window.copiar = async (code) => {
+            try { await navigator.clipboard.writeText(code); }
+            catch {
+                const t = document.createElement('textarea');
+                t.value = code; document.body.appendChild(t);
+                t.select(); document.execCommand('copy'); t.remove();
             }
-        }
+            toast('📋 Copiado: ' + code);
+        };
 
-        window.compartirCodigo = async (codigo) => {
-            const texto = `🎉 ¡Te invito a las Fiestas del Pantano!\n\nEntra en pantano2026.es y usa el código:\n\n👉 ${codigo}\n\n¡Nos vemos en las fiestas! 🎊`;
+        window.compartir = async (code) => {
+            const txt = `🎉 ¡Te invito a las Fiestas del Pantano!\n\nEntra en pantano2026.es y regístrate con el código:\n\n👉 ${code}\n\n¡Nos vemos! 🎊`;
             if (navigator.share) {
-                try {
-                    await navigator.share({ title: 'Invitación Fiestas Pantano', text: texto, url: 'https://pantano2026.es' });
-                } catch {}
-            } else {
-                await navigator.clipboard.writeText(texto);
-                mostrarToast('📋 Mensaje copiado para compartir');
+                try { await navigator.share({ title:'Invitación Fiestas Pantano', text:txt }); return; }
+                catch {}
             }
+            window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+        };
+
+        window.borrar = async (id) => {
+            if (!confirm('¿Eliminar este código?')) return;
+            await deleteDoc(doc(db,'invitaciones',id));
+            toast('🗑️ Eliminado');
+        };
+
+        /* ── TABS ────────────────────────────────────────────────── */
+        window.cambiarTab = (tab) => {
+            activeTab = tab;
+            /* Botones: tabBtn-vecinos / tabBtn-vip */
+            document.querySelectorAll('.tab-btn').forEach(b =>
+                b.classList.remove('active','active-vip'));
+            const btn = document.getElementById('tabBtn-' + tab);
+            btn.classList.add(tab === 'vip' ? 'active-vip' : 'active');
+            /* Paneles: tabPanel-vecinos / tabPanel-vip */
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('tabPanel-' + tab).classList.add('active');
+            renderLista();
+        };
+
+        /* ── FILTROS / BÚSQUEDA ──────────────────────────────────── */
+        window.setFiltro = (f) => {
+            filtro = f;
+            document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('on'));
+            document.querySelectorAll(`.f-btn[data-f="${f}"]`).forEach(b => b.classList.add('on'));
+            renderLista();
+        };
+        window.setBusqueda = (v) => { busqueda = v; renderLista(); };
+
+        /* ── DADO: rellenar input con código aleatorio ────────────── */
+        window.rellenarAleatorio = () => {
+            const inp = document.getElementById('inp-vecino');
+            inp.value = aleatorio(8);
+            inp.focus();
+        };
+
+        function aleatorio(len) {
+            const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            return Array.from({length:len}, () => c[Math.floor(Math.random()*c.length)]).join('');
         }
 
-        window.borrarCodigo = async (id) => {
-            if (!confirm('¿Borrar este código? Si alguien ya lo tiene apuntado, ya no podrá usarlo.')) return;
-            try {
-                await deleteDoc(doc(db, "invitaciones", id));
-                mostrarToast('🗑️ Código eliminado');
-            } catch (e) { mostrarToast('❌ Error al borrar'); }
-        }
-
-        // ── TABS UI ───────────────────────────────────────────────────────
-        window.switchTab = (tabName) => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            document.getElementById('tab-' + tabName).classList.add('active');
-            renderTab(tabName);
-        }
-
-        // ── TOAST ─────────────────────────────────────────────────────────
-        function mostrarToast(msg) {
+        /* ── TOAST ───────────────────────────────────────────────── */
+        window.toast = (msg) => {
             const t = document.getElementById('toast');
             t.innerText = msg; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2500);
-        }
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.remove('show'), 2700);
+        };
     </script>
 </head>
 <body>
-<div class="container">
+<div class="wrap">
 
-    <div class="page-header">
-        <button class="back-btn" onclick="window.history.back()">
+    <!-- TOPBAR -->
+    <div class="top-bar">
+        <button class="btn-ico" onclick="window.history.back()" title="Volver">
             <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
         </button>
         <h1>🎟️ Invitaciones</h1>
+        <button class="btn-ico" onclick="document.documentElement.classList.toggle('dark-mode'); localStorage.setItem('theme', document.documentElement.classList.contains('dark-mode')?'dark':'light');" title="Tema">
+            <span class="material-symbols-outlined" style="font-size:20px">dark_mode</span>
+        </button>
     </div>
 
     <!-- STATS -->
-    <div class="stats-bar">
-        <div class="stat-item">
-            <span id="stat-total" class="stat-num s-total">0</span>
-            <span class="stat-label">Total</span>
+    <div class="stats">
+        <div class="stat">
+            <span id="st-total" class="stat-n n-total">–</span>
+            <span class="stat-l">Total</span>
         </div>
-        <div class="stat-item">
-            <span id="stat-free" class="stat-num s-free">0</span>
-            <span class="stat-label">Libres</span>
+        <div class="stat">
+            <span id="st-free" class="stat-n n-free">–</span>
+            <span class="stat-l">Libres</span>
         </div>
-        <div class="stat-item">
-            <span id="stat-used" class="stat-num s-used">0</span>
-            <span class="stat-label">Canjeados</span>
+        <div class="stat">
+            <span id="st-used" class="stat-n n-used">–</span>
+            <span class="stat-l">Canjeados</span>
         </div>
     </div>
 
-    <!-- TABS -->
+    <!-- TABS
+         ⚠️  Los botones se llaman  tabBtn-vecinos  y  tabBtn-vip
+             Los paneles se llaman  tabPanel-vecinos  y  tabPanel-vip
+             Así NUNCA hay IDs duplicados y el bug de .value = null desaparece -->
     <div class="tabs">
-        <button class="tab-btn active" data-tab="usuario" onclick="switchTab('usuario')">
-            <span class="material-symbols-outlined" style="font-size:18px">group</span>
+        <button id="tabBtn-vecinos" class="tab-btn active" onclick="cambiarTab('vecinos')">
+            <span class="material-symbols-outlined" style="font-size:17px">group</span>
             Vecinos
         </button>
-        <button id="tab-vip" class="tab-btn" data-tab="vip" onclick="switchTab('vip')" style="display:none;">
-            <span class="material-symbols-outlined" style="font-size:18px">stars</span>
+        <button id="tabBtn-vip" class="tab-btn" onclick="cambiarTab('vip')" style="display:none;">
+            <span class="material-symbols-outlined" style="font-size:17px">stars</span>
             VIP / Admin
         </button>
     </div>
 
-    <!-- TAB VECINOS (usuarios normales) -->
-    <div id="tab-usuario" class="tab-content active">
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL VECINOS
+    ════════════════════════════════════════════════════════ -->
+    <div id="tabPanel-vecinos" class="tab-panel active">
 
+        <!-- Crear uno -->
         <div class="gen-card">
-            <h2>Crear código para un vecino</h2>
-            <p>Escribe un nombre personalizado (ej: <strong>VECINO_PEPE</strong>) o pulsa el dado para generar uno automático. Comparte el código y el vecino podrá registrarse con él.</p>
+            <h2>🏘️ Crear código para un vecino</h2>
+            <p>Escribe un nombre personalizado (ej: <strong>FAMILIA_GARCIA</strong>) o pulsa el dado para generar uno aleatorio. El vecino lo usará al registrarse.</p>
 
-            <div class="input-row">
-                <input type="text" id="input-usuario" placeholder="Ej: FAMILIA_GARCIA" maxlength="20">
-                <button class="btn-gen" id="btn-crear-usuario" onclick="crearCodigoUsuario()">
+            <div class="row">
+                <!-- ID único: inp-vecino -->
+                <input id="inp-vecino" class="inp" type="text"
+                       placeholder="VECINO_PEPE" maxlength="20"
+                       onkeydown="if(event.key==='Enter') crearVecino()">
+                <button id="btnCrearVecino" class="btn-add orange" onclick="crearVecino()">
                     <span class="material-symbols-outlined" style="font-size:18px">add</span>
                     Crear
                 </button>
             </div>
 
-            <button class="btn-magic" onclick="generarAleatorioEnInput()">
+            <!-- ID único: inp-nota -->
+            <div class="field-below">
+                <label>Nota (opcional)</label>
+                <input id="inp-nota" type="text" class="lower"
+                       placeholder="Para quién es este código…">
+            </div>
+
+            <button class="btn-dashed" onclick="rellenarAleatorio()">
                 <span class="material-symbols-outlined" style="font-size:18px">casino</span>
                 Generar código aleatorio
             </button>
         </div>
 
-        <div class="codes-header">
-            <span class="codes-title">Códigos creados</span>
-            <span id="count-usuario" class="codes-count">0</span>
+        <!-- Crear en masa -->
+        <div class="gen-card card-accent-left">
+            <h2>📦 Crear varios a la vez</h2>
+            <p>Genera múltiples códigos aleatorios de golpe. Ideal para imprimir y repartir.</p>
+            <div class="bulk-row">
+                <label>¿Cuántos?</label>
+                <input id="bulkQty" class="bulk-num" type="number" value="5" min="1" max="50">
+                <button id="btnBulk" class="btn-add green" onclick="crearBulk()">
+                    <span class="material-symbols-outlined" style="font-size:17px">auto_fix_high</span>
+                    Generar
+                </button>
+            </div>
         </div>
-        <div id="codes-list-usuario">
-            <div class="empty-state">
-                <span class="material-symbols-outlined">confirmation_number</span>
-                <p>Cargando...</p>
+
+        <!-- Lista -->
+        <div class="list-hdr">
+            <span class="list-title">Códigos de vecinos</span>
+            <span id="countVecinos" class="list-count cnt-orange">0</span>
+        </div>
+
+        <input class="search-inp" type="search" placeholder="Buscar código, nota o usuario…"
+               oninput="setBusqueda(this.value)">
+
+        <div class="filters">
+            <button class="f-btn on" data-f="todos"  onclick="setFiltro('todos')">Todos</button>
+            <button class="f-btn"    data-f="libres" onclick="setFiltro('libres')">✅ Libres</button>
+            <button class="f-btn"    data-f="usados" onclick="setFiltro('usados')">❌ Usados</button>
+        </div>
+
+        <div id="listVecinos">
+            <div class="empty">
+                <span class="material-symbols-outlined">hourglass_empty</span>
+                <p>Cargando…</p>
             </div>
         </div>
     </div>
 
-    <!-- TAB VIP (solo admins) -->
-    <div id="tab-vip" class="tab-content">
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL VIP  (solo admin)
+    ════════════════════════════════════════════════════════ -->
+    <div id="tabPanel-vip" class="tab-panel">
 
-        <div class="gen-card" style="border-left: 4px solid #673ab7;">
-            <h2>⭐ Crear código VIP</h2>
-            <p>Solo para dar acceso a <strong>festeros</strong> u otros <strong>admins</strong>. Estos usuarios tendrán permisos de gestión.</p>
+        <div class="gen-card card-accent-vip">
+            <h2>⭐ Código VIP</h2>
+            <p>Da acceso a <strong>festeros</strong> u otros <strong>admins</strong>. Estos usuarios tendrán permisos de gestión.</p>
 
-            <div class="input-row">
-                <input type="text" id="input-vip" placeholder="Ej: FESTERO_MARIA" maxlength="20">
-                <select id="select-vip" style="padding:12px; border-radius:12px; border:2px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; font-weight:700;">
+            <div class="row">
+                <!-- ID único: inp-vip (no colisiona con tabBtn-vip ni tabPanel-vip) -->
+                <input id="inp-vip" class="inp" type="text"
+                       placeholder="FESTERO_MARIA" maxlength="20"
+                       onkeydown="if(event.key==='Enter') crearVIP()">
+                <!-- ID único: sel-vip -->
+                <select id="sel-vip" style="padding:0 12px;border-radius:12px;border:2px solid var(--border);
+                        background:var(--bg);color:var(--text);font-family:inherit;font-weight:800;cursor:pointer;flex-shrink:0;">
                     <option value="festero">Festero</option>
                     <option value="admin">Admin</option>
                 </select>
-                <button class="btn-gen" id="btn-crear-vip" onclick="crearCodigoVIP()" style="background:#673ab7;">
+                <button id="btnCrearVip" class="btn-add purple" onclick="crearVIP()">
                     <span class="material-symbols-outlined" style="font-size:18px">add</span>
                 </button>
             </div>
         </div>
 
-        <div class="codes-header">
-            <span class="codes-title">Códigos VIP</span>
-            <span id="count-vip" class="codes-count">0</span>
+        <div class="list-hdr">
+            <span class="list-title">Códigos VIP emitidos</span>
+            <span id="countVip" class="list-count cnt-purple">0</span>
         </div>
-        <div id="codes-list-vip">
-            <div class="empty-state">
+
+        <div id="listVip">
+            <div class="empty">
                 <span class="material-symbols-outlined">stars</span>
                 <p>No hay códigos VIP aún.</p>
             </div>
         </div>
     </div>
 
-</div>
+</div><!-- /wrap -->
 
-<div id="toast" class="toast"></div>
+<div id="toast"></div>
 
 <nav class="bottom-nav">
-    <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
-    <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
+    <a href="panel.html"             class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
+    <a href="actividades.html"       class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
     <a href="mis_inscripciones.html" class="nav-item"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
-    <a href="perfil.html" class="nav-item"><span class="material-symbols-outlined">person</span>Perfil</a>
+    <a href="perfil.html"            class="nav-item"><span class="material-symbols-outlined">person</span>Perfil</a>
 </nav>
 </body>
 </html>
