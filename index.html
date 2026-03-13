@@ -85,7 +85,7 @@
         /* ── VARIABLES ──────────────────────────────────────────────── */
         :root {
             --bg:        #fdf6ee;
-            --bg2:       #f5ece0;
+            --bg2:       #f0e4d4;
             --text:      #1a1208;
             --text2:     #5a4a35;
             --card:      #ffffff;
@@ -461,6 +461,72 @@
         footer .footer-links a:hover { color: var(--accent); }
         footer .footer-links span { opacity: 0.4; }
 
+        /* ── PROGRAMA ───────────────────────────────────────────────── */
+        .programa-scroll { display:flex; flex-direction:column; gap:8px; }
+        .prog-item {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:16px; padding:14px 16px;
+            display:flex; align-items:center; gap:14px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.04);
+            transition:transform 0.2s, box-shadow 0.2s;
+        }
+        .prog-item:hover { transform:translateX(4px); box-shadow:var(--shadow); }
+        .prog-highlight {
+            background:linear-gradient(135deg,rgba(232,64,12,.07),rgba(245,158,11,.07));
+            border-color:rgba(232,64,12,.2);
+        }
+        .prog-day {
+            width:40px; height:40px; border-radius:10px; background:var(--bg2);
+            display:flex; flex-direction:column; align-items:center;
+            justify-content:center; flex-shrink:0;
+            font-weight:800; font-size:0.9rem; color:var(--text);
+        }
+        .prog-day span { font-size:0.55rem; font-weight:600; color:var(--text2); text-transform:uppercase; }
+        .prog-body { flex:1; min-width:0; }
+        .prog-title { font-size:0.9rem; font-weight:800; }
+        .prog-sub   { font-size:0.72rem; color:var(--text2); margin-top:1px; }
+        .prog-badge {
+            padding:4px 10px; border-radius:20px; font-size:0.68rem;
+            font-weight:800; white-space:nowrap; flex-shrink:0;
+        }
+        .p-orange { background:rgba(232,64,12,.1);  color:var(--accent); }
+        .p-green  { background:rgba(16,185,129,.1); color:#059669; }
+        .p-blue   { background:rgba(14,165,233,.1); color:#0369a1; }
+        .p-pink   { background:rgba(236,72,153,.1); color:#be185d; }
+        .p-gold   { background:rgba(245,158,11,.15);color:#b45309; }
+
+        /* ── FAQ ────────────────────────────────────────────────────── */
+        .faq-list { display:flex; flex-direction:column; gap:8px; }
+        .faq-item {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:14px; overflow:hidden;
+            box-shadow:0 2px 6px rgba(0,0,0,0.04);
+        }
+        .faq-item summary {
+            padding:15px 18px; font-weight:700; font-size:0.9rem;
+            cursor:pointer; list-style:none; display:flex;
+            align-items:center; justify-content:space-between; gap:10px;
+        }
+        .faq-item summary::-webkit-details-marker { display:none; }
+        .faq-item summary::after {
+            content:'+'; font-size:1.3rem; font-weight:400;
+            color:var(--accent); flex-shrink:0; transition:transform 0.2s;
+        }
+        .faq-item[open] summary::after { transform:rotate(45deg); }
+        .faq-item p { padding:0 18px 15px; font-size:0.82rem; color:var(--text2); line-height:1.6; }
+        .faq-item[open] { border-color:rgba(232,64,12,.25); }
+
+        /* ── CTA BANNER ─────────────────────────────────────────────── */
+        .cta-banner {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:var(--radius); padding:30px 24px;
+            text-align:center; box-shadow:var(--shadow);
+            display:flex; flex-direction:column; align-items:center; gap:10px;
+        }
+        .cta-banner-ico   { font-size:2.5rem; line-height:1; }
+        .cta-banner-title { font-size:1.3rem; font-weight:800; }
+        .cta-banner-sub   { font-size:0.85rem; color:var(--text2); max-width:280px; line-height:1.5; }
+
         /* ── ANIMACIONES DE ENTRADA ─────────────────────────────────── */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(22px); }
@@ -634,6 +700,117 @@
 
     </div>
 </section>
+
+<!-- ── PROGRAMA (preview público) ───────────────────────────────── -->
+<section class="section-public" aria-label="Programa de fiestas">
+    <div class="section-label">Programa de fiestas</div>
+
+    <div class="programa-scroll" role="list">
+        <div class="prog-item" role="listitem">
+            <div class="prog-day">L<span>un</span></div>
+            <div class="prog-body">
+                <div class="prog-title">Apertura oficial</div>
+                <div class="prog-sub">Pregón · Castillo de fuegos</div>
+            </div>
+            <div class="prog-badge p-orange">10 Ago</div>
+        </div>
+        <div class="prog-item" role="listitem">
+            <div class="prog-day">M<span>ar</span></div>
+            <div class="prog-body">
+                <div class="prog-title">Gran Paella Popular</div>
+                <div class="prog-sub">Para todos los vecinos · Patio central</div>
+            </div>
+            <div class="prog-badge p-green">11 Ago</div>
+        </div>
+        <div class="prog-item" role="listitem">
+            <div class="prog-day">M<span>ié</span></div>
+            <div class="prog-body">
+                <div class="prog-title">Torneos deportivos</div>
+                <div class="prog-sub">Fútbol · Pádel · Petanca</div>
+            </div>
+            <div class="prog-badge p-blue">12 Ago</div>
+        </div>
+        <div class="prog-item" role="listitem">
+            <div class="prog-day">J<span>ue</span></div>
+            <div class="prog-body">
+                <div class="prog-title">Noche de Verbena</div>
+                <div class="prog-sub">Orquesta · Baile · Barra libre</div>
+            </div>
+            <div class="prog-badge p-pink">13 Ago</div>
+        </div>
+        <div class="prog-item" role="listitem">
+            <div class="prog-day">V<span>ie</span></div>
+            <div class="prog-body">
+                <div class="prog-title">Noche infantil</div>
+                <div class="prog-sub">Animación · Hinchables · Talleres</div>
+            </div>
+            <div class="prog-badge p-orange">14 Ago</div>
+        </div>
+        <div class="prog-item prog-highlight" role="listitem">
+            <div class="prog-day">S<span>áb</span></div>
+            <div class="prog-body">
+                <div class="prog-title">🎆 Gran Noche Final</div>
+                <div class="prog-sub">Actuación estelar · Fuegos artificiales</div>
+            </div>
+            <div class="prog-badge p-gold">15 Ago</div>
+        </div>
+        <div class="prog-item" role="listitem">
+            <div class="prog-day">D<span>om</span></div>
+            <div class="prog-body">
+                <div class="prog-title">Misa y procesión</div>
+                <div class="prog-sub">Acto religioso · Comida de despedida</div>
+            </div>
+            <div class="prog-badge p-green">16 Ago</div>
+        </div>
+    </div>
+
+    <p style="text-align:center;font-size:0.75rem;color:var(--text2);margin-top:10px;">
+        Programa orientativo · sujeto a cambios
+    </p>
+</section>
+
+<!-- ── FAQ PÚBLICA ───────────────────────────────────────────────── -->
+<section class="section-public" aria-label="Preguntas frecuentes">
+    <div class="section-label">Preguntas frecuentes</div>
+
+    <div class="faq-list">
+        <details class="faq-item">
+            <summary>¿Quién puede unirse a la app?</summary>
+            <p>Cualquier vecino de la Urb. El Pantano con un <strong>código de invitación</strong> puede crear su cuenta. Pide el tuyo a cualquier Festero.</p>
+        </details>
+        <details class="faq-item">
+            <summary>¿Cuándo y dónde son las fiestas?</summary>
+            <p>Del <strong>10 al 16 de agosto de 2026</strong> en el recinto habitual de la Urbanización El Pantano, Torrent (Valencia), zona Mas del Jutge.</p>
+        </details>
+        <details class="faq-item">
+            <summary>¿Cómo me apunto a las actividades?</summary>
+            <p>Accede con tu cuenta, entra en la sección <strong>Fiestas</strong> y pulsa en la actividad que quieras. Recibirás tu ticket directamente en la app.</p>
+        </details>
+        <details class="faq-item">
+            <summary>¿La rifa es solo para vecinos?</summary>
+            <p>Sí, los números se reparten entre vecinos empadronados o con cuenta activa en la app. El sorteo se retransmitirá en directo.</p>
+        </details>
+        <details class="faq-item">
+            <summary>¿Puedo instalar esta web como app?</summary>
+            <p>Sí, en tu móvil pulsa <strong>"Añadir a pantalla de inicio"</strong> desde el menú del navegador y funciona como una app nativa.</p>
+        </details>
+    </div>
+</section>
+
+<!-- ── CTA FINAL (antes del footer) ─────────────────────────────── -->
+<section class="section-public" aria-label="Únete a las fiestas">
+    <div class="cta-banner">
+        <div class="cta-banner-ico">🎊</div>
+        <h2 class="cta-banner-title">¿Ya tienes tu código?</h2>
+        <p class="cta-banner-sub">Pide tu invitación a un Festero y únete a la app del barrio.</p>
+        <button class="cta-primary" onclick="abrirLogin(); setTimeout(()=>switchTab('register'),120);"
+                style="margin:0 auto;" aria-label="Crear cuenta nueva">
+            <span class="material-symbols-outlined" style="font-size:20px">person_add</span>
+            Crear mi cuenta
+        </button>
+    </div>
+</section>
+
 </main>
 
 <!-- ── FOOTER SEO ──────────────────────────────────────────────────── -->
