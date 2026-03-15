@@ -3,392 +3,931 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión</title>
+    <title>Gestión de Eventos · Fiestas Pantano</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ff5722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
+    <meta name="theme-color" content="#e8400c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #009688; --border: #ddd; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --border: #3e4042; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; padding-bottom: 90px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1 { border-bottom: 4px solid var(--accent); display: inline-block; padding-bottom: 5px; }
-        .card { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: inherit; box-sizing: border-box; }
-        textarea { resize: vertical; min-height: 80px; }
-        
-        .btn-create { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
-        .btn-cancel { background: #9e9e9e; display: none; margin-top: 10px; }
-        
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); }
-        .item-info { flex: 1; }
-        .item-actions { display: flex; gap: 5px; }
-        
-        .btn-icon { border: none; border-radius: 8px; cursor: pointer; font-weight: bold; padding: 8px 12px; display: flex; align-items: center; justify-content: center; }
-        .btn-del { background: #ff4444; color: white; }
-        .btn-edit { background: #2196f3; color: white; }
-        .btn-manage { background: #ff9800; color: white; }
-        .btn-users { background: #673ab7; color: white; }
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
 
-        .img-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; background: #eee; }
-
-        /* MODAL LISTA */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal { background: var(--card); padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; color: var(--text); display: flex; flex-direction: column; }
-        
-        .participant-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px; border-bottom: 1px solid var(--border); }
-        
-        .add-section { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed var(--border); }
-        .manual-inputs-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-        .manual-input { padding: 8px !important; font-size: 0.9rem; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; }
-        .nav-item.active { color: var(--accent); font-weight: bold; }
-        .material-symbols-outlined { font-size: 24px; }
-    </style>
-
+    <!-- ═══ FIREBASE — LÓGICA IDÉNTICA AL ORIGINAL ═══════════════════ -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      // ✅ IMPORTAMOS LA PERSISTENCIA
-      import { getFirestore, collection, addDoc, updateDoc, query, orderBy, onSnapshot, deleteDoc, doc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore, collection, addDoc, updateDoc, query, orderBy,
+               onSnapshot, deleteDoc, doc, getDoc, enableIndexedDbPersistence }
+          from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged }
+          from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-      
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
+      const firebaseConfig = {
+          apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+          authDomain:"fiestas-pantano.firebaseapp.com",
+          projectId:"fiestas-pantano",
+          storageBucket:"fiestas-pantano.firebasestorage.app",
+          messagingSenderId:"801380435613",
+          appId:"1:801380435613:web:a842572cf7cee93ac57674",
+          measurementId:"G-EG2MZGBT1B"
+      };
+      const app  = initializeApp(firebaseConfig);
+      const db   = getFirestore(app);
+      const auth = getAuth(app);
 
-      // ✅ ACTIVAR PERSISTENCIA
-      enableIndexedDbPersistence(db).catch((err) => {
-          if (err.code == 'failed-precondition') console.log('Múltiples pestañas abiertas.');
-          else if (err.code == 'unimplemented') console.log('Navegador no soporta persistencia.');
+      enableIndexedDbPersistence(db).catch(err => {
+          if (err.code==='failed-precondition') console.log('Múltiples pestañas abiertas.');
+          else if (err.code==='unimplemented') console.log('Navegador sin soporte.');
       });
 
-      const auth = getAuth(app);
-      
-      let editMode = false;
-      let editId = "";
+      let editMode = false, editId = "";
       let currentParticipantsAct = null;
 
+      /* ── AUTH — igual al original ── */
       onAuthStateChanged(auth, async (user) => {
-          if (!user) window.location.href = "index.html";
-          const uDoc = await getDoc(doc(db, "usuarios", user.uid));
-          if (!uDoc.exists() || (uDoc.data().rol !== 'festero' && uDoc.data().rol !== 'admin')) window.location.href = "panel.html";
+          if (!user) { window.location.href="index.html"; return; }
+          const uDoc = await getDoc(doc(db,"usuarios",user.uid));
+          if (!uDoc.exists() || (uDoc.data().rol!=='festero' && uDoc.data().rol!=='admin'))
+              window.location.href="panel.html";
           escucharActividades();
       });
 
+      /* ── PREVIEW IMAGEN — igual al original ── */
       window.previewImage = () => {
           const url = document.getElementById("act-image").value;
           const img = document.getElementById("img-preview");
-          if(url) { img.src = url; img.style.display = "block"; } else { img.style.display = "none"; }
-      }
+          const ph  = document.getElementById("img-placeholder");
+          if (url) {
+              img.src = url; img.style.display="block";
+              ph.style.display="none";
+          } else {
+              img.style.display="none"; ph.style.display="flex";
+          }
+      };
 
+      /* ── CHECK MODALIDAD — igual al original ── */
       window.checkModality = () => {
           const val = document.getElementById("act-modality").value;
-          const sizeGroup = document.getElementById("size-group");
-          if(val === 'equipos') sizeGroup.style.display = 'block';
-          else sizeGroup.style.display = 'none';
-      }
+          document.getElementById("size-group").style.display =
+              val==='equipos' ? 'block' : 'none';
+          actualizarResumen();
+      };
 
-      window.guardarActividad = async () => {
-          const titulo = document.getElementById("act-title").value;
-          const fechaStr = document.getElementById("act-date").value;
-          const lugar = document.getElementById("act-place").value;
-          const descripcion = document.getElementById("act-desc").value;
-          const imagen = document.getElementById("act-image").value;
-          const genero = document.getElementById("act-genre").value;
-          const audiencia = document.getElementById("act-audience").value;
+      /* ── ACTUALIZAR RESUMEN VISUAL — expuesto a window para oninput ── */
+      window.actualizarResumen = () => {
+          const titulo    = document.getElementById("act-title").value   || "Sin título";
+          const fechaStr  = document.getElementById("act-date").value;
+          const lugar     = document.getElementById("act-place").value   || "Sin lugar";
+          const genero    = document.getElementById("act-genre").value;
           const modalidad = document.getElementById("act-modality").value;
-          const tamano = document.getElementById("act-size").value;
 
-          if(!titulo || !fechaStr) return alert("Faltan datos obligatorios");
-          const fecha = new Date(fechaStr);
-
-          const data = { 
-              titulo, fecha, lugar, descripcion, imagen, genero, audiencia, modalidad, 
-              tamano_equipo: parseInt(tamano)
+          const catMap = {
+              concurso:{e:'🏆'},deporte:{e:'⚽'},comida:{e:'🥘'},fiesta:{e:'🎉'},
+              carrera:{e:'🏃'},torneo:{e:'🎾'},otro:{e:'🎲'}
+          };
+          const modMap = {
+              individual:'👤 Individual', parejas:'👥 Parejas',
+              equipos:'🏅 Equipos', sin_inscripcion:'🔓 Entrada libre'
           };
 
+          document.getElementById("rv-emoji").innerText  = catMap[genero]?.e || '🎲';
+          document.getElementById("rv-title").innerText  = titulo;
+          document.getElementById("rv-lugar").innerText  = lugar;
+          document.getElementById("rv-mod").innerText    = modMap[modalidad] || modalidad;
+
+          if (fechaStr) {
+              const d = new Date(fechaStr);
+              document.getElementById("rv-fecha").innerText =
+                  d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}) +
+                  ' · ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+          } else {
+              document.getElementById("rv-fecha").innerText = "Fecha sin definir";
+          }
+      };
+
+      /* ── GUARDAR ACTIVIDAD — igual al original ── */
+      window.guardarActividad = async () => {
+          const titulo    = document.getElementById("act-title").value.trim();
+          const fechaStr  = document.getElementById("act-date").value;
+          const lugar     = document.getElementById("act-place").value.trim();
+          const descripcion = document.getElementById("act-desc").value.trim();
+          const imagen    = document.getElementById("act-image").value.trim();
+          const genero    = document.getElementById("act-genre").value;
+          const audiencia = document.getElementById("act-audience").value;
+          const modalidad = document.getElementById("act-modality").value;
+          const tamano    = document.getElementById("act-size").value;
+
+          if (!titulo || !fechaStr) {
+              showToast("⚠️ El título y la fecha son obligatorios");
+              highlight("act-title", !titulo);
+              highlight("act-date", !fechaStr);
+              return;
+          }
+
+          const btn = document.getElementById("btn-submit");
+          btn.disabled=true; btn.innerText="Guardando…";
+
+          const data = { titulo, fecha: new Date(fechaStr), lugar, descripcion,
+                         imagen, genero, audiencia, modalidad, tamano_equipo: parseInt(tamano) };
           try {
               if (editMode) {
-                  await updateDoc(doc(db, "actividades", editId), data);
-                  alert("✅ Actividad Actualizada");
+                  await updateDoc(doc(db,"actividades",editId), data);
+                  showToast("✅ Actividad actualizada");
                   cancelarEdicion();
               } else {
-                  data.inscritos = []; 
-                  await addDoc(collection(db, "actividades"), data);
-                  alert("✅ Actividad Creada");
+                  data.inscritos = [];
+                  await addDoc(collection(db,"actividades"), data);
+                  showToast("✅ Actividad publicada");
                   limpiarForm();
+                  // Scroll a la lista
+                  document.getElementById("lista-section").scrollIntoView({behavior:'smooth'});
               }
-          } catch(e) { alert("Error: " + e.message); }
+          } catch(e) { showToast("❌ Error: " + e.message); }
+          btn.disabled=false;
+          btn.innerText = editMode ? "Guardar cambios" : "Publicar evento";
+      };
+
+      function highlight(id, doIt) {
+          const el = document.getElementById(id);
+          if (doIt) el.classList.add('field-error');
+          else el.classList.remove('field-error');
       }
 
+      /* ── ESCUCHAR ACTIVIDADES — igual al original ── */
       function escucharActividades() {
-          const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
+          const q = query(collection(db,"actividades"), orderBy("fecha","asc"));
           onSnapshot(q, (snapshot) => {
               const lista = document.getElementById("admin-list");
-              lista.innerHTML = "";
-              snapshot.forEach((d) => {
-                  const act = d.data();
-                  const fecha = act.fecha.toDate ? act.fecha.toDate().toLocaleDateString() : '';
-                  
-                  let btnGestion = "";
-                  if (act.genero === 'torneo') btnGestion = `<button class="btn-icon btn-manage" onclick="window.location.href='gestionar_bracket.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">emoji_events</span></button>`;
-                  else if (act.genero === 'carrera' || act.genero === 'concurso') btnGestion = `<button class="btn-icon btn-manage" onclick="window.location.href='gestionar_podio.html?id=${d.id}'"><span class="material-symbols-outlined" style="font-size:18px">podium</span></button>`;
+              if (snapshot.empty) {
+                  lista.innerHTML = `<div class="empty-list">
+                      <span class="material-symbols-outlined">event_note</span>
+                      <p>No hay eventos creados aún</p>
+                  </div>`; return;
+              }
+              lista.innerHTML = snapshot.docs.map(d => {
+                  const act  = d.data();
+                  const fecha = act.fecha.toDate ?
+                      act.fecha.toDate().toLocaleDateString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+                  const cat  = getCat(act.genero);
+                  const nInscritos = (act.inscritos||[]).length;
+                  const safeData   = encodeURIComponent(JSON.stringify({
+                      id: d.id, ...act,
+                      fecha: act.fecha.toDate().toISOString().slice(0,16)
+                  }));
 
-                  const safeData = encodeURIComponent(JSON.stringify({id: d.id, ...act, fecha: act.fecha.toDate().toISOString().slice(0,16)}));
+                  let btnGestion = '';
+                  if (act.genero==='torneo')
+                      btnGestion = `<button class="act-action-btn btn-orange" title="Gestionar bracket"
+                          onclick="window.location.href='gestionar_bracket.html?id=${d.id}'">
+                          <span class="material-symbols-outlined">emoji_events</span></button>`;
+                  else if (act.genero==='carrera'||act.genero==='concurso')
+                      btnGestion = `<button class="act-action-btn btn-orange" title="Gestionar podio"
+                          onclick="window.location.href='gestionar_podio.html?id=${d.id}'">
+                          <span class="material-symbols-outlined">social_leaderboard</span></button>`;
 
-                  lista.innerHTML += `
-                    <div class="list-item">
-                        <img src="${act.imagen || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; object-fit:cover; border-radius:5px; margin-right:10px;">
-                        <div class="item-info">
-                            <strong>${act.titulo}</strong><br>
-                            <small>${fecha} - ${act.genero}</small>
-                        </div>
-                        <div class="item-actions">
-                            <button class="btn-icon btn-users" onclick="abrirParticipantes('${d.id}')">👥</button>
-                            ${btnGestion}
-                            <button class="btn-icon btn-edit" onclick="cargarParaEditar('${safeData}')">✏️</button>
-                            <button class="btn-icon btn-del" onclick="borrar('${d.id}')">🗑️</button>
-                        </div>
-                    </div>`;
-              });
+                  return `
+                  <div class="list-event-card">
+                      <div class="lec-color-bar" style="background:${cat.bg2}"></div>
+                      <div class="lec-body">
+                          <div class="lec-top">
+                              <span class="lec-cat">${cat.emoji} ${cat.label}</span>
+                              <span class="lec-inscritos">
+                                  <span class="material-symbols-outlined" style="font-size:14px">group</span>
+                                  ${nInscritos}
+                              </span>
+                          </div>
+                          <div class="lec-title">${act.titulo}</div>
+                          <div class="lec-meta">
+                              <span><span class="material-symbols-outlined" style="font-size:13px">schedule</span>${fecha}</span>
+                              ${act.lugar?`<span><span class="material-symbols-outlined" style="font-size:13px">location_on</span>${act.lugar}</span>`:''}
+                          </div>
+                          <div class="lec-actions">
+                              <button class="act-action-btn btn-purple" title="Ver inscritos"
+                                  onclick="abrirParticipantes('${d.id}')">
+                                  <span class="material-symbols-outlined">group</span>
+                                  Inscritos
+                              </button>
+                              ${btnGestion}
+                              <button class="act-action-btn btn-blue" title="Editar"
+                                  onclick="cargarParaEditar('${safeData}')">
+                                  <span class="material-symbols-outlined">edit</span>
+                                  Editar
+                              </button>
+                              <button class="act-action-btn btn-red" title="Eliminar"
+                                  onclick="borrar('${d.id}')">
+                                  <span class="material-symbols-outlined">delete</span>
+                              </button>
+                          </div>
+                      </div>
+                  </div>`;
+              }).join('');
           });
       }
 
+      /* ── PARTICIPANTES — igual al original ── */
       window.abrirParticipantes = async (actId) => {
-          const modal = document.getElementById("modal-participantes");
-          const snap = await getDoc(doc(db, "actividades", actId));
+          const snap = await getDoc(doc(db,"actividades",actId));
           currentParticipantsAct = { id: actId, ...snap.data() };
-          
-          document.getElementById("p-title").innerText = "Inscritos: " + currentParticipantsAct.titulo;
-          
-          const inputsContainer = document.getElementById("manual-inputs");
-          inputsContainer.innerHTML = ""; 
-          
-          if(currentParticipantsAct.modalidad === 'sin_inscripcion') {
-              document.querySelector('.add-section').style.display = 'none';
-              document.getElementById("p-list").innerHTML = "<p style='text-align:center'>Este evento es de entrada libre.</p>";
+
+          document.getElementById("p-title").innerText = currentParticipantsAct.titulo;
+          document.getElementById("p-mod").innerText   =
+              currentParticipantsAct.modalidad==='sin_inscripcion'
+              ? '🔓 Entrada libre' : currentParticipantsAct.modalidad;
+
+          const inputsEl = document.getElementById("manual-inputs");
+          const addSec   = document.getElementById("add-section");
+
+          if (currentParticipantsAct.modalidad==='sin_inscripcion') {
+              addSec.style.display='none';
+              document.getElementById("p-list").innerHTML =
+                  `<div class="libre-notice">🔓 Este evento es de entrada libre, no hay lista de inscritos.</div>`;
           } else {
-              document.querySelector('.add-section').style.display = 'block';
-              inputsContainer.innerHTML += `<input type="text" id="manual-cap" class="manual-input" placeholder="Nombre Capitán / Participante">`;
-              
-              if (currentParticipantsAct.modalidad !== 'individual') {
-                  const numExtras = currentParticipantsAct.modalidad === 'parejas' ? 1 : (currentParticipantsAct.tamano_equipo - 1);
-                  for(let i=0; i < numExtras; i++) {
-                      inputsContainer.innerHTML += `<input type="text" class="manual-mate manual-input" placeholder="Nombre Compañero ${i+1}">`;
-                  }
+              addSec.style.display='block';
+              inputsEl.innerHTML = `
+                <div class="manual-field">
+                    <span class="material-symbols-outlined">person</span>
+                    <input type="text" id="manual-cap" class="manual-input"
+                           placeholder="${currentParticipantsAct.modalidad==='individual'?'Nombre del participante':'Nombre del capitán / equipo'}">
+                </div>`;
+              if (currentParticipantsAct.modalidad!=='individual') {
+                  const n = currentParticipantsAct.modalidad==='parejas'
+                      ? 1 : (currentParticipantsAct.tamano_equipo-1);
+                  for (let i=0;i<n;i++) inputsEl.innerHTML += `
+                    <div class="manual-field">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <input type="text" class="manual-mate manual-input"
+                               placeholder="Compañero ${i+1}">
+                    </div>`;
               }
-              renderListaParticipantes(currentParticipantsAct.inscritos || []);
+              renderListaParticipantes(currentParticipantsAct.inscritos||[]);
           }
-          modal.style.display = "flex";
-      }
+          abrirModal('modal-participantes');
+      };
 
       function renderListaParticipantes(inscritos) {
           const lista = document.getElementById("p-list");
-          lista.innerHTML = "";
-          
-          if(inscritos.length === 0) { lista.innerHTML = "<p style='color:gray; text-align:center;'>Nadie apuntado aún.</p>"; return; }
-
-          inscritos.forEach((insc, idx) => {
-              const nombre = insc.nombre_equipo || insc.capitan || "Sin Nombre";
-              let miembrosTxt = "";
-              if(insc.miembros && insc.miembros.length > 0) {
-                  miembrosTxt = "<br><small style='color:gray'>+ " + insc.miembros.map(m => m.nombre).join(", ") + "</small>";
-              }
-              
-              lista.innerHTML += `
-                <div class="participant-row">
-                    <div>
-                        <strong>${nombre}</strong>
-                        ${miembrosTxt}
-                        <div style="font-size:0.75rem; color:var(--accent); margin-top:2px;">${insc.capitan_uid === 'manual' ? '📝 Manual' : '📱 App'}</div>
-                    </div>
-                    <button class="btn-icon btn-del" style="padding:5px;" onclick="borrarParticipante(${idx})">×</button>
-                </div>`;
-          });
+          if (inscritos.length===0) {
+              lista.innerHTML=`<div class="empty-p">Nadie apuntado aún</div>`; return;
+          }
+          lista.innerHTML = inscritos.map((ins,idx) => {
+              const nombre = ins.nombre_equipo||ins.capitan||"Sin nombre";
+              const esManual = ins.capitan_uid==='manual';
+              const miems = ins.miembros?.filter(m=>m.nombre).map(m=>m.nombre).join(', ')||'';
+              return `
+              <div class="p-row">
+                  <div class="p-ava">${nombre[0]?.toUpperCase()||'?'}</div>
+                  <div class="p-info">
+                      <div class="p-name">${nombre}</div>
+                      ${miems?`<div class="p-mems">${miems}</div>`:''}
+                      <span class="p-badge ${esManual?'pb-manual':'pb-app'}">${esManual?'📝 Manual':'📱 App'}</span>
+                  </div>
+                  <button class="btn-del-p" onclick="borrarParticipante(${idx})" title="Eliminar">
+                      <span class="material-symbols-outlined">close</span>
+                  </button>
+              </div>`;
+          }).join('');
       }
 
       window.agregarParticipanteManual = async () => {
           const capName = document.getElementById("manual-cap").value.trim();
-          if(!capName) return alert("Falta el nombre principal");
-
+          if (!capName) { showToast("⚠️ Escribe el nombre del participante"); return; }
           const miembros = [];
-          document.querySelectorAll(".manual-mate").forEach(input => {
-              if(input.value.trim()) {
-                  miembros.push({ nombre: input.value.trim(), uid: null, vinculado: false });
-              }
+          document.querySelectorAll(".manual-mate").forEach(inp => {
+              if (inp.value.trim()) miembros.push({nombre:inp.value.trim(),uid:null,vinculado:false});
           });
-
-          const nuevaInscripcion = {
-              capitan: capName,
-              nombre_equipo: capName, 
-              capitan_uid: 'manual',
-              fecha: new Date(),
-              miembros: miembros
-          };
-
+          const nueva = { capitan:capName, nombre_equipo:capName,
+                          capitan_uid:'manual', fecha:new Date(), miembros };
           try {
-              const actRef = doc(db, "actividades", currentParticipantsAct.id);
-              const snap = await getDoc(actRef);
-              const inscritos = snap.data().inscritos || [];
-              
-              inscritos.push(nuevaInscripcion);
-              await updateDoc(actRef, { inscritos: inscritos });
-              
-              document.getElementById("manual-cap").value = "";
-              document.querySelectorAll(".manual-mate").forEach(i => i.value = "");
-              
-              renderListaParticipantes(inscritos);
-          } catch(e) { alert("Error: " + e.message); }
-      }
+              const actRef = doc(db,"actividades",currentParticipantsAct.id);
+              const snap   = await getDoc(actRef);
+              const ins    = snap.data().inscritos||[];
+              ins.push(nueva);
+              await updateDoc(actRef, { inscritos:ins });
+              document.getElementById("manual-cap").value="";
+              document.querySelectorAll(".manual-mate").forEach(i=>i.value="");
+              renderListaParticipantes(ins);
+              showToast("✅ Participante añadido");
+          } catch(e) { showToast("❌ "+e.message); }
+      };
 
       window.borrarParticipante = async (index) => {
-          if(!confirm("¿Borrar a este participante?")) return;
+          if (!confirm("¿Eliminar a este participante?")) return;
           try {
-              const actRef = doc(db, "actividades", currentParticipantsAct.id);
-              const snap = await getDoc(actRef);
-              let inscritos = snap.data().inscritos || [];
-              inscritos.splice(index, 1);
-              await updateDoc(actRef, { inscritos: inscritos });
-              renderListaParticipantes(inscritos);
-          } catch(e) { alert("Error: " + e.message); }
-      }
+              const actRef = doc(db,"actividades",currentParticipantsAct.id);
+              const snap   = await getDoc(actRef);
+              let ins = snap.data().inscritos||[];
+              ins.splice(index,1);
+              await updateDoc(actRef, { inscritos:ins });
+              renderListaParticipantes(ins);
+              showToast("🗑️ Eliminado");
+          } catch(e) { showToast("❌ "+e.message); }
+      };
 
-      window.cerrarParticipantes = () => document.getElementById("modal-participantes").style.display = "none";
+      window.cerrarParticipantes = () => cerrarModal('modal-participantes');
 
+      /* ── EDITAR — igual al original ── */
       window.cargarParaEditar = (dataStr) => {
           const data = JSON.parse(decodeURIComponent(dataStr));
-          editMode = true; editId = data.id;
-
-          document.getElementById("form-title").innerText = "Editar Actividad";
-          document.getElementById("btn-submit").innerText = "Guardar Cambios";
-          document.getElementById("btn-cancel").style.display = "block";
-
-          document.getElementById("act-title").value = data.titulo;
-          document.getElementById("act-date").value = data.fecha;
-          document.getElementById("act-place").value = data.lugar || "";
-          document.getElementById("act-desc").value = data.descripcion || "";
-          document.getElementById("act-image").value = data.imagen || "";
-          document.getElementById("act-genre").value = data.genero;
-          document.getElementById("act-audience").value = data.audiencia || "todos";
+          editMode=true; editId=data.id;
+          document.getElementById("form-title").innerText = "✏️ Editar evento";
+          document.getElementById("btn-submit").innerText  = "Guardar cambios";
+          document.getElementById("btn-cancel").style.display="flex";
+          document.getElementById("act-title").value    = data.titulo;
+          document.getElementById("act-date").value     = data.fecha;
+          document.getElementById("act-place").value    = data.lugar||"";
+          document.getElementById("act-desc").value     = data.descripcion||"";
+          document.getElementById("act-image").value    = data.imagen||"";
+          document.getElementById("act-genre").value    = data.genero;
+          document.getElementById("act-audience").value = data.audiencia||"todos";
           document.getElementById("act-modality").value = data.modalidad;
-          document.getElementById("act-size").value = data.tamano_equipo || 5;
-
-          previewImage();
-          checkModality();
-          window.scrollTo(0,0);
-      }
+          document.getElementById("act-size").value     = data.tamano_equipo||5;
+          previewImage(); checkModality(); actualizarResumen();
+          document.getElementById("form-section").scrollIntoView({behavior:'smooth'});
+      };
 
       window.cancelarEdicion = () => {
-          editMode = false; editId = "";
-          document.getElementById("form-title").innerText = "Crear Actividad";
-          document.getElementById("btn-submit").innerText = "Publicar";
-          document.getElementById("btn-cancel").style.display = "none";
+          editMode=false; editId="";
+          document.getElementById("form-title").innerText = "✨ Crear nuevo evento";
+          document.getElementById("btn-submit").innerText  = "Publicar evento";
+          document.getElementById("btn-cancel").style.display="none";
           limpiarForm();
-      }
+      };
 
       function limpiarForm() {
-          document.getElementById("act-title").value = "";
-          document.getElementById("act-date").value = "";
-          document.getElementById("act-place").value = "";
-          document.getElementById("act-desc").value = "";
-          document.getElementById("act-image").value = "";
-          document.getElementById("img-preview").style.display = "none";
-          document.getElementById("act-size").value = 5;
+          ["act-title","act-date","act-place","act-desc","act-image"].forEach(id =>
+              document.getElementById(id).value="");
+          document.getElementById("img-preview").style.display="none";
+          document.getElementById("img-placeholder").style.display="flex";
+          document.getElementById("act-size").value=5;
+          actualizarResumen();
       }
 
-      window.borrar = async (id) => { if(confirm("¿Borrar evento? Se perderán los inscritos.")) await deleteDoc(doc(db, "actividades", id)); }
+      window.borrar = async (id) => {
+          if (confirm("⚠️ ¿Eliminar este evento? Se perderán todos los inscritos."))
+              await deleteDoc(doc(db,"actividades",id));
+      };
+
+      /* ── HELPERS UI ── */
+      function getCat(g) {
+          return ({
+              concurso:{emoji:'🏆',label:'Concurso',bg2:'#f59e0b'},
+              deporte: {emoji:'⚽',label:'Deporte', bg2:'#3b82f6'},
+              comida:  {emoji:'🥘',label:'Comida',  bg2:'#f97316'},
+              fiesta:  {emoji:'🎉',label:'Fiesta',  bg2:'#a855f7'},
+              carrera: {emoji:'🏃',label:'Carrera', bg2:'#10b981'},
+              torneo:  {emoji:'🎾',label:'Torneo',  bg2:'#ec4899'},
+          }[g]) || {emoji:'🎲',label:'Otro',bg2:'#64748b'};
+      }
+
+      function abrirModal(id) {
+          const m=document.getElementById(id);
+          m.style.display="flex"; document.body.style.overflow='hidden';
+          requestAnimationFrame(()=>m.classList.add('open'));
+      }
+      function cerrarModal(id) {
+          const m=document.getElementById(id);
+          m.classList.remove('open');
+          setTimeout(()=>{ m.style.display="none"; document.body.style.overflow=''; },280);
+      }
+
+      window.showToast = (msg) => {
+          const t=document.getElementById('toast');
+          t.innerText=msg; t.classList.add('show');
+          clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+      };
+
     </script>
+
+    <style>
+        /* ── VARIABLES ──────────────────────────────────────────────── */
+        :root {
+            --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550;
+            --card:#fff; --border:rgba(0,0,0,0.07);
+            --accent:#e8400c; --gold:#f59e0b;
+            --green:#16a34a; --blue:#0ea5e9; --purple:#7c3aed;
+            --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:18px;
+        }
+        html.dark-mode {
+            --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070;
+            --card:#241c14; --border:rgba(255,255,255,0.08);
+            --shadow:0 4px 20px rgba(0,0,0,0.45);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);
+             color:var(--text);min-height:100vh;padding-bottom:90px;}
+
+        /* ── TOPBAR ─────────────────────────────────────────────────── */
+        .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;
+            gap:12px;padding:14px 18px;background:var(--bg);
+            border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+        .topbar-title{font-size:1.1rem;font-weight:800;flex:1;}
+        .btn-ico{background:var(--card);border:1px solid var(--border);width:38px;height:38px;
+            border-radius:50%;display:flex;align-items:center;justify-content:center;
+            cursor:pointer;color:var(--text);transition:transform .15s;
+            box-shadow:var(--shadow);text-decoration:none;}
+        .btn-ico:active{transform:scale(.9);}
+
+        /* ── WRAP ───────────────────────────────────────────────────── */
+        .wrap{max-width:680px;margin:0 auto;padding:20px 18px;}
+
+        /* ── SECCIÓN LABEL ──────────────────────────────────────────── */
+        .sec-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+        .sec-title{font-size:1rem;font-weight:800;}
+        .sec-title span{font-size:.78rem;font-weight:600;color:var(--text2);margin-left:4px;}
+
+        /* ── FORMULARIO ─────────────────────────────────────────────── */
+        .form-card{background:var(--card);border-radius:var(--radius);
+            border:1px solid var(--border);box-shadow:var(--shadow);
+            overflow:hidden;margin-bottom:22px;}
+
+        .form-card-header{
+            padding:18px 20px 14px;
+            border-bottom:1px solid var(--border);
+            display:flex;align-items:center;justify-content:space-between;
+        }
+        .form-card-title{font-size:1.1rem;font-weight:800;}
+
+        /* Steps visuales */
+        .form-steps{display:flex;gap:0;padding:0 20px;margin-bottom:2px;overflow-x:auto;}
+        .fstep{display:flex;align-items:center;gap:6px;padding:10px 0;
+            font-size:.72rem;font-weight:800;color:var(--text2);white-space:nowrap;
+            text-transform:uppercase;letter-spacing:.5px;}
+        .fstep.done{color:var(--green);}
+        .fstep-n{width:22px;height:22px;border-radius:50%;background:var(--bg2);
+            display:flex;align-items:center;justify-content:center;
+            font-size:.7rem;font-weight:800;flex-shrink:0;}
+        .fstep.done .fstep-n{background:var(--green);color:white;}
+        .fstep-line{width:20px;height:2px;background:var(--border);flex-shrink:0;}
+
+        /* Grupos del form */
+        .form-body{padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px;}
+
+        .fg{display:flex;flex-direction:column;gap:6px;}
+        .fg label{font-size:.8rem;font-weight:800;color:var(--text2);
+            text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center;gap:6px;}
+        .fg label .req{color:var(--accent);font-size:.7rem;}
+
+        .fg input,.fg select,.fg textarea{
+            width:100%;padding:13px 14px;border:2px solid var(--border);
+            border-radius:12px;background:var(--bg2);color:var(--text);
+            font-family:inherit;font-size:.95rem;outline:none;
+            transition:border-color .2s,background .2s;
+        }
+        .fg input:focus,.fg select:focus,.fg textarea:focus{
+            border-color:var(--accent);background:var(--card);
+        }
+        .fg input.field-error{border-color:#dc2626;}
+        .fg textarea{resize:vertical;min-height:80px;line-height:1.6;}
+
+        /* Select con icono */
+        .select-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+        .genre-btn{
+            padding:12px 8px;border-radius:12px;border:2px solid var(--border);
+            background:var(--card);cursor:pointer;font-family:inherit;
+            font-size:.82rem;font-weight:700;color:var(--text2);
+            display:flex;flex-direction:column;align-items:center;gap:4px;
+            transition:all .15s;text-align:center;
+        }
+        .genre-btn .g-emoji{font-size:1.4rem;}
+        .genre-btn.selected{border-color:var(--accent);background:rgba(232,64,12,.07);color:var(--accent);}
+        .genre-btn:active{transform:scale(.96);}
+
+        /* Modalidad pills */
+        .mod-grid{display:flex;flex-direction:column;gap:8px;}
+        .mod-btn{
+            padding:13px 16px;border-radius:12px;border:2px solid var(--border);
+            background:var(--card);cursor:pointer;font-family:inherit;
+            display:flex;align-items:center;gap:12px;
+            transition:all .15s; text-align:left;
+        }
+        .mod-btn .mod-ico{font-size:1.4rem;flex-shrink:0;}
+        .mod-btn .mod-txt strong{display:block;font-size:.9rem;font-weight:800;}
+        .mod-btn .mod-txt span{font-size:.72rem;color:var(--text2);}
+        .mod-btn.selected{border-color:var(--accent);background:rgba(232,64,12,.06);}
+        .mod-btn:active{transform:scale(.98);}
+
+        /* Imagen */
+        .img-box{border-radius:14px;overflow:hidden;border:2px dashed var(--border);
+            background:var(--bg2);position:relative;min-height:100px;}
+        .img-box input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
+        #img-placeholder{height:100px;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;gap:6px;color:var(--text2);}
+        #img-placeholder .material-symbols-outlined{font-size:28px;opacity:.4;}
+        #img-placeholder span{font-size:.78rem;}
+        .img-url-input{margin-top:8px;}
+        #img-preview{width:100%;height:160px;object-fit:cover;display:none;border-radius:12px;}
+
+        /* Resumen preview */
+        .preview-card{
+            background:linear-gradient(135deg,var(--accent),var(--gold));
+            border-radius:14px;padding:16px;color:white;
+            display:flex;align-items:center;gap:14px;
+            margin-bottom:14px;
+        }
+        .preview-emoji{font-size:2.2rem;flex-shrink:0;}
+        .preview-body{flex:1;min-width:0;}
+        .preview-title{font-size:1rem;font-weight:800;line-height:1.2;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .preview-meta{font-size:.72rem;opacity:.85;margin-top:4px;
+            display:flex;flex-direction:column;gap:2px;}
+
+        /* Botones del form */
+        .form-btns{display:flex;gap:8px;padding:0 20px 20px;}
+        .btn-submit{
+            flex:1;padding:15px;border-radius:14px;border:none;
+            background:var(--accent);color:white;font-weight:800;
+            font-size:1rem;font-family:inherit;cursor:pointer;
+            box-shadow:0 4px 14px rgba(232,64,12,.35);
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            transition:transform .15s,opacity .2s;
+        }
+        .btn-submit:active{transform:scale(.97);}
+        .btn-submit:disabled{opacity:.6;cursor:not-allowed;}
+        .btn-cancel-form{
+            padding:15px 20px;border-radius:14px;border:2px solid var(--border);
+            background:var(--card);color:var(--text2);font-weight:700;
+            font-family:inherit;font-size:.9rem;cursor:pointer;
+            display:none;align-items:center;gap:6px;
+            transition:background .15s;
+        }
+        .btn-cancel-form:hover{background:var(--bg2);}
+
+        /* ── LISTA DE EVENTOS ───────────────────────────────────────── */
+        .list-event-card{
+            background:var(--card);border-radius:var(--radius);
+            border:1px solid var(--border);overflow:hidden;
+            box-shadow:var(--shadow);margin-bottom:12px;
+            display:flex;
+            animation:fadeUp .3s ease backwards;
+        }
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        .lec-color-bar{width:5px;flex-shrink:0;}
+        .lec-body{flex:1;padding:14px 16px;min-width:0;}
+        .lec-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+        .lec-cat{font-size:.72rem;font-weight:800;color:var(--text2);
+            text-transform:uppercase;letter-spacing:.3px;}
+        .lec-inscritos{display:flex;align-items:center;gap:3px;font-size:.75rem;
+            font-weight:700;color:var(--text2);background:var(--bg2);
+            padding:2px 8px;border-radius:20px;}
+        .lec-title{font-size:.95rem;font-weight:800;margin-bottom:6px;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .lec-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:.72rem;
+            color:var(--text2);margin-bottom:10px;}
+        .lec-meta span{display:flex;align-items:center;gap:3px;}
+        .lec-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+        .act-action-btn{
+            display:flex;align-items:center;gap:5px;padding:7px 12px;
+            border-radius:10px;border:none;font-weight:800;font-size:.75rem;
+            cursor:pointer;font-family:inherit;transition:transform .15s,opacity .2s;
+        }
+        .act-action-btn:active{transform:scale(.93);}
+        .act-action-btn .material-symbols-outlined{font-size:16px;}
+        .btn-purple{background:rgba(124,58,237,.1);color:var(--purple);}
+        .btn-blue  {background:#dbeafe;color:#1d4ed8;}
+        .btn-orange{background:#ffedd5;color:#c2410c;}
+        .btn-red   {background:#fee2e2;color:#dc2626;padding:7px 10px;}
+
+        .empty-list{text-align:center;padding:40px 20px;color:var(--text2);}
+        .empty-list .material-symbols-outlined{font-size:44px;opacity:.2;display:block;margin-bottom:8px;}
+
+        /* ── MODAL PARTICIPANTES ────────────────────────────────────── */
+        .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.6);
+            display:none;justify-content:center;align-items:flex-end;backdrop-filter:blur(6px);}
+        .modal-overlay.open .modal-sheet{animation:sheetUp .3s cubic-bezier(.32,.72,0,1);}
+        @keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .modal-sheet{background:var(--card);border-radius:28px 28px 0 0;width:100%;
+            max-width:560px;max-height:88vh;overflow-y:auto;}
+        .modal-handle{width:40px;height:4px;background:var(--border);
+            border-radius:2px;margin:12px auto 0;}
+        .modal-header{padding:16px 20px;border-bottom:1px solid var(--border);
+            display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+        .modal-header-info h3{font-size:1rem;font-weight:800;margin-bottom:3px;}
+        .modal-header-info span{font-size:.75rem;color:var(--text2);}
+        .btn-close-m{background:var(--bg2);border:none;color:var(--text);
+            width:34px;height:34px;border-radius:50%;display:flex;align-items:center;
+            justify-content:center;cursor:pointer;flex-shrink:0;}
+
+        /* Añadir manual */
+        #add-section{padding:16px 20px;border-bottom:1px solid var(--border);}
+        .add-sec-title{font-size:.75rem;font-weight:800;text-transform:uppercase;
+            letter-spacing:.5px;color:var(--text2);margin-bottom:10px;}
+        .manual-field{display:flex;align-items:center;gap:10px;background:var(--bg2);
+            border-radius:12px;padding:10px 14px;margin-bottom:8px;}
+        .manual-field .material-symbols-outlined{font-size:18px;color:var(--text2);flex-shrink:0;}
+        .manual-input{flex:1;border:none;background:transparent;color:var(--text);
+            font-family:inherit;font-size:.9rem;outline:none;}
+        .btn-add-manual{width:100%;padding:12px;border-radius:12px;border:none;
+            background:var(--accent);color:white;font-weight:800;font-family:inherit;
+            font-size:.88rem;cursor:pointer;display:flex;align-items:center;
+            justify-content:center;gap:7px;transition:transform .15s;}
+        .btn-add-manual:active{transform:scale(.97);}
+
+        /* Lista participantes */
+        .p-list-wrap{padding:12px 20px 30px;}
+        .p-list-label{font-size:.72rem;font-weight:800;text-transform:uppercase;
+            letter-spacing:.5px;color:var(--text2);margin-bottom:10px;}
+        .p-row{display:flex;align-items:center;gap:12px;padding:10px 0;
+            border-bottom:1px solid var(--border);}
+        .p-row:last-child{border-bottom:none;}
+        .p-ava{width:36px;height:36px;border-radius:50%;flex-shrink:0;
+            background:linear-gradient(135deg,var(--accent),var(--gold));
+            display:flex;align-items:center;justify-content:center;
+            color:white;font-weight:800;font-size:.9rem;}
+        .p-info{flex:1;min-width:0;}
+        .p-name{font-size:.88rem;font-weight:800;}
+        .p-mems{font-size:.72rem;color:var(--text2);margin-top:2px;}
+        .p-badge{font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:10px;margin-top:4px;display:inline-block;}
+        .pb-manual{background:#fef9c3;color:#854d0e;}
+        .pb-app   {background:#dbeafe;color:#1d4ed8;}
+        .btn-del-p{background:#fee2e2;color:#dc2626;border:none;width:30px;height:30px;
+            border-radius:8px;display:flex;align-items:center;justify-content:center;
+            cursor:pointer;flex-shrink:0;transition:transform .15s;}
+        .btn-del-p:active{transform:scale(.88);}
+        .btn-del-p .material-symbols-outlined{font-size:16px;}
+        .empty-p{text-align:center;padding:24px;color:var(--text2);font-size:.85rem;}
+        .libre-notice{text-align:center;padding:20px;color:var(--text2);
+            background:var(--bg2);border-radius:12px;font-size:.85rem;margin:12px 0;}
+
+        /* ── TOAST ──────────────────────────────────────────────────── */
+        #toast{position:fixed;bottom:88px;left:50%;
+            transform:translateX(-50%) translateY(14px);background:#1a1208;
+            color:white;padding:10px 22px;border-radius:30px;font-size:.82rem;
+            font-weight:700;opacity:0;transition:all .26s;z-index:9999;
+            pointer-events:none;white-space:nowrap;}
+        #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+        /* ── BOTTOM NAV ─────────────────────────────────────────────── */
+        .bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:var(--card);
+            border-top:1px solid var(--border);display:flex;justify-content:space-around;
+            padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:1000;
+            backdrop-filter:blur(12px);}
+        .nav-item{border:none;background:transparent;color:var(--text2);
+            display:flex;flex-direction:column;align-items:center;font-size:.68rem;
+            cursor:pointer;gap:3px;flex:1;text-decoration:none;
+            font-family:inherit;transition:color .15s;}
+        .nav-item.active{color:var(--accent);font-weight:800;}
+        .nav-item .material-symbols-outlined{font-size:24px;}
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🛠️ Gestión</h1>
-        <div class="card">
-            <h2 id="form-title">Crear Actividad</h2>
-            <div class="form-group"><label>Título</label><input type="text" id="act-title"></div>
-            <div class="form-group"><label>Fecha</label><input type="datetime-local" id="act-date"></div>
-            <div class="form-group"><label>Lugar</label><input type="text" id="act-place"></div>
-            <div class="form-group"><label>Descripción / Normas</label><textarea id="act-desc"></textarea></div>
-            
-            <div class="form-group">
-                <label>Imagen (Pegar enlace URL)</label>
-                <input type="text" id="act-image" placeholder="https://..." oninput="previewImage()">
-                <img id="img-preview" class="img-preview">
-            </div>
 
-            <div class="form-group">
-                <label>Tipo</label>
-                <select id="act-genre">
-                    <option value="concurso">🏆 Concurso</option>
-                    <option value="deporte">⚽ Deporte</option>
-                    <option value="comida">🥘 Comida</option>
-                    <option value="fiesta">🎉 Fiesta</option>
-                    <option value="carrera">🏃 Carrera</option>
-                    <option value="torneo">🎾 Torneo</option>
-                    <option value="otro">🎲 Otro</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Público</label>
-                <select id="act-audience">
-                    <option value="todos">Para Todos</option>
-                    <option value="infantil">👶 Infantil</option>
-                    <option value="adultos">🔞 Adultos</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Modalidad</label>
-                <select id="act-modality" onchange="checkModality()">
-                    <option value="individual">Individual</option>
-                    <option value="parejas">Parejas</option>
-                    <option value="equipos">Equipos</option>
-                    <option value="sin_inscripcion">🔔 Entrada Libre (Misas, Desfiles...)</option>
-                </select>
-            </div>
-            <div class="form-group" id="size-group" style="display:none;">
-                <label>Miembros</label><input type="number" id="act-size" value="5">
-            </div>
-            <button id="btn-submit" class="btn-create" onclick="guardarActividad()">Publicar</button>
-            <button id="btn-cancel" class="btn-create btn-cancel" onclick="cancelarEdicion()">Cancelar</button>
-        </div>
-        <div class="card">
-            <h2>Activas</h2>
-            <div id="admin-list">Cargando...</div>
-        </div>
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <a href="panel.html" class="btn-ico" aria-label="Volver">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </a>
+        <span class="topbar-title">🛠️ Gestión de eventos</span>
+        <button class="btn-ico" aria-label="Tema"
+            onclick="document.documentElement.classList.toggle('dark-mode');localStorage.setItem('theme',document.documentElement.classList.contains('dark-mode')?'dark':'light');">
+            <span class="material-symbols-outlined" style="font-size:20px">dark_mode</span>
+        </button>
     </div>
 
-    <div id="modal-participantes" class="modal-overlay">
-        <div class="modal">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 id="p-title" style="margin:0;">Inscritos</h3>
-                <button onclick="cerrarParticipantes()" style="background:transparent; border:none; font-size:1.5rem; cursor:pointer;">×</button>
-            </div>
-            
-            <div class="add-section">
-                <strong style="display:block; margin-bottom:10px; font-size:0.9rem;">Añadir Manualmente:</strong>
-                <div id="manual-inputs" class="manual-inputs-grid">
+    <div class="wrap">
+
+        <!-- ══ FORMULARIO ════════════════════════════════════════════ -->
+        <div id="form-section">
+            <div class="form-card">
+
+                <div class="form-card-header">
+                    <div class="form-card-title" id="form-title">✨ Crear nuevo evento</div>
+                </div>
+
+                <div class="form-body">
+
+                    <!-- PREVIEW en tiempo real -->
+                    <div class="preview-card">
+                        <div class="preview-emoji" id="rv-emoji">🎲</div>
+                        <div class="preview-body">
+                            <div class="preview-title" id="rv-title">Escribe el título abajo…</div>
+                            <div class="preview-meta">
+                                <span id="rv-fecha">Fecha sin definir</span>
+                                <span id="rv-lugar">Sin lugar</span>
+                                <span id="rv-mod">Individual</span>
+                            </div>
+                        </div>
                     </div>
-                <button class="btn-create" style="margin:0; width:100%; padding:10px; font-size:0.9rem;" onclick="agregarParticipanteManual()">+ Añadir</button>
+
+                    <!-- 1. BÁSICOS -->
+                    <div class="fg">
+                        <label>Título del evento <span class="req">*</span></label>
+                        <input type="text" id="act-title" placeholder="Ej: Torneo de Pádel Mixto"
+                               oninput="actualizarResumen()">
+                    </div>
+                    <div class="fg">
+                        <label>Fecha y hora <span class="req">*</span></label>
+                        <input type="datetime-local" id="act-date" onchange="actualizarResumen()">
+                    </div>
+                    <div class="fg">
+                        <label>Lugar</label>
+                        <input type="text" id="act-place" placeholder="Ej: Pistas de tenis del Pantano"
+                               oninput="actualizarResumen()">
+                    </div>
+                    <div class="fg">
+                        <label>Descripción / Normas</label>
+                        <textarea id="act-desc" placeholder="Explica las normas, quién puede participar, premios…"></textarea>
+                    </div>
+
+                    <!-- 2. TIPO -->
+                    <div class="fg">
+                        <label>Tipo de evento</label>
+                        <!-- Select oculto para compatibilidad con lógica original -->
+                        <select id="act-genre" style="display:none" onchange="actualizarResumen()">
+                            <option value="concurso">Concurso</option>
+                            <option value="deporte">Deporte</option>
+                            <option value="comida">Comida</option>
+                            <option value="fiesta">Fiesta</option>
+                            <option value="carrera">Carrera</option>
+                            <option value="torneo">Torneo</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                        <!-- Botones visuales que sincronizan el select -->
+                        <div class="select-grid" id="genre-btns">
+                            <button type="button" class="genre-btn selected" data-val="concurso" onclick="selectGenre(this)"><span class="g-emoji">🏆</span>Concurso</button>
+                            <button type="button" class="genre-btn" data-val="deporte"  onclick="selectGenre(this)"><span class="g-emoji">⚽</span>Deporte</button>
+                            <button type="button" class="genre-btn" data-val="comida"   onclick="selectGenre(this)"><span class="g-emoji">🥘</span>Comida</button>
+                            <button type="button" class="genre-btn" data-val="fiesta"   onclick="selectGenre(this)"><span class="g-emoji">🎉</span>Fiesta</button>
+                            <button type="button" class="genre-btn" data-val="carrera"  onclick="selectGenre(this)"><span class="g-emoji">🏃</span>Carrera</button>
+                            <button type="button" class="genre-btn" data-val="torneo"   onclick="selectGenre(this)"><span class="g-emoji">🎾</span>Torneo</button>
+                            <button type="button" class="genre-btn" data-val="otro"     onclick="selectGenre(this)"><span class="g-emoji">🎲</span>Otro</button>
+                        </div>
+                    </div>
+
+                    <!-- 3. PÚBLICO -->
+                    <div class="fg">
+                        <label>¿Para quién?</label>
+                        <select id="act-audience">
+                            <option value="todos">👨‍👩‍👧 Para todos</option>
+                            <option value="infantil">👶 Solo infantil</option>
+                            <option value="adultos">🔞 Solo adultos</option>
+                        </select>
+                    </div>
+
+                    <!-- 4. MODALIDAD -->
+                    <div class="fg">
+                        <label>¿Cómo se apunta la gente?</label>
+                        <!-- Select oculto -->
+                        <select id="act-modality" style="display:none" onchange="checkModality()">
+                            <option value="individual">Individual</option>
+                            <option value="parejas">Parejas</option>
+                            <option value="equipos">Equipos</option>
+                            <option value="sin_inscripcion">Entrada libre</option>
+                        </select>
+                        <!-- Botones visuales -->
+                        <div class="mod-grid" id="mod-btns">
+                            <button type="button" class="mod-btn selected" data-val="individual" onclick="selectMod(this)">
+                                <span class="mod-ico">👤</span>
+                                <div class="mod-txt"><strong>Individual</strong><span>Cada persona se apunta por su cuenta</span></div>
+                            </button>
+                            <button type="button" class="mod-btn" data-val="parejas" onclick="selectMod(this)">
+                                <span class="mod-ico">👥</span>
+                                <div class="mod-txt"><strong>Parejas</strong><span>Se apuntan de dos en dos</span></div>
+                            </button>
+                            <button type="button" class="mod-btn" data-val="equipos" onclick="selectMod(this)">
+                                <span class="mod-ico">🏅</span>
+                                <div class="mod-txt"><strong>Equipos</strong><span>El capitán inscribe a todo el equipo</span></div>
+                            </button>
+                            <button type="button" class="mod-btn" data-val="sin_inscripcion" onclick="selectMod(this)">
+                                <span class="mod-ico">🔓</span>
+                                <div class="mod-txt"><strong>Entrada libre</strong><span>Misas, desfiles, eventos abiertos…</span></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tamaño equipo -->
+                    <div class="fg" id="size-group" style="display:none;">
+                        <label>¿Cuántos miembros tiene cada equipo?</label>
+                        <input type="number" id="act-size" value="5" min="2" max="20">
+                    </div>
+
+                    <!-- 5. IMAGEN -->
+                    <div class="fg">
+                        <label>Imagen del evento (pega un enlace URL)</label>
+                        <div class="img-box">
+                            <div id="img-placeholder">
+                                <span class="material-symbols-outlined">image</span>
+                                <span>Pega el enlace abajo para ver la imagen</span>
+                            </div>
+                            <img id="img-preview">
+                        </div>
+                        <input type="text" id="act-image" class="img-url-input"
+                               placeholder="https://i.postimg.cc/…" oninput="previewImage()">
+                    </div>
+
+                </div><!-- /form-body -->
+
+                <!-- Botones -->
+                <div class="form-btns">
+                    <button id="btn-cancel" class="btn-cancel-form" onclick="cancelarEdicion()">
+                        <span class="material-symbols-outlined" style="font-size:18px">close</span>
+                        Cancelar
+                    </button>
+                    <button id="btn-submit" class="btn-submit" onclick="guardarActividad()">
+                        <span class="material-symbols-outlined" style="font-size:20px">publish</span>
+                        Publicar evento
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══ LISTA EVENTOS ══════════════════════════════════════════ -->
+        <div id="lista-section">
+            <div class="sec-header">
+                <div class="sec-title">Eventos publicados</div>
+            </div>
+            <div id="admin-list">
+                <div class="empty-list">
+                    <span class="material-symbols-outlined">hourglass_empty</span>
+                    Cargando…
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /wrap -->
+
+    <!-- ══ MODAL PARTICIPANTES ════════════════════════════════════════ -->
+    <div id="modal-participantes" class="modal-overlay"
+         onclick="if(event.target===this) cerrarParticipantes()">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <h3 id="p-title">Inscritos</h3>
+                    <span id="p-mod"></span>
+                </div>
+                <button class="btn-close-m" onclick="cerrarParticipantes()" aria-label="Cerrar">
+                    <span class="material-symbols-outlined" style="font-size:18px">close</span>
+                </button>
             </div>
 
-            <div id="p-list">Cargando...</div>
+            <!-- Añadir manual -->
+            <div id="add-section">
+                <div style="padding:14px 20px 0;">
+                    <div class="add-sec-title">➕ Añadir manualmente</div>
+                    <div id="manual-inputs"></div>
+                    <button class="btn-add-manual" onclick="agregarParticipanteManual()">
+                        <span class="material-symbols-outlined" style="font-size:18px">person_add</span>
+                        Añadir participante
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista -->
+            <div class="p-list-wrap">
+                <div class="p-list-label">Lista de inscritos</div>
+                <div id="p-list"></div>
+            </div>
         </div>
     </div>
+
+    <div id="toast"></div>
 
     <nav class="bottom-nav">
-        <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
+        <a href="panel.html"       class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
         <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
-        <a href="admin.html" class="nav-item active"><span class="material-symbols-outlined">settings</span>Gestión</a>
+        <a href="gestion.html"     class="nav-item active"><span class="material-symbols-outlined">settings</span>Gestión</a>
     </nav>
+
+    <script>
+        /* Sincronizar botones visuales con los selects ocultos */
+        window.selectGenre = (btn) => {
+            document.querySelectorAll('#genre-btns .genre-btn').forEach(b=>b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('act-genre').value = btn.dataset.val;
+            window.actualizarResumen();
+        };
+        window.selectMod = (btn) => {
+            document.querySelectorAll('#mod-btns .mod-btn').forEach(b=>b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('act-modality').value = btn.dataset.val;
+            window.checkModality();
+        };
+
+        /* Llamar actualizarResumen al cargar y al escribir */
+        document.addEventListener('DOMContentLoaded', () => {
+            window.actualizarResumen?.();
+            ['act-title','act-date','act-place'].forEach(id => {
+                document.getElementById(id)?.addEventListener('input',  () => window.actualizarResumen());
+                document.getElementById(id)?.addEventListener('change', () => window.actualizarResumen());
+            });
+        });
+
+        /* Al cargar para editar, sincronizar botones visuales */
+        const _origCargar = window.cargarParaEditar;
+        window.cargarParaEditar = (dataStr) => {
+            _origCargar(dataStr);
+            const data = JSON.parse(decodeURIComponent(dataStr));
+            document.querySelectorAll('#genre-btns .genre-btn').forEach(b=>{
+                b.classList.toggle('selected', b.dataset.val===data.genero);
+            });
+            document.querySelectorAll('#mod-btns .mod-btn').forEach(b=>{
+                b.classList.toggle('selected', b.dataset.val===data.modalidad);
+            });
+        };
+    </script>
+
 </body>
 </html>
