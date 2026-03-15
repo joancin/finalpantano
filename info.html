@@ -3,186 +3,648 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Pantano - Info</title>
+    <title>El Pantano · Torrent, Valencia</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ff5722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#e8400c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏡</text></svg>">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 
     <style>
-        :root { --bg: #f4f7f6; --text: #333; --card: white; --accent: #673ab7; --gradient: linear-gradient(135deg, #673ab7, #9c27b0); }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --gradient: linear-gradient(135deg, #4527a0, #7b1fa2); }
+        /* ── VARIABLES ──────────────────────────────────────────────── */
+        :root {
+            --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550;
+            --card:#fff; --border:rgba(0,0,0,0.07);
+            --accent:#e8400c; --gold:#f59e0b; --green:#059669; --blue:#0ea5e9;
+            --shadow:0 4px 20px rgba(0,0,0,0.07);
+            --radius:18px;
+        }
+        html.dark-mode {
+            --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070;
+            --card:#241c14; --border:rgba(255,255,255,0.08);
+            --shadow:0 4px 20px rgba(0,0,0,0.45);
+        }
 
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; padding-bottom: 90px; }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body {
+            font-family:'Bricolage Grotesque',sans-serif;
+            background:var(--bg); color:var(--text);
+            min-height:100vh; overflow-x:hidden; padding-bottom:80px;
+        }
 
-        /* HERO SECTION */
+        /* ── TOPBAR ─────────────────────────────────────────────────── */
+        .topbar {
+            position:sticky; top:0; z-index:100;
+            display:flex; align-items:center; gap:12px;
+            padding:14px 18px;
+            background:var(--bg); border-bottom:1px solid var(--border);
+            backdrop-filter:blur(12px);
+        }
+        .btn-ico {
+            background:var(--card); border:1px solid var(--border);
+            width:40px; height:40px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; color:var(--text); flex-shrink:0;
+            box-shadow:var(--shadow); transition:transform .15s;
+            text-decoration:none;
+        }
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-title{font-size:1.1rem; font-weight:800; flex:1;}
+
+        /* ── HERO ───────────────────────────────────────────────────── */
         .hero {
-            background: var(--gradient);
-            color: white;
-            padding: 50px 20px;
-            text-align: center;
-            border-bottom-left-radius: 40px;
-            border-bottom-right-radius: 40px;
-            box-shadow: 0 10px 30px rgba(103, 58, 183, 0.4);
-            margin-bottom: 40px;
-            position: relative;
-            overflow: hidden;
+            position:relative; overflow:hidden;
+            padding:50px 24px 44px; text-align:center;
         }
-        .hero h1 { margin: 0; font-size: 2.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .hero p { opacity: 0.9; margin-top: 5px; font-weight: 600; font-size: 0.9rem; }
-        
-        /* DECORACIÓN FONDO HERO */
-        .hero::before { content: ''; position: absolute; top: -50px; left: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; }
-        .hero::after { content: ''; position: absolute; bottom: -30px; right: -30px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
-
-        .container { max-width: 700px; margin: 0 auto; padding: 0 20px; }
-
-        /* SECCIÓN FESTEROS */
-        .festeros-section { text-align: center; margin-bottom: 40px; }
-        .festeros-text { font-size: 1rem; line-height: 1.6; color: var(--text); margin-bottom: 20px; opacity: 0.9; }
-        
-        /* GALERÍA DE FOTOS */
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
+        .hero-blob1,.hero-blob2,.hero-blob3 {
+            position:absolute; border-radius:50%; filter:blur(60px);
+            pointer-events:none; opacity:.25;
         }
-        .gallery-img {
-            width: 100%;
-            aspect-ratio: 1/1;
-            object-fit: cover;
-            border-radius: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
-        .gallery-img:hover { transform: scale(1.05); }
+        .hero-blob1{width:350px;height:350px;background:#e8400c;top:-100px;left:-80px; animation:bfloat 9s ease-in-out infinite;}
+        .hero-blob2{width:250px;height:250px;background:#f59e0b;bottom:-60px;right:-60px; animation:bfloat 11s ease-in-out infinite reverse;}
+        .hero-blob3{width:180px;height:180px;background:#0ea5e9;top:30%;left:55%; animation:bfloat 7s ease-in-out infinite 2s;}
+        @keyframes bfloat{0%,100%{transform:translate(0,0)}50%{transform:translate(15px,-20px)}}
 
-        /* TARJETA HISTORIA */
-        .story-card {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            border-left: 6px solid #ff9800;
-        }
-        .story-title { font-size: 1.3rem; font-weight: 800; color: #ff9800; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-        .story-text { line-height: 1.7; font-size: 0.95rem; opacity: 0.8; }
+        .hero-content{position:relative;z-index:1;}
 
-        /* BOTONES UBICACIÓN */
-        .location-grid { display: grid; gap: 15px; margin-top: 10px; }
-        
-        .location-btn {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 18px;
-            display: flex; align-items: center; justify-content: space-between;
-            text-decoration: none; color: var(--text);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid rgba(0,0,0,0.05);
+        .hero-tag {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(232,64,12,.1); color:var(--accent);
+            border:1px solid rgba(232,64,12,.2);
+            padding:5px 14px; border-radius:30px;
+            font-size:.75rem; font-weight:800; text-transform:uppercase;
+            letter-spacing:.5px; margin-bottom:18px;
         }
-        .location-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        
-        .loc-icon { 
-            background: rgba(103, 58, 183, 0.1); color: var(--accent); 
-            width: 55px; height: 55px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            margin-right: 15px; font-size: 26px;
+        .hero-tag-dot{
+            width:6px;height:6px;border-radius:50%;background:var(--accent);
+            animation:pdot 1.5s ease-in-out infinite;
         }
-        .loc-info h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
-        .loc-info p { margin: 0; font-size: 0.85rem; opacity: 0.6; }
+        @keyframes pdot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.8);opacity:.4}}
 
-        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; text-decoration: none; transition: transform 0.2s; }
-        .btn-back-float:active { transform: scale(0.9); }
+        .hero h1 {
+            font-size:clamp(3rem,14vw,5.5rem); font-weight:800;
+            line-height:.92; letter-spacing:-2px; margin-bottom:10px;
+        }
+        .h1-plain{display:block; color:var(--text);}
+        .h1-accent{
+            display:block;
+            background:linear-gradient(135deg,var(--accent),var(--gold));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            background-clip:text;
+        }
 
-        .divider { height: 1px; background: rgba(0,0,0,0.1); margin: 40px 0; }
-        
-        .section-header { font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: gray; margin-bottom: 15px; text-align: center; }
+        .hero-sub {
+            font-family:'Lora',serif; font-style:italic;
+            font-size:1rem; color:var(--text2); margin-bottom:24px;
+        }
+
+        /* Stat pills */
+        .hero-stats {
+            display:flex; flex-wrap:wrap; justify-content:center; gap:8px;
+        }
+        .hstat {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:30px; padding:8px 16px;
+            display:flex; align-items:center; gap:6px;
+            font-size:.8rem; font-weight:700; box-shadow:var(--shadow);
+        }
+        .hstat .material-symbols-outlined{font-size:16px; color:var(--accent);}
+
+        /* ── GALERÍA ────────────────────────────────────────────────── */
+        .section{max-width:680px; margin:0 auto; padding:0 18px 32px;}
+        .sec-label {
+            display:flex; align-items:center; gap:10px;
+            font-size:.72rem; font-weight:800; text-transform:uppercase;
+            letter-spacing:1.5px; color:var(--text2); margin-bottom:16px;
+        }
+        .sec-label::after{content:''; flex:1; height:1px; background:var(--border);}
+
+        .gallery-grid {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            grid-template-rows:auto auto;
+            gap:10px;
+        }
+        .gimg {
+            border-radius:14px; overflow:hidden;
+            border:2px solid var(--border); box-shadow:var(--shadow);
+            cursor:pointer; position:relative;
+            animation:fadeUp .4s ease backwards;
+        }
+        .gimg img{
+            width:100%; height:100%; object-fit:cover; display:block;
+            transition:transform .3s;
+        }
+        .gimg:hover img{transform:scale(1.05);}
+        .gimg:hover{border-color:var(--gold);}
+
+        /* Primera foto más grande (ocupa 2 filas) */
+        .gimg:first-child{
+            grid-row:span 2;
+            aspect-ratio:3/4;
+        }
+        .gimg:not(:first-child){
+            aspect-ratio:4/3;
+        }
+
+        /* Botón ver todo */
+        .btn-gallery-all {
+            width:100%; margin-top:10px; padding:12px;
+            background:transparent; border:2px dashed var(--border);
+            border-radius:14px; color:var(--text2); font-family:inherit;
+            font-size:.82rem; font-weight:700; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; gap:7px;
+            transition:all .2s;
+        }
+        .btn-gallery-all:hover{border-color:var(--accent);color:var(--accent);}
+
+        /* ── TARJETA ESPIRITU ───────────────────────────────────────── */
+        .spirit-card {
+            background:linear-gradient(135deg,var(--accent) 0%,var(--gold) 100%);
+            border-radius:var(--radius); padding:26px 22px; color:white;
+            box-shadow:0 8px 30px rgba(232,64,12,.3); position:relative; overflow:hidden;
+            margin-bottom:32px;
+        }
+        .spirit-card::before {
+            content:'';
+            position:absolute; inset:0;
+            background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+        }
+        .spirit-card h2{
+            font-size:1.3rem; font-weight:800; margin-bottom:10px;
+            position:relative;
+        }
+        .spirit-card p{
+            font-size:.88rem; line-height:1.7; opacity:.92; position:relative;
+        }
+
+        /* ── TRADICION CARD ─────────────────────────────────────────── */
+        .info-card {
+            background:var(--card); border-radius:var(--radius);
+            border:1px solid var(--border); padding:22px;
+            box-shadow:var(--shadow); margin-bottom:12px;
+            animation:fadeUp .4s ease backwards;
+        }
+        @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+        .ic-header{
+            display:flex; align-items:center; gap:12px; margin-bottom:12px;
+        }
+        .ic-icon {
+            width:44px; height:44px; border-radius:12px; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+            color:white; font-size:20px;
+        }
+        .ic-icon.orange{background:linear-gradient(135deg,#f59e0b,#e8400c);}
+        .ic-icon.blue  {background:linear-gradient(135deg,#0ea5e9,#6366f1);}
+        .ic-icon.green {background:linear-gradient(135deg,#059669,#34d399);}
+        .ic-icon.red   {background:linear-gradient(135deg,#e8400c,#ec4899);}
+        .ic-icon.purple{background:linear-gradient(135deg,#7c3aed,#0ea5e9);}
+
+        .ic-title{font-size:1rem; font-weight:800;}
+        .ic-sub  {font-size:.72rem; color:var(--text2); margin-top:1px;}
+        .ic-body {font-size:.85rem; line-height:1.7; color:var(--text2);}
+        .ic-body strong{color:var(--text);}
+
+        /* ── MAPA ───────────────────────────────────────────────────── */
+        .map-wrap {
+            border-radius:var(--radius); overflow:hidden;
+            border:2px solid var(--border); box-shadow:var(--shadow);
+            margin-bottom:14px; position:relative;
+        }
+        .map-wrap iframe{
+            width:100%; height:240px; display:block; border:none;
+            filter:saturate(.9);
+        }
+        html.dark-mode .map-wrap iframe{filter:saturate(.6) brightness(.8) invert(.9) hue-rotate(180deg);}
+
+        /* ── BOTONES UBICACIÓN ──────────────────────────────────────── */
+        .loc-btn {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:var(--radius); padding:16px 18px;
+            display:flex; align-items:center; gap:14px;
+            text-decoration:none; color:var(--text);
+            box-shadow:var(--shadow); margin-bottom:10px;
+            transition:transform .2s, box-shadow .2s, border-color .2s;
+        }
+        .loc-btn:hover{transform:translateY(-3px); box-shadow:0 10px 28px rgba(0,0,0,.1); border-color:var(--accent);}
+        .loc-btn:active{transform:scale(.97);}
+        .loc-btn-ico{
+            width:46px; height:46px; border-radius:12px; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center; color:white;
+        }
+        .loc-btn-txt{flex:1;}
+        .loc-btn-txt h3{font-size:.95rem; font-weight:800; margin-bottom:2px;}
+        .loc-btn-txt span{font-size:.75rem; color:var(--text2);}
+        .loc-btn .material-symbols-outlined.arr{font-size:18px; color:var(--text2); opacity:.5;}
+
+        /* ── DATOS RÁPIDOS ──────────────────────────────────────────── */
+        .quick-grid{
+            display:grid; grid-template-columns:1fr 1fr; gap:10px;
+        }
+        .quick-item {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:14px; padding:16px 14px; text-align:center;
+            box-shadow:var(--shadow); animation:fadeUp .4s ease backwards;
+        }
+        .qi-ico{font-size:1.6rem; display:block; margin-bottom:6px;}
+        .qi-val{font-size:1rem; font-weight:800; color:var(--text); display:block; line-height:1.2;}
+        .qi-lbl{font-size:.68rem; font-weight:700; text-transform:uppercase;
+                letter-spacing:.5px; color:var(--text2); margin-top:3px; display:block;}
+
+        /* ── CÓMO LLEGAR ────────────────────────────────────────────── */
+        .transport-list{display:flex; flex-direction:column; gap:10px;}
+        .trans-item{
+            background:var(--card); border:1px solid var(--border);
+            border-radius:14px; padding:14px 16px;
+            display:flex; align-items:center; gap:12px;
+            box-shadow:var(--shadow);
+        }
+        .trans-ico{
+            width:40px; height:40px; border-radius:10px; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center; color:white;
+        }
+        .trans-body h4{font-size:.88rem; font-weight:800; margin-bottom:2px;}
+        .trans-body p{font-size:.75rem; color:var(--text2); line-height:1.5;}
+        .trans-body a{color:var(--blue); text-decoration:none; font-weight:700;}
+        .trans-body a:hover{text-decoration:underline;}
+
+        /* ── LIGHTBOX ───────────────────────────────────────────────── */
+        #lb {
+            position:fixed; inset:0; z-index:9000;
+            background:rgba(0,0,0,.93); backdrop-filter:blur(12px);
+            display:none; align-items:center; justify-content:center; padding:20px;
+        }
+        #lb.open{display:flex; animation:lbIn .2s ease;}
+        @keyframes lbIn{from{opacity:0}to{opacity:1}}
+        #lb img{
+            max-width:min(520px,92vw); max-height:85vh;
+            border-radius:16px; object-fit:contain;
+            box-shadow:0 30px 80px rgba(0,0,0,.7);
+            animation:lbZoom .22s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes lbZoom{from{transform:scale(.88)}to{transform:scale(1)}}
+        .lb-close{
+            position:fixed; top:18px; right:18px;
+            background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+            color:white; width:42px; height:42px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; backdrop-filter:blur(6px); font-size:1.2rem;
+            transition:background .2s;
+        }
+        .lb-close:hover{background:rgba(255,255,255,.22);}
+        .lb-nav{
+            position:fixed; top:50%; transform:translateY(-50%);
+            background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+            color:white; width:44px; height:44px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; backdrop-filter:blur(6px); transition:background .2s;
+        }
+        .lb-nav:hover{background:rgba(255,255,255,.22);}
+        .lb-prev{left:12px;} .lb-next{right:12px;}
+        .lb-cnt{
+            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+            color:rgba(255,255,255,.55); font-size:.8rem; font-weight:700; letter-spacing:1px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="hero">
-        <span class="material-symbols-outlined" style="font-size: 56px; margin-bottom: 10px;">landscape</span>
-        <h1>El Pantano</h1>
-        <p>Torrent, Valencia</p>
-    </div>
-
-    <div class="container">
-        
-        <div class="festeros-section">
-            <h2 style="font-size: 1.8rem; margin-bottom: 15px;">¡Hacemos Historia! 🎉</h2>
-            <div class="festeros-text">
-                Somos un grupo grande de vecinos, amigos y festeros unidos por una única pasión: 
-                <strong>hacer de estas fiestas algo inolvidable</strong>. 
-                <br><br>
-                Con ilusión, esfuerzo y muchas ganas de pasarlo bien, trabajamos todo el año para llenar nuestras calles de alegría, música y tradición. ¡Porque El Pantano sois vosotros!
-            </div>
-
-            <div class="gallery">
-                <img src="https://i.postimg.cc/CMPWVhp0/d.jpg" class="gallery-img" alt="Festeros">
-                <img src="https://i.postimg.cc/BZYdGSfG/n.jpg" class="gallery-img" alt="Festeros">
-                <img src="https://i.postimg.cc/05WLqk1s/r.jpg" class="gallery-img" alt="Festeros">
-                <img src="https://i.postimg.cc/VsG3cfP1/Whats-App-Image-2026-02-01-at-12-23-56.jpg" class="gallery-img" alt="Festeros">
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="section-header">Tradición y Cultura</div>
-
-        <div class="story-card">
-            <div class="story-title">
-                <span class="material-symbols-outlined">church</span>
-                La Asunción
-            </div>
-            <div class="story-text">
-                Nuestras fiestas culminan con honor y devoción en el día de la <strong>Asunción de la Virgen María</strong> (15 de Agosto). <br><br>
-                Es el momento más emotivo del año, donde la tradición se une con la fiesta para despedir el verano por todo lo alto.
-            </div>
-        </div>
-
-        <div class="section-header">Ubicaciones Clave</div>
-
-        <div class="location-grid">
-            <a href="https://maps.app.goo.gl/uSR6EbwwFWMG4Xj1A" target="_blank" class="location-btn">
-                <div style="display:flex; align-items:center;">
-                    <div class="loc-icon"><span class="material-symbols-outlined">park</span></div>
-                    <div class="loc-info">
-                        <h3>Área Recreativa</h3>
-                        <p>Zona de juegos y reuniones</p>
-                    </div>
-                </div>
-                <span class="material-symbols-outlined" style="opacity:0.5;">open_in_new</span>
-            </a>
-
-            <a href="https://maps.app.goo.gl/fRJUXnfBRARdaMte8" target="_blank" class="location-btn">
-                <div style="display:flex; align-items:center;">
-                    <div class="loc-icon"><span class="material-symbols-outlined">location_on</span></div>
-                    <div class="loc-info">
-                        <h3>La Ermita</h3>
-                        <p>Corazón de la urbanización</p>
-                    </div>
-                </div>
-                <span class="material-symbols-outlined" style="opacity:0.5;">open_in_new</span>
-            </a>
-        </div>
-
-        <div style="margin-top: 40px; text-align: center; opacity: 0.5; font-size: 0.8rem;">
-            <p>Urbanización El Pantano © 2026</p>
-        </div>
-    </div>
-
-    <a href="index.html" class="btn-back-float">
-        <span class="material-symbols-outlined">home</span>
+<!-- TOPBAR -->
+<div class="topbar">
+    <a href="index.html" class="btn-ico" aria-label="Inicio">
+        <span class="material-symbols-outlined" style="font-size:20px">home</span>
     </a>
+    <span class="topbar-title">El Pantano</span>
+    <button class="btn-ico"
+        onclick="document.documentElement.classList.toggle('dark-mode');localStorage.setItem('theme',document.documentElement.classList.contains('dark-mode')?'dark':'light');"
+        aria-label="Cambiar tema">
+        <span class="material-symbols-outlined" style="font-size:20px">dark_mode</span>
+    </button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-blob1"></div>
+    <div class="hero-blob2"></div>
+    <div class="hero-blob3"></div>
+    <div class="hero-content">
+        <div class="hero-tag">
+            <span class="hero-tag-dot"></span>
+            Torrent · Valencia
+        </div>
+        <h1>
+            <span class="h1-plain">Urb. El</span>
+            <span class="h1-accent">Pantano</span>
+        </h1>
+        <p class="hero-sub">El barrio que lo da todo</p>
+        <div class="hero-stats">
+            <div class="hstat">
+                <span class="material-symbols-outlined">calendar_month</span>
+                Fiestas en Agosto
+            </div>
+            <div class="hstat">
+                <span class="material-symbols-outlined">church</span>
+                La Asunción · 15 Ago
+            </div>
+            <div class="hstat">
+                <span class="material-symbols-outlined">location_on</span>
+                Zona Mas del Jutge
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GALERÍA -->
+<div class="section">
+    <div class="sec-label">Fotos del barrio</div>
+
+    <div class="gallery-grid" id="gallery">
+        <!-- mismas 4 imágenes del original -->
+        <div class="gimg" style="animation-delay:.05s" onclick="openLb(0)">
+            <img src="https://i.postimg.cc/CMPWVhp0/d.jpg" alt="Festeros El Pantano" loading="lazy">
+        </div>
+        <div class="gimg" style="animation-delay:.1s" onclick="openLb(1)">
+            <img src="https://i.postimg.cc/BZYdGSfG/n.jpg" alt="Fiesta El Pantano" loading="lazy">
+        </div>
+        <div class="gimg" style="animation-delay:.15s" onclick="openLb(2)">
+            <img src="https://i.postimg.cc/05WLqk1s/r.jpg" alt="El Pantano" loading="lazy">
+        </div>
+        <div class="gimg" style="animation-delay:.2s" onclick="openLb(3)">
+            <img src="https://i.postimg.cc/VsG3cfP1/Whats-App-Image-2026-02-01-at-12-23-56.jpg" alt="Fiestas Pantano 2026" loading="lazy">
+        </div>
+    </div>
+
+    <a href="https://eu.zonerama.com/MEDRAN/1490386" target="_blank" rel="noopener" class="btn-gallery-all">
+        <span class="material-symbols-outlined" style="font-size:18px">photo_library</span>
+        Ver galería completa · Zonerama
+    </a>
+</div>
+
+<!-- ESPÍRITU DEL BARRIO -->
+<div class="section">
+    <div class="spirit-card">
+        <h2>🎉 ¡Hacemos Historia!</h2>
+        <p>
+            Somos un grupo grande de vecinos, amigos y festeros unidos por una única pasión:
+            <strong>hacer de estas fiestas algo inolvidable</strong>.
+            Con ilusión, esfuerzo y muchas ganas de pasarlo bien, trabajamos todo el año para llenar nuestras calles de alegría, música y tradición.
+            <br><br>
+            ¡Porque El Pantano sois vosotros!
+        </p>
+    </div>
+</div>
+
+<!-- TRADICIÓN -->
+<div class="section">
+    <div class="sec-label">Tradición y cultura</div>
+
+    <div class="info-card" style="animation-delay:.05s; border-left:4px solid #f59e0b;">
+        <div class="ic-header">
+            <div class="ic-icon orange">
+                <span class="material-symbols-outlined">church</span>
+            </div>
+            <div>
+                <div class="ic-title">La Asunción de la Virgen María</div>
+                <div class="ic-sub">15 de Agosto · Día grande</div>
+            </div>
+        </div>
+        <div class="ic-body">
+            Nuestras fiestas culminan con honor y devoción en el día de la
+            <strong>Asunción de la Virgen María</strong>.
+            Es el momento más emotivo del año, donde la tradición se une con la fiesta
+            para despedir el verano por todo lo alto.
+        </div>
+    </div>
+
+    <div class="info-card" style="animation-delay:.1s; border-left:4px solid #0ea5e9;">
+        <div class="ic-header">
+            <div class="ic-icon blue">
+                <span class="material-symbols-outlined">groups</span>
+            </div>
+            <div>
+                <div class="ic-title">El equipo festero</div>
+                <div class="ic-sub">21 festeros + 3 colaboradores</div>
+            </div>
+        </div>
+        <div class="ic-body">
+            Cada año una nueva comisión de festeros se encarga de organizar todos los actos.
+            Son vecinos voluntarios que dedican su tiempo y energía para que las fiestas
+            sean <strong>mejores cada año</strong>.
+        </div>
+    </div>
+
+    <div class="info-card" style="animation-delay:.15s; border-left:4px solid #059669;">
+        <div class="ic-header">
+            <div class="ic-icon green">
+                <span class="material-symbols-outlined">confirmation_number</span>
+            </div>
+            <div>
+                <div class="ic-title">La Rifa de Fiestas</div>
+                <div class="ic-sub">Sorteo oficial entre vecinos</div>
+            </div>
+        </div>
+        <div class="ic-body">
+            Una de las tradiciones más esperadas. Los números se reparten entre los vecinos
+            y el sorteo se celebra durante las fiestas. El historial de rifas anteriores
+            está disponible en la <strong>sección Rifa</strong> de la app.
+        </div>
+    </div>
+
+    <div class="info-card" style="animation-delay:.2s; border-left:4px solid #e8400c;">
+        <div class="ic-header">
+            <div class="ic-icon red">
+                <span class="material-symbols-outlined">sports_bar</span>
+            </div>
+            <div>
+                <div class="ic-title">Mig Any · Fiesta Vaquera</div>
+                <div class="ic-sub">Jueves Santo · El Rancho · 5€</div>
+            </div>
+        </div>
+        <div class="ic-body">
+            A mitad de camino entre una fiesta y la siguiente, los festeros organizan la
+            <strong>Fiesta Vaquera</strong> en El Rancho el Jueves Santo. Incluye cena y
+            fiesta. ¡El sombrero y las botas son obligatorios!
+        </div>
+    </div>
+</div>
+
+<!-- DATOS RÁPIDOS -->
+<div class="section">
+    <div class="sec-label">El barrio en números</div>
+    <div class="quick-grid">
+        <div class="quick-item" style="animation-delay:.05s">
+            <span class="qi-ico">📅</span>
+            <span class="qi-val">Agosto</span>
+            <span class="qi-lbl">Mes de fiestas</span>
+        </div>
+        <div class="quick-item" style="animation-delay:.1s">
+            <span class="qi-ico">⛪</span>
+            <span class="qi-val">15 Ago</span>
+            <span class="qi-lbl">La Asunción</span>
+        </div>
+        <div class="quick-item" style="animation-delay:.15s">
+            <span class="qi-ico">🎟️</span>
+            <span class="qi-val">14+</span>
+            <span class="qi-lbl">Rifas históricas</span>
+        </div>
+        <div class="quick-item" style="animation-delay:.2s">
+            <span class="qi-ico">🤠</span>
+            <span class="qi-val">Jue. Santo</span>
+            <span class="qi-lbl">Mig Any</span>
+        </div>
+    </div>
+</div>
+
+<!-- MAPA + UBICACIONES -->
+<div class="section">
+    <div class="sec-label">Dónde estamos</div>
+
+    <!-- Mapa embebido centrado en la urbanización -->
+    <div class="map-wrap">
+        <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1559.7!2d-0.4985!3d39.4235!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd604f3b2a2e3c1b%3A0x123!2sUrbanizaci%C3%B3n+El+Pantano%2C+Torrent!5e0!3m2!1ses!2ses!4v1"
+            allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+            title="Mapa Urbanización El Pantano, Torrent">
+        </iframe>
+    </div>
+
+    <!-- Mismos links del original -->
+    <a href="https://maps.app.goo.gl/uSR6EbwwFWMG4Xj1A" target="_blank" rel="noopener" class="loc-btn">
+        <div class="loc-btn-ico" style="background:linear-gradient(135deg,#059669,#34d399);">
+            <span class="material-symbols-outlined" style="font-size:22px">park</span>
+        </div>
+        <div class="loc-btn-txt">
+            <h3>Área Recreativa</h3>
+            <span>Zona de juegos y reuniones · Ver en Maps</span>
+        </div>
+        <span class="material-symbols-outlined arr">open_in_new</span>
+    </a>
+
+    <a href="https://maps.app.goo.gl/fRJUXnfBRARdaMte8" target="_blank" rel="noopener" class="loc-btn">
+        <div class="loc-btn-ico" style="background:linear-gradient(135deg,#f59e0b,#e8400c);">
+            <span class="material-symbols-outlined" style="font-size:22px">church</span>
+        </div>
+        <div class="loc-btn-txt">
+            <h3>La Ermita</h3>
+            <span>Corazón de la urbanización · Ver en Maps</span>
+        </div>
+        <span class="material-symbols-outlined arr">open_in_new</span>
+    </a>
+</div>
+
+<!-- CÓMO LLEGAR -->
+<div class="section">
+    <div class="sec-label">Cómo llegar</div>
+    <div class="transport-list">
+
+        <div class="trans-item">
+            <div class="trans-ico" style="background:linear-gradient(135deg,#e8400c,#f59e0b);">
+                <span class="material-symbols-outlined" style="font-size:22px">directions_car</span>
+            </div>
+            <div class="trans-body">
+                <h4>En coche</h4>
+                <p>Desde Valencia por la V-31 / CV-400 dirección Torrent. Buscar zona <strong>Mas del Jutge</strong> o usar el enlace del mapa de arriba.</p>
+            </div>
+        </div>
+
+        <div class="trans-item">
+            <div class="trans-ico" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);">
+                <span class="material-symbols-outlined" style="font-size:22px">directions_bus</span>
+            </div>
+            <div class="trans-body">
+                <h4>En autobús</h4>
+                <p>MetroBus desde Valencia o Torrent ciudad. Consulta horarios actualizados en
+                <a href="https://www.metrovalencia.es" target="_blank" rel="noopener">metrovalencia.es</a></p>
+            </div>
+        </div>
+
+        <div class="trans-item">
+            <div class="trans-ico" style="background:linear-gradient(135deg,#7c3aed,#0ea5e9);">
+                <span class="material-symbols-outlined" style="font-size:22px">train</span>
+            </div>
+            <div class="trans-body">
+                <h4>En metro / FGV</h4>
+                <p>Línea 1 de Metrovalencia hasta <strong>Torrent Avinguda</strong>, luego autobús o taxi hasta la urbanización.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div class="section">
+    <div style="text-align:center; padding:10px 0; font-size:.75rem; color:var(--text2); line-height:1.8;">
+        <strong style="color:var(--text);">Urbanización El Pantano</strong><br>
+        Torrent · Valencia · Zona Mas del Jutge<br>
+        Fiestas Patronales · La Asunción · 15 de Agosto
+    </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lb" onclick="if(event.target===this)closeLb()">
+    <button class="lb-close" onclick="closeLb()">✕</button>
+    <button class="lb-nav lb-prev" onclick="moveLb(-1)">
+        <span class="material-symbols-outlined" style="font-size:20px">chevron_left</span>
+    </button>
+    <img id="lb-img" src="" alt="">
+    <button class="lb-nav lb-next" onclick="moveLb(1)">
+        <span class="material-symbols-outlined" style="font-size:20px">chevron_right</span>
+    </button>
+    <div class="lb-cnt" id="lb-cnt"></div>
+</div>
+
+<script>
+    /* ── LIGHTBOX ──────────────────────────────────────────────── */
+    const lbImgs = [
+        "https://i.postimg.cc/CMPWVhp0/d.jpg",
+        "https://i.postimg.cc/BZYdGSfG/n.jpg",
+        "https://i.postimg.cc/05WLqk1s/r.jpg",
+        "https://i.postimg.cc/VsG3cfP1/Whats-App-Image-2026-02-01-at-12-23-56.jpg"
+    ];
+    let lbIdx = 0;
+    const lb    = document.getElementById('lb');
+    const lbImg = document.getElementById('lb-img');
+    const lbCnt = document.getElementById('lb-cnt');
+
+    window.openLb = (i) => {
+        lbIdx = i;
+        lbImg.src = lbImgs[i];
+        lbCnt.innerText = (i+1) + ' / ' + lbImgs.length;
+        lb.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    };
+    window.closeLb = () => {
+        lb.classList.remove('open');
+        document.body.style.overflow = '';
+    };
+    window.moveLb = (dir) => {
+        lbIdx = (lbIdx + dir + lbImgs.length) % lbImgs.length;
+        lbImg.style.opacity = '0'; lbImg.style.transform = 'scale(.92)';
+        setTimeout(() => {
+            lbImg.src = lbImgs[lbIdx];
+            lbCnt.innerText = (lbIdx+1) + ' / ' + lbImgs.length;
+            lbImg.style.opacity = ''; lbImg.style.transform = '';
+        }, 110);
+    };
+
+    /* Swipe */
+    let tsx = 0;
+    lb.addEventListener('touchstart', e => tsx = e.touches[0].clientX, {passive:true});
+    lb.addEventListener('touchend',   e => { if(Math.abs(e.changedTouches[0].clientX - tsx) > 40) moveLb(e.changedTouches[0].clientX < tsx ? 1 : -1); });
+
+    /* Teclado */
+    document.addEventListener('keydown', e => {
+        if (!lb.classList.contains('open')) return;
+        if (e.key==='ArrowRight') moveLb(1);
+        if (e.key==='ArrowLeft')  moveLb(-1);
+        if (e.key==='Escape')     closeLb();
+    });
+</script>
 
 </body>
 </html>
