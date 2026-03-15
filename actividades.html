@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
 
-    <!-- ═══ FIREBASE — LÓGICA 100% IDÉNTICA AL ORIGINAL ══════════════ -->
+    <!-- ═══ FIREBASE — LÓGICA 100% IDÉNTICA ══════════════════════════ -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
       import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc,
@@ -40,6 +40,7 @@
       let currentUser = null, myUsername = "";
       let allActivities = [], selectedDay = "";
 
+      /* ── AUTH ── */
       onAuthStateChanged(auth, async (user) => {
           if (!user) { window.location.href = "index.html"; return; }
           currentUser = user;
@@ -48,6 +49,7 @@
           cargarActividades();
       });
 
+      /* ── CARGAR ── */
       async function cargarActividades() {
           const q = query(collection(db,"actividades"), orderBy("fecha","asc"));
           const snap = await getDocs(q);
@@ -59,6 +61,7 @@
           renderActivities();
       }
 
+      /* ── TABS ── */
       function generarTabsDias() {
           const container = document.getElementById("date-tabs");
           const uniqueDays = {};
@@ -66,16 +69,32 @@
               const d = act.fecha.toDate(), key = d.toDateString();
               if (!uniqueDays[key]) uniqueDays[key] = d;
           });
-          container.innerHTML = Object.keys(uniqueDays).map(key => {
-              const d = uniqueDays[key];
+
+          const keys = Object.keys(uniqueDays);
+          if (keys.length === 0) { container.innerHTML = ''; return; }
+
+          container.innerHTML = keys.map((key, idx) => {
+              const d       = uniqueDays[key];
               const dayName = d.toLocaleDateString('es-ES',{weekday:'short'}).replace('.','');
               const mon     = d.toLocaleDateString('es-ES',{month:'short'}).replace('.','');
+              const isToday = d.toDateString() === new Date().toDateString();
+              const active  = selectedDay === key;
+
+              // Contar mis inscripciones en este día
+              const misEvents = allActivities.filter(a => {
+                  if (a.fecha.toDate().toDateString() !== key) return false;
+                  return (a.inscritos||[]).some(e =>
+                      e.capitan_uid===currentUser?.uid ||
+                      e.miembros?.some(m=>m.uid===currentUser?.uid));
+              }).length;
+
               return `
-                <button class="date-tab ${selectedDay===key?'active':''}"
-                        onclick="setDay('${key}')" aria-label="${dayName} ${d.getDate()}">
+                <button class="date-tab ${active?'active':''}" onclick="setDay('${key}')">
+                    ${isToday ? `<span class="tab-today">HOY</span>` : ''}
                     <span class="tab-day">${dayName}</span>
                     <span class="tab-num">${d.getDate()}</span>
                     <span class="tab-mon">${mon}</span>
+                    ${misEvents > 0 ? `<span class="tab-dot"></span>` : ''}
                 </button>`;
           }).join('');
       }
@@ -84,87 +103,179 @@
           selectedDay = key; generarTabsDias(); renderActivities();
       };
 
+      /* ── RENDER CARDS ── */
       window.renderActivities = () => {
           const container = document.getElementById("activities-container");
+
+          // Cabecera del día seleccionado
+          const dayDate = allActivities.find(a => a.fecha.toDate().toDateString()===selectedDay)?.fecha.toDate();
+          const isToday = dayDate && dayDate.toDateString()===new Date().toDateString();
+          const dayLabel = dayDate
+              ? (isToday ? '🌟 Hoy · ' : '') +
+                dayDate.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})
+              : '';
+
           const filtered = allActivities.filter(a => a.fecha.toDate().toDateString()===selectedDay);
+
           if (filtered.length === 0) {
               container.innerHTML = `
+                ${dayLabel ? `<div class="day-label">${dayLabel}</div>` : ''}
                 <div class="empty-state">
-                    <span class="material-symbols-outlined">event_busy</span>
-                    <p>No hay eventos este día</p>
+                    <span class="es-emoji">📭</span>
+                    <p>Sin eventos este día</p>
                     <span>Prueba con otro día usando las pestañas de arriba</span>
                 </div>`; return;
           }
-          container.innerHTML = filtered.map((act, i) => {
-              const timeStr  = act.fecha.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-              const cat      = getCat(act.genero);
-              const inscritos = act.inscritos || [];
-              const yoEstoy  = inscritos.some(e =>
-                  e.capitan_uid===currentUser?.uid ||
-                  e.miembros?.some(m=>m.uid===currentUser?.uid));
-              const estaLibre = act.modalidad==='sin_inscripcion';
-              return `
-              <div class="act-card" onclick="verDetalles('${act.id}')"
-                   role="button" tabindex="0" style="animation-delay:${i*45}ms">
-                  ${act.imagen
-                    ? `<div class="act-img-wrap"><img src="${act.imagen}" class="act-img" alt="${act.titulo}"
-                           onerror="this.parentElement.innerHTML='<div class=act-img-placeholder style=background:${cat.bg}><span>${cat.emoji}</span></div>'"></div>`
-                    : `<div class="act-img-placeholder" style="background:${cat.bg}"><span>${cat.emoji}</span></div>`}
-                  <div class="act-body">
-                      <div class="act-top">
-                          <span class="cat-badge" style="background:${cat.bg};color:${cat.fg}">
-                              ${cat.emoji} ${cat.label}
-                          </span>
-                          ${yoEstoy   ? `<span class="status-badge s-in">✅ Apuntado</span>` : ''}
-                          ${!yoEstoy && estaLibre ? `<span class="status-badge s-libre">🔓 Libre</span>` : ''}
-                      </div>
-                      <h3 class="act-title">${act.titulo}</h3>
-                      <div class="meta-row">
-                          <span class="meta-pill"><span class="material-symbols-outlined">schedule</span>${timeStr}</span>
-                          <span class="meta-pill"><span class="material-symbols-outlined">location_on</span>${act.lugar||'Por definir'}</span>
-                          ${inscritos.length>0?`<span class="meta-pill"><span class="material-symbols-outlined">group</span>${inscritos.length} apuntado${inscritos.length!==1?'s':''}</span>`:''}
-                      </div>
-                      <div class="act-cta">
-                          Ver detalles <span class="material-symbols-outlined" style="font-size:16px">chevron_right</span>
-                      </div>
-                  </div>
-              </div>`;
-          }).join('');
+
+          container.innerHTML = `
+            ${dayLabel ? `<div class="day-label">${dayLabel}</div>` : ''}
+            ${filtered.map((act, i) => {
+                const timeStr   = act.fecha.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+                const cat       = getCat(act.genero);
+                const inscritos = act.inscritos || [];
+                const total     = inscritos.length;
+                const yoEstoy   = inscritos.some(e =>
+                    e.capitan_uid===currentUser?.uid ||
+                    e.miembros?.some(m=>m.uid===currentUser?.uid));
+                const estaLibre = act.modalidad==='sin_inscripcion';
+
+                // Barra de progreso si hay plazas (heurística: máx 30)
+                const maxPlazas = act.max_plazas || null;
+                const pct = maxPlazas ? Math.min(100, Math.round(total/maxPlazas*100)) : null;
+
+                return `
+                <article class="act-card ${yoEstoy?'card-joined':''}"
+                         onclick="verDetalles('${act.id}')"
+                         role="button" tabindex="0"
+                         style="animation-delay:${i*55}ms">
+
+                    <!-- Imagen / placeholder -->
+                    <div class="card-media" style="background:${cat.gradient}">
+                        ${act.imagen
+                          ? `<img src="${act.imagen}" class="card-img" alt="${act.titulo}"
+                                 onerror="this.style.display='none'">`
+                          : ''}
+                        <div class="card-media-overlay"></div>
+
+                        <!-- Badges sobre la imagen -->
+                        <div class="card-badges">
+                            <span class="cat-pill" style="background:${cat.pill}; color:${cat.fg}">
+                                ${cat.emoji} ${cat.label}
+                            </span>
+                            ${yoEstoy
+                              ? `<span class="status-pill pill-in">✅ Apuntado</span>`
+                              : estaLibre
+                              ? `<span class="status-pill pill-libre">🔓 Libre</span>`
+                              : ''}
+                        </div>
+
+                        <!-- Hora encima de la imagen -->
+                        <div class="card-time">
+                            <span class="material-symbols-outlined" style="font-size:14px">schedule</span>
+                            ${timeStr}
+                        </div>
+                    </div>
+
+                    <!-- Cuerpo -->
+                    <div class="card-body">
+                        <h3 class="card-title">${act.titulo}</h3>
+
+                        <div class="card-meta">
+                            <span class="cmeta-item">
+                                <span class="material-symbols-outlined">location_on</span>
+                                ${act.lugar || 'Por definir'}
+                            </span>
+                            <span class="cmeta-item">
+                                <span class="material-symbols-outlined">group</span>
+                                ${total === 0 ? 'Nadie aún' : total + ' apuntado' + (total!==1?'s':'')}
+                            </span>
+                        </div>
+
+                        ${pct !== null ? `
+                        <div class="plazas-bar">
+                            <div class="plazas-fill" style="width:${pct}%"></div>
+                        </div>
+                        <div class="plazas-txt">${total} / ${maxPlazas} plazas</div>
+                        ` : ''}
+
+                        <!-- CTA principal visible desde la card -->
+                        <div class="card-cta-row">
+                            ${yoEstoy
+                              ? `<span class="cta-tag cta-in">✅ Ya estás apuntado/a</span>`
+                              : estaLibre
+                              ? `<span class="cta-tag cta-libre">🔓 Sin inscripción</span>`
+                              : `<span class="cta-tag cta-join">Pulsa para apuntarte →</span>`}
+                        </div>
+                    </div>
+                </article>`;
+            }).join('')}`;
       };
 
+      /* ── MODAL DETALLES ── */
       window.verDetalles = (id) => {
           const act = allActivities.find(a=>a.id===id);
           if (!act) return;
-          const cat = getCat(act.genero);
-          const dateFull = act.fecha.toDate().toLocaleString([],{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+          const cat      = getCat(act.genero);
+          const dateFull = act.fecha.toDate().toLocaleString([],
+              {weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
           const inscritos = act.inscritos || [];
-          let estoyDentro=false, miRol=null;
+          let estoyDentro = false, miRol = null;
 
-          // Imagen o placeholder
+          // Imagen
           const imgWrap = document.getElementById("d-img-wrap");
-          imgWrap.innerHTML = act.imagen
-            ? `<img src="${act.imagen}" class="modal-header-img" alt="${act.titulo}"
-                   onerror="this.parentElement.innerHTML='<div class=modal-placeholder style=background:${cat.bg}><span>${cat.emoji}</span></div>'">`
-            : `<div class="modal-placeholder" style="background:${cat.bg}"><span>${cat.emoji}</span></div>`;
+          if (act.imagen) {
+              imgWrap.innerHTML = `
+                <div class="modal-img-wrap" style="background:${cat.gradient}">
+                    <img src="${act.imagen}" class="modal-header-img" alt="${act.titulo}"
+                         onerror="this.style.display='none'">
+                    <div class="modal-img-overlay"></div>
+                    <div class="modal-img-cat">
+                        <span class="cat-pill" style="background:${cat.pill};color:${cat.fg}">${cat.emoji} ${cat.label}</span>
+                    </div>
+                </div>`;
+          } else {
+              imgWrap.innerHTML = `
+                <div class="modal-placeholder" style="background:${cat.gradient}">
+                    <span class="mp-emoji">${cat.emoji}</span>
+                    <div class="modal-img-cat">
+                        <span class="cat-pill" style="background:${cat.pill};color:${cat.fg}">${cat.emoji} ${cat.label}</span>
+                    </div>
+                </div>`;
+          }
 
-          document.getElementById("d-cat").innerHTML =
-            `<span class="cat-badge" style="background:${cat.bg};color:${cat.fg}">${cat.emoji} ${cat.label}</span>`;
-          document.getElementById("d-title").innerText  = act.titulo;
-          document.getElementById("d-date").innerHTML   =
-            `<span class="material-symbols-outlined">schedule</span> ${dateFull}`;
-          document.getElementById("d-place").innerHTML  =
-            `<span class="material-symbols-outlined">location_on</span> ${act.lugar||'Por definir'}`;
-          document.getElementById("d-desc").innerHTML   =
-            act.descripcion ? `<div class="detail-desc">${act.descripcion}</div>` : "";
+          document.getElementById("d-title").innerText = act.titulo;
+
+          // Bloque fecha + lugar visual
+          document.getElementById("d-meta-block").innerHTML = `
+            <div class="d-meta-item">
+                <div class="d-meta-ico" style="background:rgba(232,64,12,.1)">
+                    <span class="material-symbols-outlined" style="color:var(--accent)">calendar_month</span>
+                </div>
+                <div><div class="d-meta-lbl">Cuándo</div><div class="d-meta-val">${dateFull}</div></div>
+            </div>
+            <div class="d-meta-item">
+                <div class="d-meta-ico" style="background:rgba(14,165,233,.1)">
+                    <span class="material-symbols-outlined" style="color:#0ea5e9">location_on</span>
+                </div>
+                <div><div class="d-meta-lbl">Dónde</div><div class="d-meta-val">${act.lugar||'Por definir'}</div></div>
+            </div>`;
+
+          // Descripción
+          document.getElementById("d-desc").innerHTML = act.descripcion
+              ? `<div class="detail-desc">${act.descripcion}</div>` : "";
 
           // Participantes
           let pHTML = "";
-          if (inscritos.length===0) {
-              pHTML = `<p class="no-inscritos">Nadie apuntado aún — ¡sé el primero!</p>`;
+          if (inscritos.length === 0) {
+              pHTML = `<div class="no-inscritos">
+                  <span style="font-size:1.8rem">🙋</span>
+                  <p>Nadie apuntado aún</p>
+                  <span>¡Sé el primero en apuntarte!</span>
+              </div>`;
           } else {
               pHTML = inscritos.map(e => {
-                  const nombre = e.nombre_equipo||e.capitan||"Usuario";
-                  const members = e.miembros?.map(m=>m.nombre).join(", ")||"";
+                  const nombre  = e.nombre_equipo||e.capitan||"Usuario";
+                  const members = e.miembros?.filter(m=>m.nombre).map(m=>m.nombre).join(", ")||"";
                   if (e.capitan_uid===currentUser.uid) { estoyDentro=true; miRol='capitan'; }
                   if (e.miembros?.some(m=>m.uid===currentUser.uid)) { estoyDentro=true; miRol='miembro'; }
                   return `
@@ -177,57 +288,91 @@
                     </div>`;
               }).join('');
           }
-          document.getElementById("d-list").innerHTML  = pHTML;
+          document.getElementById("d-list").innerHTML = pHTML;
           document.getElementById("d-count").innerText =
-            inscritos.length===0 ? "nadie aún" : inscritos.length+" participante"+(inscritos.length!==1?"s":"");
+              inscritos.length===0 ? "Nadie" :
+              inscritos.length + " apuntado" + (inscritos.length!==1?"s":"");
 
-          // Botones extra — igual al original
-          let extraHTML = `<a href="chat.html?id=${act.id}" class="btn-extra btn-blue">💬 Chat del evento</a>`;
+          // Botones extra
+          let extraHTML = `<a href="chat.html?id=${act.id}" class="btn-extra btn-blue">
+              <span class="material-symbols-outlined">chat</span> Chat
+          </a>`;
           if (act.genero==='carrera'||act.genero==='concurso')
-              extraHTML += `<a href="ver_carrera.html?id=${act.id}" class="btn-extra btn-orange">📊 Resultados</a>`;
+              extraHTML += `<a href="ver_carrera.html?id=${act.id}" class="btn-extra btn-orange">
+                  <span class="material-symbols-outlined">social_leaderboard</span> Resultados
+              </a>`;
           if (act.genero==='torneo')
-              extraHTML += `<a href="ver_torneo.html?id=${act.id}" class="btn-extra btn-pink">🏆 Cuadro</a>`;
+              extraHTML += `<a href="ver_torneo.html?id=${act.id}" class="btn-extra btn-pink">
+                  <span class="material-symbols-outlined">emoji_events</span> Cuadro
+              </a>`;
           document.getElementById("d-actions").innerHTML = `<div class="extra-row">${extraHTML}</div>`;
 
-          // Botón inscripción — igual al original
+          // ── BOTÓN INSCRIPCIÓN — el más importante del modal ──
           const inscArea = document.getElementById("d-inscripcion");
           if (act.modalidad==='sin_inscripcion') {
               inscArea.innerHTML = `
-                <div class="badge-libre">
-                    <span class="material-symbols-outlined">lock_open</span>
-                    <div><strong>Entrada libre</strong><span>No necesitas apuntarte</span></div>
+                <div class="insc-libre">
+                    <div class="insc-libre-ico">🔓</div>
+                    <div>
+                        <strong>Entrada libre</strong>
+                        <span>No hace falta apuntarse para participar</span>
+                    </div>
                 </div>`;
           } else if (estoyDentro) {
               inscArea.innerHTML = `
-                <button class="btn-full btn-leave" onclick="salirDeActividad('${act.id}','${miRol}')">
-                    <span class="material-symbols-outlined">person_remove</span> Darme de baja
+                <div class="insc-ya">
+                    <div class="insc-ya-check">✅</div>
+                    <div class="insc-ya-txt">
+                        <strong>¡Ya estás apuntado/a!</strong>
+                        <span>Apareces en la lista de participantes</span>
+                    </div>
+                </div>
+                <button class="btn-baja" onclick="salirDeActividad('${act.id}','${miRol}')">
+                    <span class="material-symbols-outlined">person_remove</span>
+                    Quiero darme de baja
                 </button>`;
           } else {
               inscArea.innerHTML = `
-                <button class="btn-full btn-join" onclick="prepararInscripcion('${act.id}','${act.modalidad}',${act.tamano_equipo||1})">
-                    <span class="material-symbols-outlined">how_to_reg</span> ¡Apuntarme!
+                <button class="btn-apuntarme" onclick="prepararInscripcion('${act.id}','${act.modalidad}',${act.tamano_equipo||1})">
+                    <span class="material-symbols-outlined">how_to_reg</span>
+                    ¡Apuntarme a este evento!
                 </button>`;
           }
+
           abrirModal('modal-detalles');
       };
 
       window.cerrarDetalles = () => cerrarModal('modal-detalles');
 
+      /* ── INSCRIPCIÓN ── */
       let currentActId="", currentModalidad="";
 
       window.prepararInscripcion = (id, mod, size) => {
           cerrarModal('modal-detalles');
           currentActId=id; currentModalidad=mod;
-          document.getElementById("modal-titulo").innerText =
-            mod==='individual' ? "Confirmar asistencia" : `Inscribir equipo (${mod})`;
+
+          const titulo = mod==='individual'
+              ? "Confirmar asistencia" : `Inscribir ${mod}`;
+          document.getElementById("modal-titulo").innerText = titulo;
+
           let html = "";
           if (mod==='individual') {
-              html = `<div class="confirm-box"><span>🎉</span><p>¿Te apuntas?</p>
-                      <span>Te registras como: <strong>${myUsername}</strong></span></div>`;
+              html = `
+                <div class="insc-confirm">
+                    <div class="ic-emoji">🎉</div>
+                    <div class="ic-txt">
+                        <strong>¿Te apuntas?</strong>
+                        <span>Te registrarás como: <strong>${myUsername}</strong></span>
+                    </div>
+                </div>`;
           } else {
-              html = `<div class="capitan-row"><span class="material-symbols-outlined">star</span>
-                      Capitán: <strong>${myUsername}</strong></div>
-                      <p class="mates-hint">Añade compañeros (opcional, deben tener cuenta):</p>`;
+              html = `
+                <div class="capitan-box">
+                    <span class="material-symbols-outlined">star</span>
+                    <span>Capitán: <strong>${myUsername}</strong></span>
+                </div>
+                <p class="mates-hint">👇 Añade a tus compañeros (opcional):<br>
+                <small>Escribe su nombre de usuario en la app. Se pondrá verde si existe.</small></p>`;
               const n = mod==='parejas' ? 1 : (size-1);
               for (let i=0;i<n;i++) html += `
                 <div class="mate-field">
@@ -235,6 +380,7 @@
                     <input type="text" class="mate-input"
                            placeholder="Usuario compañero ${i+1}"
                            onkeyup="verificarUsuario(this)">
+                    <span class="mate-hint-ico" id="mhi-${i}"></span>
                 </div>`;
           }
           document.getElementById("modal-inputs").innerHTML = html;
@@ -245,18 +391,28 @@
 
       window.verificarUsuario = async (input) => {
           const val = input.value.trim();
-          if (val.length<2) { input.classList.remove('mate-ok','mate-err'); input.removeAttribute('data-uid'); return; }
-          const q = query(collection(db,"usuarios"), where("username","==",val));
+          if (val.length<2) {
+              input.classList.remove('mate-ok','mate-err');
+              input.removeAttribute('data-uid'); return;
+          }
+          const q    = query(collection(db,"usuarios"), where("username","==",val));
           const snap = await getDocs(q);
-          if (!snap.empty) { input.classList.add('mate-ok'); input.classList.remove('mate-err'); input.setAttribute('data-uid',snap.docs[0].id); }
-          else { input.classList.remove('mate-ok'); input.classList.add('mate-err'); input.removeAttribute('data-uid'); }
+          if (!snap.empty) {
+              input.classList.add('mate-ok'); input.classList.remove('mate-err');
+              input.setAttribute('data-uid', snap.docs[0].id);
+          } else {
+              input.classList.remove('mate-ok'); input.classList.add('mate-err');
+              input.removeAttribute('data-uid');
+          }
       };
 
       window.confirmarInscripcion = async () => {
           const btn = document.getElementById("btn-confirmar");
-          btn.innerText="Guardando…"; btn.disabled=true;
+          btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin .8s linear infinite">progress_activity</span> Guardando…';
+          btn.disabled = true;
           try {
-              let data = { capitan:myUsername, capitan_uid:currentUser.uid, fecha:new Date(), nombre_equipo:myUsername, miembros:[] };
+              let data = { capitan:myUsername, capitan_uid:currentUser.uid,
+                           fecha:new Date(), nombre_equipo:myUsername, miembros:[] };
               if (currentModalidad!=='individual') {
                   document.querySelectorAll(".mate-input").forEach(inp => {
                       if (inp.value.trim()) data.miembros.push({
@@ -270,50 +426,56 @@
               cerrarModal('modal-inscripcion');
               showToast("✅ ¡Inscrito correctamente!");
               cargarActividades();
-          } catch(e) { showToast("❌ "+e.message); }
-          btn.innerText="Confirmar"; btn.disabled=false;
+          } catch(e) { showToast("❌ " + e.message); }
+          btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Confirmar inscripción';
+          btn.disabled = false;
       };
 
       window.salirDeActividad = async (actId, miRol) => {
-          if (!confirm("¿Seguro que quieres borrarte?")) return;
+          if (!confirm("¿Seguro que quieres borrarte de este evento?")) return;
           try {
-              const actRef = doc(db,"actividades",actId);
-              const snap   = await getDoc(actRef);
+              const actRef  = doc(db,"actividades",actId);
+              const snap    = await getDoc(actRef);
               let inscritos = snap.data().inscritos;
               let nuevos;
-              if (miRol==='capitan') nuevos = inscritos.filter(e=>e.capitan_uid!==currentUser.uid);
-              else nuevos = inscritos.map(e => {
-                  if (e.miembros?.some(m=>m.uid===currentUser.uid))
-                      e.miembros = e.miembros.filter(m=>m.uid!==currentUser.uid);
-                  return e;
-              });
-              await updateDoc(actRef, { inscritos:nuevos });
+              if (miRol==='capitan') {
+                  nuevos = inscritos.filter(e => e.capitan_uid!==currentUser.uid);
+              } else {
+                  nuevos = inscritos.map(e => {
+                      if (e.miembros?.some(m=>m.uid===currentUser.uid))
+                          e.miembros = e.miembros.filter(m=>m.uid!==currentUser.uid);
+                      return e;
+                  });
+              }
+              await updateDoc(actRef, { inscritos: nuevos });
               cerrarModal('modal-detalles');
               showToast("🗑️ Te has dado de baja");
               cargarActividades();
-          } catch(e) { showToast("❌ "+e.message); }
+          } catch(e) { showToast("❌ " + e.message); }
       };
 
-      /* helpers */
+      /* ── HELPERS ── */
       function getCat(g) {
-          return ({
-              deporte: {emoji:'⚽',label:'Deporte', bg:'#dbeafe',fg:'#1d4ed8'},
-              concurso:{emoji:'🏆',label:'Concurso',bg:'#fef9c3',fg:'#854d0e'},
-              fiesta:  {emoji:'🎉',label:'Fiesta',  bg:'#f3e8ff',fg:'#7e22ce'},
-              torneo:  {emoji:'🎮',label:'Torneo',  bg:'#fce7f3',fg:'#9d174d'},
-              carrera: {emoji:'🏃',label:'Carrera', bg:'#dcfce7',fg:'#166534'},
-          }[g]) || {emoji:'📌',label:'Otro',bg:'#f1f5f9',fg:'#475569'};
+          const map = {
+              deporte: { emoji:'⚽', label:'Deporte',  gradient:'linear-gradient(135deg,#1d4ed8,#3b82f6)', pill:'rgba(219,234,254,.9)', fg:'#1d4ed8' },
+              concurso:{ emoji:'🏆', label:'Concurso', gradient:'linear-gradient(135deg,#854d0e,#f59e0b)', pill:'rgba(254,249,195,.9)', fg:'#854d0e' },
+              fiesta:  { emoji:'🎉', label:'Fiesta',   gradient:'linear-gradient(135deg,#7e22ce,#a855f7)', pill:'rgba(243,232,255,.9)', fg:'#7e22ce' },
+              torneo:  { emoji:'🎾', label:'Torneo',   gradient:'linear-gradient(135deg,#9d174d,#ec4899)', pill:'rgba(252,231,243,.9)', fg:'#9d174d' },
+              carrera: { emoji:'🏃', label:'Carrera',  gradient:'linear-gradient(135deg,#166534,#22c55e)', pill:'rgba(220,252,231,.9)', fg:'#166534' },
+              comida:  { emoji:'🥘', label:'Comida',   gradient:'linear-gradient(135deg,#9a3412,#f97316)', pill:'rgba(255,237,213,.9)', fg:'#9a3412' },
+          };
+          return map[g] || { emoji:'🎲', label:'Otro', gradient:'linear-gradient(135deg,#475569,#94a3b8)', pill:'rgba(241,245,249,.9)', fg:'#475569' };
       }
 
       function abrirModal(id) {
-          const m=document.getElementById(id);
+          const m = document.getElementById(id);
           m.style.display="flex"; document.body.style.overflow='hidden';
           requestAnimationFrame(()=>m.classList.add('open'));
       }
       function cerrarModal(id) {
-          const m=document.getElementById(id);
+          const m = document.getElementById(id);
           m.classList.remove('open');
-          setTimeout(()=>{ m.style.display="none"; document.body.style.overflow=''; },280);
+          setTimeout(()=>{ m.style.display="none"; document.body.style.overflow=''; },300);
       }
 
       window.showToast = (msg) => {
@@ -324,11 +486,12 @@
     </script>
 
     <style>
+        /* ── VARIABLES ──────────────────────────────────────────────── */
         :root {
             --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550;
             --card:#fff; --border:rgba(0,0,0,0.07);
             --accent:#e8400c; --gold:#f59e0b;
-            --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:18px;
+            --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:20px;
         }
         html.dark-mode {
             --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070;
@@ -336,188 +499,412 @@
             --shadow:0 4px 20px rgba(0,0,0,0.45);
         }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
         body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);
              color:var(--text);min-height:100vh;overflow-x:hidden;padding-bottom:90px;}
 
-        /* TOPBAR */
-        .topbar{position:fixed;top:0;left:0;right:0;z-index:100;
-            background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
-        .topbar-row{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;}
+        /* ── TOPBAR ─────────────────────────────────────────────────── */
+        .topbar{
+            position:fixed;top:0;left:0;right:0;z-index:100;
+            background:var(--bg);border-bottom:1px solid var(--border);
+            backdrop-filter:blur(14px);
+        }
+        .topbar-row{display:flex;align-items:center;gap:12px;padding:14px 18px 8px;}
         .topbar-title{font-size:1.2rem;font-weight:800;flex:1;}
-        .btn-ico{background:var(--card);border:1px solid var(--border);width:38px;height:38px;
-            border-radius:50%;display:flex;align-items:center;justify-content:center;
-            cursor:pointer;color:var(--text);transition:transform .15s;box-shadow:var(--shadow);
-            text-decoration:none;flex-shrink:0;}
+        .btn-ico{
+            background:var(--card);border:1px solid var(--border);
+            width:38px;height:38px;border-radius:50%;display:flex;
+            align-items:center;justify-content:center;cursor:pointer;
+            color:var(--text);transition:transform .15s;
+            box-shadow:var(--shadow);text-decoration:none;flex-shrink:0;
+        }
         .btn-ico:active{transform:scale(.9);}
 
-        /* TABS */
-        .tabs-scroll{display:flex;gap:8px;overflow-x:auto;padding:0 18px 12px;
-            scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+        /* ── TABS ───────────────────────────────────────────────────── */
+        .tabs-scroll{
+            display:flex;gap:8px;overflow-x:auto;padding:0 18px 14px;
+            scrollbar-width:none;-webkit-overflow-scrolling:touch;
+        }
         .tabs-scroll::-webkit-scrollbar{display:none;}
-        .date-tab{background:var(--card);border:2px solid var(--border);
-            padding:10px 16px;border-radius:14px;text-align:center;min-width:64px;
-            cursor:pointer;flex-shrink:0;transition:all .2s;
+
+        .date-tab{
+            background:var(--card);border:2px solid var(--border);
+            border-radius:16px;padding:10px 14px;text-align:center;
+            min-width:62px;cursor:pointer;flex-shrink:0;
             display:flex;flex-direction:column;align-items:center;gap:1px;
-            font-family:inherit;color:var(--text2);}
-        .date-tab.active{background:var(--accent);color:white;border-color:var(--accent);
-            box-shadow:0 4px 14px rgba(232,64,12,.35);transform:scale(1.06);}
-        .tab-day{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
+            font-family:inherit;color:var(--text2);
+            transition:all .2s;position:relative;
+        }
+        .date-tab.active{
+            background:var(--accent);color:white;border-color:var(--accent);
+            box-shadow:0 4px 16px rgba(232,64,12,.4);transform:scale(1.07);
+        }
+        .tab-today{
+            font-size:.5rem;font-weight:800;text-transform:uppercase;
+            letter-spacing:.5px;background:var(--gold);color:white;
+            padding:1px 5px;border-radius:4px;margin-bottom:1px;
+        }
+        .date-tab.active .tab-today{background:rgba(255,255,255,.3);color:white;}
+        .tab-day{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
         .tab-num{font-size:1.5rem;font-weight:800;line-height:1;}
         .tab-mon{font-size:.58rem;text-transform:uppercase;opacity:.7;}
+        .tab-dot{
+            width:6px;height:6px;border-radius:50%;background:var(--gold);
+            margin-top:2px;
+        }
+        .date-tab.active .tab-dot{background:white;}
 
-        /* MAIN */
-        .main-content{padding:18px;padding-top:130px;max-width:680px;margin:0 auto;}
+        /* ── MAIN ───────────────────────────────────────────────────── */
+        .main-wrap{
+            padding:18px 18px 0;padding-top:128px;
+            max-width:680px;margin:0 auto;
+        }
 
-        /* EMPTY */
-        .empty-state{text-align:center;padding:60px 20px;color:var(--text2);
-            display:flex;flex-direction:column;align-items:center;gap:10px;}
-        .empty-state .material-symbols-outlined{font-size:52px;opacity:.25;}
-        .empty-state p{font-size:1rem;font-weight:700;color:var(--text);}
-        .empty-state span{font-size:.82rem;}
+        /* Etiqueta del día */
+        .day-label{
+            font-size:.85rem;font-weight:800;color:var(--text2);
+            margin-bottom:16px;text-transform:capitalize;
+            display:flex;align-items:center;gap:8px;
+        }
+        .day-label::after{content:'';flex:1;height:1px;background:var(--border);}
 
-        /* CARD */
-        .act-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);
-            overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px;cursor:pointer;
-            transition:transform .2s,box-shadow .2s;
-            animation:fadeUp .3s ease backwards;}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-        .act-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.1);}
+        /* ── EMPTY ──────────────────────────────────────────────────── */
+        .empty-state{
+            text-align:center;padding:60px 20px;
+            display:flex;flex-direction:column;align-items:center;gap:10px;
+        }
+        .es-emoji{font-size:3rem;}
+        .empty-state p{font-size:1.1rem;font-weight:800;color:var(--text);}
+        .empty-state span{font-size:.85rem;color:var(--text2);}
+
+        /* ── CARD ───────────────────────────────────────────────────── */
+        .act-card{
+            background:var(--card);border-radius:var(--radius);
+            border:1px solid var(--border);overflow:hidden;
+            box-shadow:var(--shadow);margin-bottom:18px;
+            cursor:pointer;transition:transform .22s,box-shadow .22s;
+            animation:fadeUp .35s ease backwards;
+        }
+        @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+        .act-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.12);}
         .act-card:active{transform:scale(.98);}
+        .act-card.card-joined{border-color:rgba(22,163,74,.3);}
 
-        .act-img-wrap{position:relative;}
-        .act-img{width:100%;height:170px;object-fit:cover;display:block;}
-        .act-img-placeholder{width:100%;height:110px;display:flex;align-items:center;
-            justify-content:center;font-size:2.8rem;opacity:.85;}
+        /* Media */
+        .card-media{
+            position:relative;height:180px;overflow:hidden;
+            display:flex;align-items:flex-end;
+        }
+        .card-img{
+            position:absolute;inset:0;width:100%;height:100%;
+            object-fit:cover;transition:transform .3s;
+        }
+        .act-card:hover .card-img{transform:scale(1.04);}
+        .card-media-overlay{
+            position:absolute;inset:0;
+            background:linear-gradient(to bottom,rgba(0,0,0,.05) 0%,rgba(0,0,0,.55) 100%);
+        }
 
-        .act-body{padding:16px 18px 14px;}
-        .act-top{display:flex;align-items:center;justify-content:space-between;
-            margin-bottom:10px;gap:8px;flex-wrap:wrap;}
-        .cat-badge{padding:4px 12px;border-radius:20px;font-size:.72rem;
-            font-weight:800;text-transform:uppercase;letter-spacing:.3px;}
-        .status-badge{padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:800;}
-        .s-in   {background:#dcfce7;color:#166534;}
-        .s-libre{background:#f0fdf4;color:#15803d;}
+        /* Badges sobre imagen */
+        .card-badges{
+            position:absolute;top:12px;left:12px;right:12px;
+            display:flex;align-items:center;justify-content:space-between;gap:6px;
+            flex-wrap:wrap;
+        }
+        .cat-pill{
+            padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:800;
+            backdrop-filter:blur(4px);text-transform:uppercase;letter-spacing:.3px;
+        }
+        .status-pill{
+            padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:800;
+            backdrop-filter:blur(4px);
+        }
+        .pill-in   {background:rgba(220,252,231,.9);color:#166534;}
+        .pill-libre{background:rgba(240,253,244,.9);color:#15803d;}
 
-        .act-title{font-size:1.1rem;font-weight:800;line-height:1.25;margin-bottom:10px;}
-        .meta-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
-        .meta-pill{display:flex;align-items:center;gap:4px;font-size:.78rem;color:var(--text2);
-            font-weight:600;background:var(--bg2);padding:4px 10px;border-radius:20px;}
-        .meta-pill .material-symbols-outlined{font-size:14px;}
-        .act-cta{display:flex;align-items:center;justify-content:flex-end;gap:2px;
-            color:var(--accent);font-size:.8rem;font-weight:800;}
+        /* Hora sobre imagen */
+        .card-time{
+            position:absolute;bottom:10px;right:12px;
+            display:flex;align-items:center;gap:4px;
+            color:white;font-size:.8rem;font-weight:800;
+            text-shadow:0 1px 4px rgba(0,0,0,.5);
+        }
 
-        /* MODAL */
-        .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.6);
-            display:none;justify-content:center;align-items:flex-end;backdrop-filter:blur(6px);}
-        .modal-overlay.open .modal-sheet{animation:sheetUp .3s cubic-bezier(.32,.72,0,1);}
+        /* Cuerpo card */
+        .card-body{padding:14px 16px 16px;}
+        .card-title{
+            font-size:1.1rem;font-weight:800;line-height:1.25;
+            margin-bottom:10px;color:var(--text);
+        }
+        .card-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+        .cmeta-item{
+            display:flex;align-items:center;gap:4px;
+            font-size:.78rem;color:var(--text2);font-weight:600;
+        }
+        .cmeta-item .material-symbols-outlined{font-size:15px;}
+
+        /* Barra plazas */
+        .plazas-bar{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:4px;}
+        .plazas-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s;}
+        .plazas-txt{font-size:.7rem;color:var(--text2);font-weight:700;margin-bottom:10px;}
+
+        /* CTA de la card */
+        .card-cta-row{display:flex;}
+        .cta-tag{
+            font-size:.78rem;font-weight:800;padding:6px 14px;border-radius:20px;
+        }
+        .cta-join {background:rgba(232,64,12,.1);color:var(--accent);}
+        .cta-in   {background:#dcfce7;color:#166534;}
+        .cta-libre{background:#f0fdf4;color:#15803d;}
+
+        /* ── MODALES ────────────────────────────────────────────────── */
+        .modal-overlay{
+            position:fixed;inset:0;z-index:2000;
+            background:rgba(0,0,0,.65);display:none;
+            justify-content:center;align-items:flex-end;
+            backdrop-filter:blur(6px);
+        }
+        .modal-overlay.open .modal-sheet{animation:sheetUp .32s cubic-bezier(.32,.72,0,1);}
         @keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-        .modal-sheet{background:var(--card);border-radius:28px 28px 0 0;width:100%;
-            max-width:620px;max-height:90vh;overflow-y:auto;position:relative;}
-        .modal-handle{width:40px;height:4px;background:var(--border);
-            border-radius:2px;margin:12px auto 0;}
-        .btn-close{position:sticky;top:0;float:right;margin:8px 16px 0 0;
-            background:var(--bg2);border:none;color:var(--text);width:36px;height:36px;
-            border-radius:50%;display:flex;align-items:center;justify-content:center;
-            cursor:pointer;z-index:10;transition:background .2s;}
-        .btn-close:hover{background:var(--border);}
 
-        .modal-header-img{width:100%;height:220px;object-fit:cover;display:block;}
-        .modal-placeholder{width:100%;height:150px;display:flex;align-items:center;
-            justify-content:center;font-size:3.5rem;opacity:.8;}
-        .modal-body{padding:20px 20px 44px;}
-        .detail-title{font-size:1.5rem;font-weight:800;line-height:1.2;margin:12px 0 10px;}
-        .detail-meta{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;}
-        .detail-meta-item{display:flex;align-items:center;gap:8px;font-size:.88rem;
-            color:var(--text2);font-weight:600;}
-        .detail-meta-item .material-symbols-outlined{font-size:18px;color:var(--accent);}
-        .detail-desc{background:var(--bg2);border-radius:14px;padding:14px 16px;
-            font-size:.88rem;line-height:1.7;margin:14px 0;color:var(--text);}
+        .modal-sheet{
+            background:var(--card);border-radius:28px 28px 0 0;
+            width:100%;max-width:640px;max-height:92vh;overflow-y:auto;
+        }
+        .modal-handle{
+            width:44px;height:4px;background:var(--border);
+            border-radius:2px;margin:14px auto 0;
+        }
+        .modal-close-row{
+            display:flex;justify-content:flex-end;padding:8px 16px 0;
+            position:sticky;top:0;background:var(--card);z-index:5;
+        }
+        .btn-close-modal{
+            background:var(--bg2);border:none;color:var(--text);
+            width:34px;height:34px;border-radius:50%;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;
+            transition:background .2s;
+        }
+        .btn-close-modal:hover{background:var(--border);}
 
-        .extra-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-        .btn-extra{padding:10px 16px;border-radius:12px;font-weight:800;font-size:.82rem;
+        /* Imagen modal */
+        .modal-img-wrap{
+            position:relative;height:220px;overflow:hidden;
+            display:flex;align-items:flex-end;
+        }
+        .modal-header-img{
+            position:absolute;inset:0;width:100%;height:100%;
+            object-fit:cover;
+        }
+        .modal-img-overlay{
+            position:absolute;inset:0;
+            background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.6));
+        }
+        .modal-img-cat{position:absolute;bottom:14px;left:16px;}
+        .modal-placeholder{
+            height:160px;display:flex;align-items:center;
+            justify-content:center;position:relative;
+        }
+        .mp-emoji{font-size:4rem;}
+
+        /* Cuerpo modal */
+        .modal-body{padding:18px 20px 48px;}
+
+        .d-title{
+            font-size:1.6rem;font-weight:800;line-height:1.2;
+            margin-bottom:16px;
+        }
+
+        /* Bloque meta */
+        .d-meta-block{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+        .d-meta-item{display:flex;align-items:center;gap:12px;}
+        .d-meta-ico{
+            width:42px;height:42px;border-radius:12px;flex-shrink:0;
+            display:flex;align-items:center;justify-content:center;
+        }
+        .d-meta-ico .material-symbols-outlined{font-size:22px;}
+        .d-meta-lbl{font-size:.65rem;font-weight:800;text-transform:uppercase;
+                    letter-spacing:.5px;color:var(--text2);}
+        .d-meta-val{font-size:.9rem;font-weight:700;text-transform:capitalize;}
+
+        /* Descripción */
+        .detail-desc{
+            background:var(--bg2);border-radius:14px;padding:14px 16px;
+            font-size:.88rem;line-height:1.7;color:var(--text);margin-bottom:18px;
+        }
+
+        /* Extra botones */
+        .extra-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+        .btn-extra{
+            padding:9px 14px;border-radius:12px;font-weight:800;font-size:.8rem;
             text-decoration:none;display:inline-flex;align-items:center;gap:6px;
-            transition:transform .15s;font-family:inherit;border:none;cursor:pointer;}
+            transition:transform .15s;font-family:inherit;border:none;cursor:pointer;
+        }
         .btn-extra:active{transform:scale(.95);}
         .btn-blue  {background:#dbeafe;color:#1d4ed8;}
         .btn-orange{background:#ffedd5;color:#c2410c;}
         .btn-pink  {background:#fce7f3;color:#9d174d;}
 
-        .btn-full{width:100%;padding:16px;border-radius:16px;border:none;font-weight:800;
-            font-size:1rem;font-family:inherit;cursor:pointer;display:flex;align-items:center;
-            justify-content:center;gap:10px;transition:transform .15s,opacity .2s;margin-top:8px;}
-        .btn-full:active{transform:scale(.97);}
-        .btn-full:disabled{opacity:.6;cursor:not-allowed;}
-        .btn-join {background:var(--accent);color:white;box-shadow:0 4px 14px rgba(232,64,12,.35);}
-        .btn-leave{background:#fef2f2;color:#dc2626;border:2px solid #fecaca;}
+        /* ── INSCRIPCIÓN — la parte más importante ──────────────────── */
+        /* Botón apuntarme — grande, verde, imposible de no ver */
+        .btn-apuntarme{
+            width:100%;padding:18px 20px;border-radius:18px;border:none;
+            background:linear-gradient(135deg,#16a34a,#22c55e);color:white;
+            font-weight:800;font-size:1.1rem;font-family:inherit;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:10px;
+            box-shadow:0 6px 20px rgba(22,163,74,.4);
+            transition:transform .15s,box-shadow .15s;
+            margin-bottom:6px;
+        }
+        .btn-apuntarme:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(22,163,74,.5);}
+        .btn-apuntarme:active{transform:scale(.97);}
+        .btn-apuntarme .material-symbols-outlined{font-size:24px;}
 
-        .badge-libre{display:flex;align-items:center;gap:14px;background:#f0fdf4;
-            border:1px solid #bbf7d0;border-radius:14px;padding:16px;color:#166534;margin-top:8px;}
-        .badge-libre .material-symbols-outlined{font-size:26px;color:#16a34a;}
-        .badge-libre strong{display:block;font-size:.95rem;font-weight:800;}
-        .badge-libre span{font-size:.78rem;opacity:.75;}
+        /* Ya apuntado */
+        .insc-ya{
+            display:flex;align-items:center;gap:14px;
+            background:#f0fdf4;border:2px solid #bbf7d0;
+            border-radius:16px;padding:16px;margin-bottom:10px;
+        }
+        .insc-ya-check{font-size:2rem;flex-shrink:0;}
+        .insc-ya-txt strong{display:block;font-size:.95rem;font-weight:800;color:#166534;}
+        .insc-ya-txt span{font-size:.78rem;color:#4ade80;}
 
-        .sec-lbl{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;
-            color:var(--text2);margin:20px 0 10px;display:flex;align-items:center;gap:8px;}
-        .sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
-        .p-row{display:flex;align-items:center;gap:12px;padding:10px 0;
-            border-bottom:1px solid var(--border);}
+        .btn-baja{
+            width:100%;padding:12px;border-radius:14px;
+            background:#fef2f2;color:#dc2626;
+            border:2px solid #fecaca;font-weight:700;font-size:.88rem;
+            font-family:inherit;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            transition:background .2s;
+        }
+        .btn-baja:hover{background:#fee2e2;}
+
+        /* Libre */
+        .insc-libre{
+            display:flex;align-items:center;gap:14px;
+            background:#f0fdf4;border:1px solid #bbf7d0;
+            border-radius:16px;padding:16px;
+        }
+        .insc-libre-ico{font-size:2rem;flex-shrink:0;}
+        .insc-libre strong{display:block;font-weight:800;}
+        .insc-libre span{font-size:.8rem;color:var(--text2);}
+
+        /* Separador participantes */
+        .p-sec-label{
+            font-size:.72rem;font-weight:800;text-transform:uppercase;
+            letter-spacing:1px;color:var(--text2);
+            margin:20px 0 10px;display:flex;align-items:center;gap:8px;
+        }
+        .p-sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+        .p-row{
+            display:flex;align-items:center;gap:12px;
+            padding:10px 0;border-bottom:1px solid var(--border);
+        }
         .p-row:last-child{border-bottom:none;}
-        .p-ava{width:36px;height:36px;border-radius:50%;flex-shrink:0;
+        .p-ava{
+            width:38px;height:38px;border-radius:50%;flex-shrink:0;
             background:linear-gradient(135deg,var(--accent),var(--gold));
             display:flex;align-items:center;justify-content:center;
-            color:white;font-weight:800;font-size:.9rem;}
+            color:white;font-weight:800;font-size:.95rem;
+        }
         .p-name{font-weight:700;font-size:.9rem;}
-        .p-mems{font-size:.75rem;color:var(--text2);margin-top:2px;}
-        .no-inscritos{text-align:center;padding:20px;color:var(--text2);
-            font-size:.85rem;line-height:1.6;}
+        .p-mems{font-size:.73rem;color:var(--text2);margin-top:2px;}
 
-        /* Inscripción modal */
-        .confirm-box{text-align:center;padding:20px 10px;display:flex;
-            flex-direction:column;align-items:center;gap:8px;}
-        .confirm-box span:first-child{font-size:2.5rem;}
-        .confirm-box p{font-size:1rem;font-weight:800;}
-        .confirm-box span{font-size:.85rem;color:var(--text2);}
-        .capitan-row{display:flex;align-items:center;gap:8px;background:rgba(232,64,12,.08);
-            border:1px solid rgba(232,64,12,.2);border-radius:12px;padding:12px 14px;
-            font-size:.88rem;font-weight:700;color:var(--accent);margin-bottom:14px;}
-        .mates-hint{font-size:.8rem;color:var(--text2);margin-bottom:10px;}
-        .mate-field{display:flex;align-items:center;gap:10px;background:var(--bg2);
-            border-radius:12px;padding:10px 14px;margin-bottom:8px;
-            border:2px solid transparent;transition:border-color .2s;}
+        .no-inscritos{
+            text-align:center;padding:24px 16px;
+            display:flex;flex-direction:column;align-items:center;gap:6px;
+            color:var(--text2);
+        }
+        .no-inscritos p{font-weight:800;font-size:.95rem;color:var(--text);}
+        .no-inscritos span{font-size:.8rem;}
+
+        /* ── MODAL INSCRIPCIÓN ──────────────────────────────────────── */
+        .insc-confirm{
+            display:flex;align-items:center;gap:14px;
+            background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.2);
+            border-radius:16px;padding:16px;margin-bottom:16px;
+        }
+        .ic-emoji{font-size:2.2rem;flex-shrink:0;}
+        .ic-txt strong{display:block;font-size:.95rem;font-weight:800;margin-bottom:3px;}
+        .ic-txt span{font-size:.82rem;color:var(--text2);}
+
+        .capitan-box{
+            display:flex;align-items:center;gap:8px;
+            background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);
+            border-radius:12px;padding:12px 14px;
+            font-size:.88rem;font-weight:700;color:#92400e;margin-bottom:14px;
+        }
+        .capitan-box .material-symbols-outlined{font-size:18px;color:#f59e0b;}
+        html.dark-mode .capitan-box{color:#fcd34d;}
+
+        .mates-hint{font-size:.8rem;color:var(--text2);margin-bottom:12px;line-height:1.5;}
+        .mates-hint small{font-size:.72rem;display:block;margin-top:4px;opacity:.7;}
+
+        .mate-field{
+            display:flex;align-items:center;gap:10px;background:var(--bg2);
+            border-radius:14px;padding:12px 14px;margin-bottom:8px;
+            border:2px solid transparent;transition:border-color .2s;
+        }
         .mate-field:focus-within{border-color:var(--accent);}
         .mate-field .material-symbols-outlined{font-size:20px;color:var(--text2);flex-shrink:0;}
-        .mate-input{flex:1;border:none;background:transparent;color:var(--text);
-            font-family:inherit;font-size:.9rem;outline:none;}
-        .mate-input.mate-ok {color:#16a34a;}
+        .mate-input{
+            flex:1;border:none;background:transparent;color:var(--text);
+            font-family:inherit;font-size:.92rem;outline:none;
+        }
+        .mate-input.mate-ok {color:#16a34a;font-weight:700;}
         .mate-input.mate-err{color:#dc2626;}
-        .modal-btns{display:flex;gap:10px;margin-top:20px;}
-        .btn-cancel{flex:1;padding:14px;border-radius:14px;border:none;background:var(--bg2);
-            color:var(--text2);font-weight:700;font-family:inherit;font-size:.9rem;cursor:pointer;}
 
-        /* TOAST */
-        #toast{position:fixed;bottom:88px;left:50%;
+        .insc-btns{display:flex;gap:10px;margin-top:16px;}
+        .btn-cancel-insc{
+            flex:1;padding:15px;border-radius:14px;border:none;
+            background:var(--bg2);color:var(--text2);
+            font-weight:700;font-family:inherit;font-size:.9rem;cursor:pointer;
+        }
+        #btn-confirmar{
+            flex:2;padding:15px;border-radius:14px;border:none;
+            background:linear-gradient(135deg,#16a34a,#22c55e);color:white;
+            font-weight:800;font-size:.95rem;font-family:inherit;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            box-shadow:0 4px 14px rgba(22,163,74,.35);transition:opacity .2s;
+        }
+        #btn-confirmar:disabled{opacity:.6;cursor:not-allowed;}
+        #btn-confirmar .material-symbols-outlined{font-size:20px;}
+
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* ── TOAST ──────────────────────────────────────────────────── */
+        #toast{
+            position:fixed;bottom:88px;left:50%;
             transform:translateX(-50%) translateY(14px);
-            background:#1a1208;color:white;padding:10px 22px;border-radius:30px;
-            font-size:.82rem;font-weight:700;opacity:0;transition:all .26s;z-index:9999;
-            pointer-events:none;white-space:nowrap;}
+            background:#1a1208;color:white;padding:11px 22px;
+            border-radius:30px;font-size:.83rem;font-weight:700;
+            opacity:0;transition:all .26s;z-index:9999;
+            pointer-events:none;white-space:nowrap;
+        }
         #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-        /* BOTTOM NAV */
-        .bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:var(--card);
+        /* ── BOTTOM NAV ─────────────────────────────────────────────── */
+        .bottom-nav{
+            position:fixed;bottom:0;left:0;width:100%;background:var(--card);
             border-top:1px solid var(--border);display:flex;justify-content:space-around;
             padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:1000;
-            backdrop-filter:blur(12px);}
-        .nav-item{border:none;background:transparent;color:var(--text2);
-            display:flex;flex-direction:column;align-items:center;font-size:.68rem;
-            cursor:pointer;gap:3px;flex:1;text-decoration:none;
-            font-family:inherit;transition:color .15s;}
+            backdrop-filter:blur(12px);
+        }
+        .nav-item{
+            border:none;background:transparent;color:var(--text2);
+            display:flex;flex-direction:column;align-items:center;
+            font-size:.68rem;cursor:pointer;gap:3px;flex:1;
+            text-decoration:none;font-family:inherit;transition:color .15s;
+        }
         .nav-item.active{color:var(--accent);font-weight:800;}
         .nav-item .material-symbols-outlined{font-size:24px;}
     </style>
 </head>
 <body>
 
-    <!-- TOPBAR -->
+    <!-- ── TOPBAR ──────────────────────────────────────────────────── -->
     <div class="topbar">
         <div class="topbar-row">
             <a href="panel.html" class="btn-ico" aria-label="Inicio">
@@ -528,60 +915,87 @@
         <div id="date-tabs" class="tabs-scroll"></div>
     </div>
 
-    <!-- LISTA -->
-    <div class="main-content" id="activities-container">
+    <!-- ── LISTA ───────────────────────────────────────────────────── -->
+    <div class="main-wrap" id="activities-container">
         <div class="empty-state">
-            <span class="material-symbols-outlined">hourglass_empty</span>
+            <span class="es-emoji">⏳</span>
             <p>Cargando actividades…</p>
             <span>Un momento por favor</span>
         </div>
     </div>
 
-    <!-- MODAL DETALLES -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         MODAL DETALLES
+    ════════════════════════════════════════════════════════════════ -->
     <div id="modal-detalles" class="modal-overlay"
          onclick="if(event.target===this) cerrarDetalles()">
         <div class="modal-sheet">
             <div class="modal-handle"></div>
-            <button class="btn-close" onclick="cerrarDetalles()" aria-label="Cerrar">
-                <span class="material-symbols-outlined" style="font-size:18px">close</span>
-            </button>
+            <div class="modal-close-row">
+                <button class="btn-close-modal" onclick="cerrarDetalles()" aria-label="Cerrar">
+                    <span class="material-symbols-outlined" style="font-size:18px">close</span>
+                </button>
+            </div>
+
+            <!-- Imagen -->
             <div id="d-img-wrap"></div>
+
             <div class="modal-body">
-                <div id="d-cat"></div>
-                <h2 id="d-title" class="detail-title"></h2>
-                <div class="detail-meta">
-                    <div id="d-date" class="detail-meta-item"></div>
-                    <div id="d-place" class="detail-meta-item"></div>
-                </div>
+                <!-- Título -->
+                <h2 id="d-title" class="d-title"></h2>
+
+                <!-- Fecha y lugar -->
+                <div id="d-meta-block" class="d-meta-block"></div>
+
+                <!-- Descripción -->
                 <div id="d-desc"></div>
+
+                <!-- Botones extra (chat, resultados, cuadro) -->
                 <div id="d-actions"></div>
+
+                <!-- ── INSCRIPCIÓN ─────────────────────────────────── -->
                 <div id="d-inscripcion"></div>
-                <div class="sec-lbl">
-                    <span class="material-symbols-outlined" style="font-size:16px">group</span>
+
+                <!-- Participantes -->
+                <div class="p-sec-label">
+                    <span class="material-symbols-outlined" style="font-size:15px">group</span>
                     Participantes
-                    <span id="d-count" style="margin-left:auto;font-size:.68rem;font-weight:700;text-transform:none;letter-spacing:0;color:var(--text2);"></span>
+                    <span id="d-count"
+                          style="margin-left:auto;font-size:.68rem;font-weight:700;
+                                 text-transform:none;letter-spacing:0;color:var(--text2);">
+                    </span>
                 </div>
                 <div id="d-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL INSCRIPCIÓN -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         MODAL INSCRIPCIÓN
+    ════════════════════════════════════════════════════════════════ -->
     <div id="modal-inscripcion" class="modal-overlay"
          onclick="if(event.target===this) cerrarInscripcion()">
-        <div class="modal-sheet" style="max-width:460px;">
+        <div class="modal-sheet" style="max-width:480px;">
             <div class="modal-handle"></div>
-            <button class="btn-close" onclick="cerrarInscripcion()" aria-label="Cerrar">
-                <span class="material-symbols-outlined" style="font-size:18px">close</span>
-            </button>
-            <div style="padding:10px 20px 40px;">
-                <h2 id="modal-titulo" style="font-size:1.2rem;font-weight:800;margin-bottom:16px;"></h2>
+            <div class="modal-close-row">
+                <button class="btn-close-modal" onclick="cerrarInscripcion()" aria-label="Cerrar">
+                    <span class="material-symbols-outlined" style="font-size:18px">close</span>
+                </button>
+            </div>
+
+            <div style="padding:4px 20px 40px;">
+                <h2 id="modal-titulo"
+                    style="font-size:1.2rem;font-weight:800;margin-bottom:18px;"></h2>
+
                 <div id="modal-inputs"></div>
-                <div class="modal-btns">
-                    <button class="btn-cancel" onclick="cerrarInscripcion()">Cancelar</button>
-                    <button id="btn-confirmar" class="btn-full btn-join"
-                            style="margin-top:0;flex:2;" onclick="confirmarInscripcion()">
-                        <span class="material-symbols-outlined">check_circle</span> Confirmar
+
+                <div class="insc-btns">
+                    <button class="btn-cancel-insc" onclick="cerrarInscripcion()">
+                        Cancelar
+                    </button>
+                    <button id="btn-confirmar" onclick="confirmarInscripcion()">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Confirmar inscripción
                     </button>
                 </div>
             </div>
@@ -590,11 +1004,21 @@
 
     <div id="toast"></div>
 
+    <!-- ── BOTTOM NAV ──────────────────────────────────────────────── -->
     <nav class="bottom-nav">
-        <a href="panel.html"             class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
-        <a href="actividades.html"       class="nav-item active"><span class="material-symbols-outlined">event</span>Fiestas</a>
-        <a href="mis_inscripciones.html" class="nav-item"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
-        <a href="perfil.html"            class="nav-item"><span class="material-symbols-outlined">person</span>Perfil</a>
+        <a href="panel.html"             class="nav-item">
+            <span class="material-symbols-outlined">home</span>Inicio
+        </a>
+        <a href="actividades.html"       class="nav-item active">
+            <span class="material-symbols-outlined">event</span>Fiestas
+        </a>
+        <a href="mis_inscripciones.html" class="nav-item">
+            <span class="material-symbols-outlined">confirmation_number</span>Tickets
+        </a>
+        <a href="perfil.html"            class="nav-item">
+            <span class="material-symbols-outlined">person</span>Perfil
+        </a>
     </nav>
+
 </body>
 </html>
