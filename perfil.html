@@ -3,219 +3,460 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Carnet</title>
+    <title>Mi Perfil · Fiestas Pantano 2026</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ff5722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
+    <meta name="theme-color" content="#e8400c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    
-    <script>
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
-    </script>
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --gradient: linear-gradient(135deg, #ff5722, #ff9800); --danger: #d32f2f; }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --gradient: linear-gradient(135deg, #d84315, #f57c00); --danger: #ef5350; }
-        
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
-        .container { max-width: 500px; margin: 0 auto; }
-        
-        h1 { margin-bottom: 20px; font-weight: 800; }
-
-        /* CARNET DIGITAL */
-        .carnet {
-            background: var(--gradient);
-            color: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 25px rgba(255, 87, 34, 0.3);
-            position: relative;
-            overflow: hidden;
-            min-height: 160px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            transition: transform 0.3s;
-        }
-        .carnet:active { transform: scale(0.98); }
-
-        .carnet::before { content: ''; position: absolute; top: -50px; right: -50px; width: 180px; height: 180px; background: rgba(255,255,255,0.1); border-radius: 50%; }
-        .carnet::after { content: ''; position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; }
-
-        .carnet-header { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
-        .app-name { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.8; text-transform: uppercase; font-weight: bold; }
-        .carnet-role { background: rgba(255,255,255,0.25); padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; backdrop-filter: blur(5px); text-transform: uppercase; border: 1px solid rgba(255,255,255,0.4); }
-
-        .carnet-body { z-index: 2; margin-top: 25px; }
-        .user-name { font-size: 2rem; font-weight: 800; margin: 0; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .user-id { font-family: 'Share Tech Mono', monospace; font-size: 1rem; opacity: 0.85; margin-top: 8px; letter-spacing: 1px; }
-
-        /* SECCIONES MENU */
-        .section-title { font-size: 0.8rem; color: gray; margin-bottom: 8px; font-weight: 700; margin-left: 5px; margin-top: 25px; letter-spacing: 0.5px; }
-        
-        .action-list { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-        
-        .action-item { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: background 0.2s; }
-        .action-item:last-child { border-bottom: none; }
-        .action-item:active { background: rgba(0,0,0,0.02); }
-        
-        .a-left { display: flex; align-items: center; gap: 15px; font-weight: 600; color: var(--text); }
-        .icon-box { width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; }
-        
-        .i-admin { background: #673ab7; }
-        .i-help { background: #00bcd4; } /* NUEVO ICONO AYUDA */
-        .i-theme { background: #2196f3; }
-        .i-legal { background: #607d8b; }
-        .i-logout { background: #ff5252; }
-        .i-delete { background: #d32f2f; }
-
-        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: max(15px, env(safe-area-inset-bottom)); }
-        .nav-item { border: none; background: transparent; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; text-decoration: none; flex: 1; transition: color 0.2s; }
-        .nav-item.active { color: var(--accent); font-weight: bold; }
-        .nav-item span { font-size: 26px; margin-bottom: 4px; }
-    </style>
-
+    <!-- ═══ FIREBASE — LÓGICA IDÉNTICA AL ORIGINAL ════════════════════ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, deleteDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, deleteDoc, enableIndexedDbPersistence }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, deleteUser }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const firebaseConfig = {
+            apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+            authDomain:"fiestas-pantano.firebaseapp.com",
+            projectId:"fiestas-pantano",
+            storageBucket:"fiestas-pantano.firebasestorage.app",
+            messagingSenderId:"801380435613",
+            appId:"1:801380435613:web:a842572cf7cee93ac57674",
+            measurementId:"G-EG2MZGBT1B"
+        };
+        const app  = initializeApp(firebaseConfig);
+        const db   = getFirestore(app);
         const auth = getAuth(app);
 
-        enableIndexedDbPersistence(db).catch(() => {});
+        enableIndexedDbPersistence(db).catch(()=>{});
         let currentUser = null;
 
+        /* ── MISMA LÓGICA AUTH DEL ORIGINAL ── */
         onAuthStateChanged(auth, async (user) => {
-            if (!user) window.location.href = "index.html";
+            if (!user) { window.location.href = "index.html"; return; }
             currentUser = user;
-            
-            const docRef = doc(db, "usuarios", user.uid);
-            const docSnap = await getDoc(docRef);
-            
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                document.getElementById("u-name").innerText = data.username.toUpperCase();
-                document.getElementById("u-id").innerText = "ID: " + user.uid.slice(0, 8).toUpperCase();
-                
-                if (data.rol === 'admin' || data.rol === 'festero') {
-                    document.getElementById("u-role").innerText = "ADMIN / FESTERO";
+
+            const snap = await getDoc(doc(db, "usuarios", user.uid));
+            if (snap.exists()) {
+                const data = snap.data();
+                const nombre = data.username || data.nombre || "Festero";
+
+                /* Carnet */
+                document.getElementById("u-name").innerText = nombre.toUpperCase();
+                document.getElementById("u-id").innerText   = "ID · " + user.uid.slice(0,8).toUpperCase();
+
+                /* Iniciales avatar */
+                const ini = nombre.split(' ').slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('');
+                document.getElementById("avatar-ini").innerText = ini || "?";
+
+                /* Rol — mismo condicional del original */
+                const rol = data.rol || 'usuario';
+                const rolEl = document.getElementById("u-role");
+                if (rol === 'admin' || rol === 'festero') {
+                    rolEl.innerText = rol === 'admin' ? '⭐ Admin' : '🎉 Festero';
+                    rolEl.className = 'carnet-role role-staff';
                     document.getElementById("admin-zone").style.display = "block";
                 } else {
-                    document.getElementById("u-role").innerText = "MIEMBRO OFICIAL";
+                    rolEl.innerText = '🏘️ Miembro oficial';
+                    rolEl.className = 'carnet-role role-member';
+                }
+
+                /* Fecha de registro si existe */
+                if (data.fecha_registro?.toDate) {
+                    const f = data.fecha_registro.toDate();
+                    document.getElementById("u-since").innerText =
+                        "Miembro desde " + f.toLocaleDateString('es-ES',{month:'short',year:'numeric'});
                 }
             }
         });
 
+        /* ── MISMAS FUNCIONES DEL ORIGINAL ── */
         window.initTheme = () => {
-            const isDark = localStorage.getItem('theme') === 'dark';
-            document.getElementById('theme-toggle').checked = isDark;
-        }
+            document.getElementById('theme-toggle').checked = localStorage.getItem('theme') === 'dark';
+        };
 
-        window.toggleTheme = (checkbox) => {
-            if(checkbox.checked) {
+        window.toggleTheme = (cb) => {
+            if (cb.checked) {
                 document.documentElement.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
+                localStorage.setItem('theme','dark');
             } else {
                 document.documentElement.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light');
+                localStorage.setItem('theme','light');
             }
-        }
+        };
 
         window.cerrarSesion = () => {
-            if(confirm("¿Cerrar sesión?")) {
+            if (confirm("¿Cerrar sesión?"))
                 signOut(auth).then(() => window.location.href = "index.html");
-            }
-        }
+        };
 
         window.eliminarCuenta = async () => {
-            if(!confirm("⚠️ ¿ESTÁS SEGURO? \n\nEsta acción borrará todos tus datos y no se puede deshacer.")) return;
-            
+            if (!confirm("⚠️ ¿ESTÁS SEGURO?\n\nEsta acción borrará todos tus datos y no se puede deshacer.")) return;
             const promptName = prompt("Para confirmar, escribe tu nombre de usuario:");
-            if(!promptName) return; 
-
+            if (!promptName) return;
             try {
-                await deleteDoc(doc(db, "usuarios", currentUser.uid));
+                await deleteDoc(doc(db,"usuarios",currentUser.uid));
                 await deleteUser(currentUser);
                 alert("Cuenta eliminada correctamente. Adiós 👋");
                 window.location.href = "index.html";
             } catch(e) {
-                console.error(e);
-                if(e.code === 'auth/requires-recent-login') {
+                if (e.code === 'auth/requires-recent-login') {
                     alert("Por seguridad, debes cerrar sesión y volver a entrar para poder borrar tu cuenta.");
                     signOut(auth).then(() => window.location.href = "index.html");
                 } else {
                     alert("Error al borrar: " + e.message);
                 }
             }
+        };
+
+        window.onload = window.initTheme;
+    </script>
+
+    <style>
+        /* ── VARIABLES ──────────────────────────────────────────────── */
+        :root {
+            --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550;
+            --card:#fff; --border:rgba(0,0,0,0.07);
+            --accent:#e8400c; --gold:#f59e0b;
+            --danger:#dc2626; --danger-bg:rgba(220,38,38,.08);
+            --shadow:0 4px 20px rgba(0,0,0,0.07);
+            --radius:18px;
+        }
+        html.dark-mode {
+            --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070;
+            --card:#241c14; --border:rgba(255,255,255,0.08);
+            --shadow:0 4px 20px rgba(0,0,0,0.45);
+            --danger-bg:rgba(220,38,38,.12);
         }
 
-        window.onload = initTheme;
-    </script>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body {
+            font-family:'Bricolage Grotesque',sans-serif;
+            background:var(--bg); color:var(--text);
+            min-height:100vh; padding-bottom:90px;
+        }
+
+        /* ── TOPBAR ─────────────────────────────────────────────────── */
+        .topbar {
+            position:sticky; top:0; z-index:50;
+            display:flex; align-items:center; gap:12px;
+            padding:14px 18px; background:var(--bg);
+            border-bottom:1px solid var(--border);
+            backdrop-filter:blur(12px);
+        }
+        .topbar h1{font-size:1.2rem; font-weight:800; flex:1;}
+        .btn-ico {
+            background:var(--card); border:1px solid var(--border);
+            width:38px; height:38px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; color:var(--text); transition:transform .15s;
+            box-shadow:var(--shadow); text-decoration:none;
+        }
+        .btn-ico:active{transform:scale(.9);}
+
+        /* ── CARNET ─────────────────────────────────────────────────── */
+        .carnet-wrap {
+            padding:22px 18px 0;
+            max-width:500px; margin:0 auto;
+        }
+
+        .carnet {
+            position:relative; border-radius:24px; overflow:hidden;
+            padding:26px 24px 24px;
+            background:linear-gradient(145deg,#1a0a04 0%,#2d1206 50%,#1a0804 100%);
+            box-shadow:
+                0 0 0 1px rgba(232,64,12,.3),
+                0 20px 50px rgba(0,0,0,.45),
+                0 0 60px rgba(232,64,12,.08);
+            color:white;
+            animation:cardIn .5s cubic-bezier(.34,1.56,.64,1) .05s backwards;
+        }
+        @keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
+
+        /* Blobs internos */
+        .cb1,.cb2 {
+            position:absolute; border-radius:50%; filter:blur(50px);
+            pointer-events:none; opacity:.3;
+        }
+        .cb1{width:200px;height:200px;background:#e8400c;top:-60px;left:-40px;}
+        .cb2{width:160px;height:160px;background:#f59e0b;bottom:-40px;right:-30px;}
+
+        /* Grano */
+        .carnet::after {
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+        }
+
+        .carnet-top {
+            position:relative; z-index:1;
+            display:flex; align-items:flex-start; justify-content:space-between;
+            margin-bottom:22px;
+        }
+        .carnet-app {
+            font-size:.6rem; font-weight:800; letter-spacing:3px;
+            text-transform:uppercase; opacity:.55;
+        }
+        .carnet-role {
+            padding:4px 12px; border-radius:20px;
+            font-size:.68rem; font-weight:800;
+            backdrop-filter:blur(6px);
+        }
+        .role-staff  { background:rgba(232,64,12,.3); border:1px solid rgba(232,64,12,.4); color:#fca5a5; }
+        .role-member { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:rgba(255,255,255,.8); }
+
+        .carnet-body {
+            position:relative; z-index:1;
+            display:flex; align-items:center; gap:16px;
+        }
+        .carnet-avatar {
+            width:64px; height:64px; border-radius:50%; flex-shrink:0;
+            background:linear-gradient(135deg,var(--accent),var(--gold));
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.4rem; font-weight:800; color:white;
+            border:2px solid rgba(255,255,255,.2);
+            box-shadow:0 4px 14px rgba(232,64,12,.4);
+        }
+        .carnet-info{ flex:1; min-width:0; }
+        .carnet-name {
+            font-size:clamp(1.4rem,7vw,2rem); font-weight:800; line-height:1.1;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+            text-shadow:0 2px 4px rgba(0,0,0,.2);
+        }
+        .carnet-id {
+            font-family:'Share Tech Mono',monospace;
+            font-size:.8rem; opacity:.6; margin-top:5px; letter-spacing:1px;
+        }
+        .carnet-since {
+            font-size:.7rem; opacity:.5; margin-top:3px;
+        }
+
+        /* Línea de corte */
+        .carnet-cut {
+            position:relative; z-index:1;
+            display:flex; align-items:center;
+            margin:18px -24px 0; padding:0 24px;
+        }
+        .cut-circle{
+            width:20px; height:20px; border-radius:50%;
+            background:var(--bg); flex-shrink:0; margin:0 -10px;
+        }
+        .cut-line{
+            flex:1; border-top:1.5px dashed rgba(255,255,255,.18);
+        }
+
+        /* Footer del carnet */
+        .carnet-footer {
+            position:relative; z-index:1;
+            display:flex; align-items:center; justify-content:space-between;
+            margin-top:14px;
+        }
+        .carnet-year {
+            font-size:.65rem; font-weight:800; text-transform:uppercase;
+            letter-spacing:2px; opacity:.4;
+        }
+        .carnet-dots {
+            display:flex; gap:4px;
+        }
+        .cdot {
+            width:8px; height:8px; border-radius:50%;
+            background:rgba(255,255,255,.2);
+        }
+        .cdot:last-child{background:var(--accent); opacity:.8;}
+
+        /* ── SECCIONES ──────────────────────────────────────────────── */
+        .wrap { max-width:500px; margin:0 auto; padding:0 18px; }
+
+        .sec-label {
+            font-size:.68rem; font-weight:800; text-transform:uppercase;
+            letter-spacing:1.5px; color:var(--text2);
+            margin:24px 0 8px; display:flex; align-items:center; gap:8px;
+        }
+        .sec-label::after{content:''; flex:1; height:1px; background:var(--border);}
+
+        /* Lista de items */
+        .action-list {
+            background:var(--card); border-radius:var(--radius);
+            border:1px solid var(--border); overflow:hidden;
+            box-shadow:var(--shadow);
+        }
+
+        .action-item {
+            padding:15px 18px;
+            display:flex; align-items:center; justify-content:space-between;
+            border-bottom:1px solid var(--border);
+            cursor:pointer; transition:background .15s;
+            text-decoration:none; color:var(--text);
+        }
+        .action-item:last-child{border-bottom:none;}
+        .action-item:active{background:var(--bg2);}
+
+        .ai-left{display:flex; align-items:center; gap:13px; font-weight:700; font-size:.9rem;}
+        .ai-ico {
+            width:36px; height:36px; border-radius:10px; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+            color:white; font-size:18px;
+        }
+        .ic-purple{background:linear-gradient(135deg,#7c3aed,#4f46e5);}
+        .ic-cyan  {background:linear-gradient(135deg,#0ea5e9,#06b6d4);}
+        .ic-blue  {background:linear-gradient(135deg,#3b82f6,#6366f1);}
+        .ic-slate {background:linear-gradient(135deg,#64748b,#475569);}
+        .ic-red   {background:linear-gradient(135deg,#ef4444,#dc2626);}
+
+        .ai-arr{font-size:18px; color:var(--text2); opacity:.4;}
+
+        /* Danger items */
+        .action-item.danger .ai-left{color:var(--danger);}
+        .action-item.danger:active{background:var(--danger-bg);}
+
+        /* Toggle switch */
+        .switch{position:relative; display:inline-block; width:46px; height:26px;}
+        .switch input{opacity:0; width:0; height:0;}
+        .slider{
+            position:absolute; cursor:pointer; inset:0;
+            background:#cbd5e1; transition:.35s; border-radius:34px;
+        }
+        .slider::before{
+            content:""; position:absolute;
+            width:20px; height:20px; left:3px; bottom:3px;
+            background:white; transition:.35s; border-radius:50%;
+            box-shadow:0 1px 4px rgba(0,0,0,.2);
+        }
+        input:checked + .slider{background:var(--accent);}
+        input:checked + .slider::before{transform:translateX(20px);}
+
+        /* ── VERSION FOOTER ─────────────────────────────────────────── */
+        .app-version {
+            text-align:center; color:var(--text2);
+            font-size:.72rem; margin-top:28px; padding-bottom:8px;
+            display:flex; flex-direction:column; align-items:center; gap:4px;
+        }
+        .app-version strong{color:var(--text);}
+
+        /* ── BOTTOM NAV ─────────────────────────────────────────────── */
+        .bottom-nav{
+            position:fixed; bottom:0; left:0; width:100%;
+            background:var(--card); border-top:1px solid var(--border);
+            display:flex; justify-content:space-around;
+            padding:10px 0 max(10px,env(safe-area-inset-bottom));
+            z-index:1000; backdrop-filter:blur(12px);
+        }
+        .nav-item{
+            border:none; background:transparent; color:var(--text2);
+            display:flex; flex-direction:column; align-items:center;
+            font-size:.68rem; cursor:pointer; gap:3px; flex:1;
+            text-decoration:none; font-family:inherit; transition:color .15s;
+        }
+        .nav-item.active{color:var(--accent); font-weight:800;}
+        .nav-item .material-symbols-outlined{font-size:24px;}
+    </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Mi Perfil</h1>
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <a href="panel.html" class="btn-ico" aria-label="Volver al panel">
+            <span class="material-symbols-outlined" style="font-size:20px">home</span>
+        </a>
+        <h1>Mi perfil</h1>
+    </div>
 
+    <!-- CARNET ─────────────────────────────────────────────────────── -->
+    <div class="carnet-wrap">
         <div class="carnet">
-            <div class="carnet-header">
-                <span class="app-name">FIESTAS PANTANO</span>
-                <span class="carnet-role" id="u-role">Cargando...</span>
+            <div class="cb1"></div>
+            <div class="cb2"></div>
+
+            <div class="carnet-top">
+                <div class="carnet-app">Fiestas Pantano · 2026</div>
+                <div id="u-role" class="carnet-role role-member">Cargando…</div>
             </div>
-            
+
             <div class="carnet-body">
-                <div class="user-name" id="u-name">...</div>
-                <div class="user-id" id="u-id">****</div>
+                <div class="carnet-avatar" id="avatar-ini">··</div>
+                <div class="carnet-info">
+                    <div class="carnet-name" id="u-name">···</div>
+                    <div class="carnet-id"   id="u-id">ID · ········</div>
+                    <div class="carnet-since" id="u-since"></div>
+                </div>
+            </div>
+
+            <!-- Corte de ticket -->
+            <div class="carnet-cut">
+                <div class="cut-circle"></div>
+                <div class="cut-line"></div>
+                <div class="cut-circle"></div>
+            </div>
+
+            <div class="carnet-footer">
+                <div class="carnet-year">Edición 2026</div>
+                <div class="carnet-dots">
+                    <div class="cdot"></div>
+                    <div class="cdot"></div>
+                    <div class="cdot"></div>
+                </div>
             </div>
         </div>
+    </div>
 
+    <!-- SECCIONES ──────────────────────────────────────────────────── -->
+    <div class="wrap">
+
+        <!-- ADMIN — mismo id del original -->
         <div id="admin-zone" style="display:none;">
-            <div class="section-title">ADMINISTRACIÓN</div>
+            <div class="sec-label">Administración</div>
             <div class="action-list">
-                <div class="action-item" onclick="window.location.href='gestion.html'">
-                    <div class="a-left">
-                        <div class="icon-box i-admin"><span class="material-symbols-outlined">settings_suggest</span></div>
-                        Gestionar Eventos
+                <a href="gestion.html" class="action-item">
+                    <div class="ai-left">
+                        <div class="ai-ico ic-purple">
+                            <span class="material-symbols-outlined">settings_suggest</span>
+                        </div>
+                        Gestionar eventos
                     </div>
-                    <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
-                </div>
+                    <span class="material-symbols-outlined ai-arr">chevron_right</span>
+                </a>
+                <a href="codigos.html" class="action-item">
+                    <div class="ai-left">
+                        <div class="ai-ico ic-purple">
+                            <span class="material-symbols-outlined">confirmation_number</span>
+                        </div>
+                        Invitaciones
+                    </div>
+                    <span class="material-symbols-outlined ai-arr">chevron_right</span>
+                </a>
             </div>
         </div>
 
-        <div class="section-title">AYUDA</div>
+        <!-- AYUDA -->
+        <div class="sec-label">Ayuda</div>
         <div class="action-list">
-            <div class="action-item" onclick="window.location.href='guia.html'">
-                <div class="a-left">
-                    <div class="icon-box i-help"><span class="material-symbols-outlined">help</span></div>
-                    Guía de la App
+            <a href="guia.html" class="action-item">
+                <div class="ai-left">
+                    <div class="ai-ico ic-cyan">
+                        <span class="material-symbols-outlined">help</span>
+                    </div>
+                    Guía de la app
                 </div>
-                <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
-            </div>
+                <span class="material-symbols-outlined ai-arr">chevron_right</span>
+            </a>
         </div>
 
-        <div class="section-title">CONFIGURACIÓN</div>
+        <!-- CONFIGURACIÓN -->
+        <div class="sec-label">Configuración</div>
         <div class="action-list">
-            <div class="action-item">
-                <div class="a-left">
-                    <div class="icon-box i-theme"><span class="material-symbols-outlined">dark_mode</span></div>
-                    Modo Oscuro
+            <div class="action-item" style="cursor:default;">
+                <div class="ai-left">
+                    <div class="ai-ico ic-blue">
+                        <span class="material-symbols-outlined">dark_mode</span>
+                    </div>
+                    Modo oscuro
                 </div>
+                <!-- Mismo toggle del original -->
                 <label class="switch">
                     <input type="checkbox" id="theme-toggle" onchange="toggleTheme(this)">
                     <span class="slider"></span>
@@ -223,57 +464,81 @@
             </div>
         </div>
 
-        <div class="section-title">LEGAL</div>
+        <!-- LEGAL -->
+        <div class="sec-label">Legal</div>
         <div class="action-list">
-            <div class="action-item" onclick="window.location.href='terminos.html'">
-                <div class="a-left">
-                    <div class="icon-box i-legal"><span class="material-symbols-outlined">gavel</span></div>
-                    Términos y Condiciones
+            <a href="terminos.html" class="action-item">
+                <div class="ai-left">
+                    <div class="ai-ico ic-slate">
+                        <span class="material-symbols-outlined">gavel</span>
+                    </div>
+                    Términos y condiciones
                 </div>
-                <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
+                <span class="material-symbols-outlined ai-arr">chevron_right</span>
+            </a>
+            <a href="privacidad.html" class="action-item">
+                <div class="ai-left">
+                    <div class="ai-ico ic-slate">
+                        <span class="material-symbols-outlined">policy</span>
+                    </div>
+                    Política de privacidad
+                </div>
+                <span class="material-symbols-outlined ai-arr">chevron_right</span>
+            </a>
+            <a href="cookies.html" class="action-item">
+                <div class="ai-left">
+                    <div class="ai-ico ic-slate">
+                        <span class="material-symbols-outlined">cookie</span>
+                    </div>
+                    Política de cookies
+                </div>
+                <span class="material-symbols-outlined ai-arr">chevron_right</span>
+            </a>
+        </div>
+
+        <!-- CUENTA -->
+        <div class="sec-label">Cuenta</div>
+        <div class="action-list">
+            <div class="action-item danger" onclick="cerrarSesion()">
+                <div class="ai-left">
+                    <div class="ai-ico ic-red">
+                        <span class="material-symbols-outlined">logout</span>
+                    </div>
+                    Cerrar sesión
+                </div>
             </div>
-            <div class="action-item" onclick="window.location.href='privacidad.html'">
-                <div class="a-left">
-                    <div class="icon-box i-legal"><span class="material-symbols-outlined">policy</span></div>
-                    Política de Privacidad
+            <div class="action-item danger" onclick="eliminarCuenta()">
+                <div class="ai-left">
+                    <div class="ai-ico ic-red">
+                        <span class="material-symbols-outlined">delete_forever</span>
+                    </div>
+                    <span style="font-weight:800;">Eliminar cuenta</span>
                 </div>
-                <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
-            </div>
-            <div class="action-item" onclick="window.location.href='cookies.html'">
-                <div class="a-left">
-                    <div class="icon-box i-legal"><span class="material-symbols-outlined">cookie</span></div>
-                    Política de Cookies
-                </div>
-                <span class="material-symbols-outlined" style="color:#ccc">chevron_right</span>
             </div>
         </div>
 
-        <div class="section-title">CUENTA</div>
-        <div class="action-list">
-            <div class="action-item" onclick="cerrarSesion()">
-                <div class="a-left">
-                    <div class="icon-box i-logout"><span class="material-symbols-outlined">logout</span></div>
-                    <span style="color:var(--danger)">Cerrar Sesión</span>
-                </div>
-            </div>
-            <div class="action-item" onclick="eliminarCuenta()">
-                <div class="a-left">
-                    <div class="icon-box i-delete"><span class="material-symbols-outlined">delete_forever</span></div>
-                    <span style="color:var(--danger); font-weight:bold;">Eliminar Cuenta</span>
-                </div>
-            </div>
+        <!-- VERSION -->
+        <div class="app-version">
+            <strong>Fiestas Pantano App</strong>
+            v2.2 · 2026
         </div>
-        
-        <p style="text-align:center; color:gray; font-size:0.75rem; margin-top:20px;">
-            Fiestas Pantano App v2.2
-        </p>
+
     </div>
 
+    <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
-        <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
-        <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
-        <a href="mis_inscripciones.html" class="nav-item"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
-        <a href="#" class="nav-item active"><span class="material-symbols-outlined">person</span>Perfil</a>
+        <a href="panel.html"             class="nav-item">
+            <span class="material-symbols-outlined">home</span>Inicio
+        </a>
+        <a href="actividades.html"       class="nav-item">
+            <span class="material-symbols-outlined">event</span>Fiestas
+        </a>
+        <a href="mis_inscripciones.html" class="nav-item">
+            <span class="material-symbols-outlined">confirmation_number</span>Tickets
+        </a>
+        <a href="#"                      class="nav-item active">
+            <span class="material-symbols-outlined">person</span>Perfil
+        </a>
     </nav>
 
 </body>
