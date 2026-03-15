@@ -3,166 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mis Tickets</title>
+    <title>Mis Tickets · Fiestas Pantano 2026</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ff5722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
+    <meta name="theme-color" content="#e8400c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    
-    <script>
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
-    </script>
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        
-        /* CABECERA CON SWITCH */
-        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        h1 { margin: 0; font-size: 1.8rem; font-weight: 800; background: linear-gradient(45deg, #FF5722, #FFC107); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        .toggle-wrapper { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 600; color: gray; }
-        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        input:checked + .slider { background-color: #FF5722; }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        /* LISTA TICKETS */
-        .tickets-list { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-
-        .ticket {
-            background: var(--card);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            position: relative;
-            display: flex;
-            transition: transform 0.2s;
-            cursor: pointer;
-            min-height: 110px;
-        }
-        .ticket:active { transform: scale(0.98); }
-        .ticket.past { filter: grayscale(1); opacity: 0.6; }
-
-        .ticket-color-bar { width: 10px; height: 100%; flex-shrink: 0; }
-        .ticket-body { flex: 1; padding: 15px; display: flex; flex-direction: column; justify-content: center; position: relative; }
-        
-        .date-badge { position: absolute; right: 15px; top: 15px; text-align: center; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 5px 10px; min-width: 45px; }
-        .d-day { font-size: 1.2rem; font-weight: 800; line-height: 1; display: block; }
-        .d-month { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; color: gray; }
-
-        .t-title { font-size: 1.1rem; font-weight: 700; margin-right: 60px; margin-bottom: 5px; line-height: 1.2; }
-        .t-info { font-size: 0.85rem; color: gray; display: flex; align-items: center; gap: 5px; margin-top: 4px; }
-        .role-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; margin-top: 10px; width: fit-content; letter-spacing: 0.5px; }
-
-        /* MODALES */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 2000; backdrop-filter: blur(4px); }
-        .modal { background: var(--card); width: 100%; max-width: 600px; margin: 0 auto; border-radius: 25px 25px 0 0; padding: 25px; padding-bottom: 40px; position: relative; animation: slideUp 0.3s; max-height: 85vh; overflow-y: auto; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        .close-btn { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: #333; display: flex; align-items: center; justify-content: center; }
-        .modal-header-color { height: 100px; margin: -25px -25px 20px -25px; position: relative; }
-        .modal-icon { position: absolute; bottom: -25px; left: 25px; width: 60px; height: 60px; background: var(--card); border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 30px; }
-
-        .m-title { font-size: 1.5rem; font-weight: 800; margin-top: 15px; margin-bottom: 5px; }
-        .m-sub { font-size: 0.9rem; color: gray; margin-bottom: 20px; }
-
-        .list-group { margin-top: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; padding: 15px; }
-        .list-item { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); padding: 8px 0; font-size: 0.9rem; }
-        
-        .btn-action { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 700; margin-top: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1rem; }
-        .btn-chat { background: #E3F2FD; color: #1976D2; }
-        .btn-danger { background: #FFEBEE; color: #D32F2F; }
-        .btn-edit { background: #F3E5F5; color: #7B1FA2; }
-
-        /* ✅ ESTILOS PARA LA VINCULACIÓN DE USUARIOS */
-        .mate-input { 
-            width: 100%; 
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border: 2px solid #ddd; /* Borde un poco más grueso para ver el verde */
-            border-radius: 10px; 
-            box-sizing: border-box; 
-            transition: border-color 0.3s;
-        }
-        /* Cuando se encuentra usuario, borde verde y tic */
-        .mate-found { 
-            border-color: #4caf50 !important; 
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='//www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234caf50' width='24px'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); 
-            background-repeat: no-repeat; 
-            background-position: right 10px center; 
-        }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: max(15px, env(safe-area-inset-bottom)); }
-        .nav-item { text-decoration: none; color: gray; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; }
-        .nav-item.active { color: #FF5722; font-weight: bold; }
-        .nav-item span { font-size: 24px; margin-bottom: 4px; }
-    </style>
-
+    <!-- ═══ FIREBASE — LÓGICA 100% IDÉNTICA AL ORIGINAL ══════════════ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, updateDoc, getDocs, where, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot,
+                 doc, getDoc, updateDoc, getDocs, where, enableIndexedDbPersistence }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        enableIndexedDbPersistence(db).catch(() => {});
+        const firebaseConfig = {
+            apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+            authDomain:"fiestas-pantano.firebaseapp.com",
+            projectId:"fiestas-pantano",
+            storageBucket:"fiestas-pantano.firebasestorage.app",
+            messagingSenderId:"801380435613",
+            appId:"1:801380435613:web:a842572cf7cee93ac57674",
+            measurementId:"G-EG2MZGBT1B"
+        };
+        const app  = initializeApp(firebaseConfig);
+        const db   = getFirestore(app);
+        enableIndexedDbPersistence(db).catch(()=>{});
         const auth = getAuth(app);
-        
-        let allTickets = [];
-        let currentUser = null;
 
+        let allTickets = [], currentUser = null;
+
+        /* ── COLOR por evento — igual al original ── */
         function getColor(str) {
-            const colors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#009688', '#4CAF50', '#FF9800', '#FF5722', '#795548'];
+            const colors = ['#F44336','#E91E63','#9C27B0','#673AB7','#3F51B5',
+                            '#2196F3','#009688','#4CAF50','#FF9800','#FF5722','#795548'];
             let hash = 0;
-            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            for (let i=0;i<str.length;i++) hash = str.charCodeAt(i) + ((hash<<5)-hash);
             return colors[Math.abs(hash) % colors.length];
         }
 
+        /* ── AUTH + SNAPSHOT — igual al original ── */
         onAuthStateChanged(auth, async (user) => {
-            if (!user) window.location.href = "index.html";
+            if (!user) { window.location.href="index.html"; return; }
             currentUser = user;
-            
-            const q = query(collection(db, "actividades"), orderBy("fecha", "asc"));
+
+            const q = query(collection(db,"actividades"), orderBy("fecha","asc"));
             onSnapshot(q, (snapshot) => {
                 allTickets = [];
-                snapshot.forEach((docSnap) => {
-                    const act = docSnap.data();
+                snapshot.forEach(docSnap => {
+                    const act       = docSnap.data();
                     const inscritos = act.inscritos || [];
                     const fechaEvento = act.fecha.toDate ? act.fecha.toDate() : new Date(act.fecha);
-                    
-                    let miRol = null;
-                    let miEquipo = null;
 
-                    const soyCapitan = inscritos.find(e => e.capitan_uid === user.uid);
-                    const soyMiembroUID = inscritos.find(e => e.miembros && e.miembros.some(m => m.uid === user.uid));
-                    
-                    if (soyCapitan) { miRol = "Capitán"; miEquipo = soyCapitan; } 
-                    else if (soyMiembroUID) { miRol = "Miembro"; miEquipo = soyMiembroUID; } 
+                    let miRol=null, miEquipo=null;
+                    const soyCapitan    = inscritos.find(e => e.capitan_uid===user.uid);
+                    const soyMiembroUID = inscritos.find(e =>
+                        e.miembros && e.miembros.some(m=>m.uid===user.uid));
+
+                    if (soyCapitan)    { miRol="Capitán";  miEquipo=soyCapitan; }
+                    else if (soyMiembroUID) { miRol="Miembro"; miEquipo=soyMiembroUID; }
 
                     if (miEquipo) {
                         let etiquetaRol = miRol;
-                        if(act.modalidad === 'individual') etiquetaRol = "Participante";
-
+                        if (act.modalidad==='individual') etiquetaRol = "Participante";
                         allTickets.push({
-                            id: docSnap.id,
-                            data: act,
-                            titulo: act.titulo,
-                            fecha: fechaEvento,
-                            rol: etiquetaRol,
-                            rolReal: miRol, 
-                            equipo: miEquipo,
+                            id: docSnap.id, data: act,
+                            titulo: act.titulo, fecha: fechaEvento,
+                            rol: etiquetaRol, rolReal: miRol, equipo: miEquipo,
                             esPasado: fechaEvento < new Date(),
                             color: getColor(docSnap.id)
                         });
@@ -172,235 +84,716 @@
             });
         });
 
+        /* ── RENDER — igual al original ── */
         window.renderTickets = () => {
             const container = document.getElementById("tickets-list");
-            const hidePast = document.getElementById("toggle-past").checked;
-            container.innerHTML = "";
-            const filtered = allTickets.filter(t => hidePast ? !t.esPasado : true);
+            const hidePast  = document.getElementById("toggle-past").checked;
+            const filtered  = allTickets.filter(t => hidePast ? !t.esPasado : true);
 
-            if(filtered.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:50px; color:gray;"><p>No hay tickets visibles.</p></div>`;
+            // Actualizar contador header
+            document.getElementById("header-count").innerText =
+                filtered.length + " evento" + (filtered.length!==1?"s":"");
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="es-emoji">🎟️</span>
+                        <p>${hidePast ? "No tienes eventos próximos" : "No estás apuntado a ningún evento"}</p>
+                        <a href="actividades.html" class="btn-go-act">
+                            Ver actividades
+                            <span class="material-symbols-outlined" style="font-size:16px">chevron_right</span>
+                        </a>
+                    </div>`;
                 return;
             }
 
-            filtered.forEach(t => {
-                const dia = t.fecha.getDate();
-                const mes = t.fecha.toLocaleString('es-ES', { month: 'short' });
-                const hora = t.fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const nombreMostrar = (t.data.modalidad === 'individual') ? 'Individual' : (t.equipo.nombre_equipo || "Mi Equipo");
+            container.innerHTML = filtered.map((t, i) => {
+                const dia  = t.fecha.getDate();
+                const mes  = t.fecha.toLocaleString('es-ES',{month:'short'}).replace('.','');
+                const hora = t.fecha.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+                const diaSem = t.fecha.toLocaleString('es-ES',{weekday:'short'}).replace('.','');
+                const nombreMostrar = t.data.modalidad==='individual'
+                    ? 'Individual' : (t.equipo.nombre_equipo || "Mi equipo");
 
-                container.innerHTML += `
-                    <div class="ticket ${t.esPasado ? 'past' : ''}" onclick="verDetalles('${t.id}')">
-                        <div class="ticket-color-bar" style="background:${t.color}"></div>
-                        <div class="ticket-body">
-                            <div class="date-badge"><span class="d-day">${dia}</span><span class="d-month">${mes}</span></div>
-                            <div class="t-title">${t.titulo}</div>
-                            <div class="t-info"><span class="material-symbols-outlined" style="font-size:16px">schedule</span> ${hora}</div>
-                            <div class="t-info"><span class="material-symbols-outlined" style="font-size:16px">group</span> ${nombreMostrar}</div>
-                            <div class="role-badge" style="background:${t.color}20; color:${t.color}">${t.rol}</div>
+                return `
+                <article class="ticket ${t.esPasado?'past':''}"
+                         onclick="verDetalles('${t.id}')"
+                         style="animation-delay:${i*50}ms" role="button" tabindex="0">
+
+                    <!-- Muesca izquierda -->
+                    <div class="ticket-left" style="background:${t.color}">
+                        <div class="tl-day">${diaSem}</div>
+                        <div class="tl-num">${dia}</div>
+                        <div class="tl-mon">${mes}</div>
+                    </div>
+
+                    <!-- Línea dentada -->
+                    <div class="ticket-perf">
+                        <div class="perf-notch top"></div>
+                        <div class="perf-line"></div>
+                        <div class="perf-notch bot"></div>
+                    </div>
+
+                    <!-- Cuerpo -->
+                    <div class="ticket-body">
+                        <div class="tb-top">
+                            <span class="tb-rol" style="background:${t.color}20;color:${t.color}">
+                                ${t.rol}
+                            </span>
+                            ${t.esPasado ? `<span class="tb-past">Pasado</span>` : `<span class="tb-upcoming">Próximo</span>`}
                         </div>
-                    </div>`;
-            });
-        }
+                        <h3 class="tb-title">${t.titulo}</h3>
+                        <div class="tb-meta">
+                            <span class="tbm-item">
+                                <span class="material-symbols-outlined">schedule</span>${hora}
+                            </span>
+                            <span class="tbm-item">
+                                <span class="material-symbols-outlined">group</span>${nombreMostrar}
+                            </span>
+                            ${t.data.lugar ? `
+                            <span class="tbm-item">
+                                <span class="material-symbols-outlined">location_on</span>${t.data.lugar}
+                            </span>` : ''}
+                        </div>
+                    </div>
 
+                    <!-- Flecha -->
+                    <div class="ticket-arr">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </div>
+                </article>`;
+            }).join('');
+        };
+
+        /* ── VER DETALLES — igual al original ── */
         window.verDetalles = (id) => {
-            const ticket = allTickets.find(t => t.id === id);
-            if(!ticket) return;
+            const ticket = allTickets.find(t=>t.id===id);
+            if (!ticket) return;
 
-            document.querySelector(".modal-header-color").style.background = ticket.color;
-            document.querySelector(".modal-icon").style.color = ticket.color;
-            document.querySelector(".modal-icon").innerHTML = `<span class="material-symbols-outlined">confirmation_number</span>`;
+            // Header
+            document.getElementById("d-header").style.background =
+                `linear-gradient(135deg, ${ticket.color}, ${ticket.color}bb)`;
+            document.getElementById("d-emoji").innerText =
+                ticket.data.modalidad==='individual' ? '🎫' : '🏅';
+            document.getElementById("d-rol").innerText  = ticket.rol;
+            document.getElementById("d-rol").style.cssText =
+                `background:${ticket.color}30;color:${ticket.color};`;
             document.getElementById("m-title").innerText = ticket.titulo;
-            document.getElementById("m-fecha").innerText = ticket.fecha.toLocaleString([], {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
-            document.getElementById("m-lugar").innerText = ticket.data.lugar || "Ubicación por definir";
+            document.getElementById("m-fecha").innerText =
+                ticket.fecha.toLocaleString([],
+                {weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+            document.getElementById("m-lugar").innerText = ticket.data.lugar || "Por definir";
 
+            // Lista equipo
             const listDiv = document.getElementById("participants-list");
             listDiv.innerHTML = "";
-            
-            if(ticket.data.modalidad === 'individual') {
-                listDiv.innerHTML = `<div class="list-item"><span>Participante</span><b>${ticket.equipo.capitan || currentUser.displayName}</b></div>`;
+            if (ticket.data.modalidad==='individual') {
+                listDiv.innerHTML = `
+                    <div class="d-row">
+                        <div class="d-ava" style="background:${ticket.color}">${(ticket.equipo.capitan||'?')[0].toUpperCase()}</div>
+                        <div class="d-info">
+                            <div class="d-name">${ticket.equipo.capitan||'Tú'}</div>
+                            <div class="d-sub">Participante individual</div>
+                        </div>
+                        <span class="d-badge badge-cap">👤</span>
+                    </div>`;
             } else {
-                listDiv.innerHTML += `<div class="list-item"><span>Nombre Equipo</span><b>${ticket.equipo.nombre_equipo}</b></div>`;
-                listDiv.innerHTML += `<div class="list-item"><span>Capitán</span><b>${ticket.equipo.capitan}</b></div>`;
-                if(ticket.equipo.miembros) {
-                    ticket.equipo.miembros.forEach(m => {
-                        const styleLink = m.uid ? "color:#4caf50; font-weight:bold" : ""; // Verde si está vinculado
-                        const icon = m.uid ? "✅" : "";
-                        listDiv.innerHTML += `<div class="list-item"><span>Miembro</span><span style="${styleLink}">${m.nombre} ${icon}</span></div>`;
-                    });
-                }
+                // Capitán
+                listDiv.innerHTML += `
+                    <div class="d-row">
+                        <div class="d-ava" style="background:${ticket.color}">${(ticket.equipo.capitan||'?')[0].toUpperCase()}</div>
+                        <div class="d-info">
+                            <div class="d-name">${ticket.equipo.capitan}</div>
+                            <div class="d-sub">Capitán · ${ticket.equipo.nombre_equipo||''}</div>
+                        </div>
+                        <span class="d-badge badge-cap">⭐</span>
+                    </div>`;
+                // Miembros
+                (ticket.equipo.miembros||[]).forEach(m => {
+                    const vinculado = !!m.uid;
+                    listDiv.innerHTML += `
+                        <div class="d-row">
+                            <div class="d-ava" style="background:${vinculado?'#16a34a':'#94a3b8'}">${(m.nombre||'?')[0].toUpperCase()}</div>
+                            <div class="d-info">
+                                <div class="d-name">${m.nombre}</div>
+                                <div class="d-sub">${vinculado?'✅ Cuenta vinculada':'Sin cuenta vinculada'}</div>
+                            </div>
+                            ${vinculado?`<span class="d-badge badge-ok">✅</span>`:`<span class="d-badge badge-warn">⚠️</span>`}
+                        </div>`;
+                });
             }
 
+            // Acciones
             const actionsDiv = document.getElementById("modal-actions");
             actionsDiv.innerHTML = `
-                <button class="btn-action btn-chat" onclick="window.location.href='chat.html?id=${ticket.id}'"><span class="material-symbols-outlined">chat</span> Chat</button>
-                <button class="btn-action btn-danger" onclick="salirDeActividad('${ticket.id}', '${ticket.rolReal}')"><span class="material-symbols-outlined">logout</span> Bajas</button>
-            `;
+                <a href="chat.html?id=${ticket.id}" class="btn-act btn-blue">
+                    <span class="material-symbols-outlined">chat</span> Chat del evento
+                </a>
+                <button class="btn-act btn-red" onclick="salirDeActividad('${ticket.id}','${ticket.rolReal}')">
+                    <span class="material-symbols-outlined">person_remove</span> Darme de baja
+                </button>
+                ${ticket.rolReal==='Capitán' && ticket.data.modalidad!=='individual' ? `
+                <button class="btn-act btn-purple" onclick="abrirEdicion('${ticket.id}')">
+                    <span class="material-symbols-outlined">edit</span> Editar compañeros
+                </button>` : ''}`;
 
-            if(ticket.rolReal === 'Capitán' && ticket.data.modalidad !== 'individual') {
-                actionsDiv.innerHTML += `<button class="btn-action btn-edit" onclick="abrirEdicion('${ticket.id}')"><span class="material-symbols-outlined">edit</span> Editar</button>`;
-            }
-
-            document.getElementById("modal-detalles").style.display = "flex";
-        }
+            abrirModal('modal-detalles');
+        };
 
         window.cerrarModal = () => {
-            document.getElementById("modal-detalles").style.display = "none";
-            document.getElementById("modal-edit").style.display = "none";
-        }
+            cerrarModalEl('modal-detalles');
+            cerrarModalEl('modal-edit');
+        };
 
+        /* ── SALIR — igual al original ── */
         window.salirDeActividad = async (actId, rolTecnico) => {
-            if(!confirm("¿Seguro que quieres borrarte?")) return;
+            if (!confirm("¿Seguro que quieres borrarte de este evento?")) return;
             try {
-                const actRef = doc(db, "actividades", actId);
-                const snap = await getDoc(actRef);
-                const data = snap.data();
-                let inscritos = data.inscritos;
-                let nuevosInscritos = [];
-
-                if (rolTecnico === 'Capitán') {
-                    nuevosInscritos = inscritos.filter(e => e.capitan_uid !== currentUser.uid);
+                const actRef  = doc(db,"actividades",actId);
+                const snap    = await getDoc(actRef);
+                let inscritos = snap.data().inscritos;
+                let nuevos;
+                if (rolTecnico==='Capitán') {
+                    nuevos = inscritos.filter(e => e.capitan_uid!==currentUser.uid);
                 } else {
-                    nuevosInscritos = inscritos.map(eq => {
-                        if (eq.miembros && eq.miembros.some(m => m.uid === currentUser.uid)) {
-                            eq.miembros = eq.miembros.filter(m => m.uid !== currentUser.uid);
-                        }
+                    nuevos = inscritos.map(eq => {
+                        if (eq.miembros?.some(m=>m.uid===currentUser.uid))
+                            eq.miembros = eq.miembros.filter(m=>m.uid!==currentUser.uid);
                         return eq;
                     });
                 }
-                await updateDoc(actRef, { inscritos: nuevosInscritos });
-                alert("Hecho. Te has dado de baja.");
+                await updateDoc(actRef, { inscritos: nuevos });
                 cerrarModal();
-            } catch(e) { alert("Error: " + e.message); }
-        }
+                showToast("🗑️ Te has dado de baja");
+            } catch(e) { showToast("❌ "+e.message); }
+        };
 
-        // --- EDICIÓN CON VINCULACIÓN ---
+        /* ── EDICIÓN EQUIPO — igual al original ── */
         let editActId = "";
         window.abrirEdicion = (actId) => {
-            cerrarModal();
+            cerrarModalEl('modal-detalles');
             editActId = actId;
-            const ticket = allTickets.find(t => t.id === actId);
+            const ticket    = allTickets.find(t=>t.id===actId);
             const inputsDiv = document.getElementById("edit-inputs");
             inputsDiv.innerHTML = "";
-            
-            if(ticket.equipo.miembros) {
-                ticket.equipo.miembros.forEach(m => {
-                    // ✅ AÑADIDO: onkeyup="verificarUsuario(this)" y data-uid recuperado
-                    inputsDiv.innerHTML += `
-                        <input type="text" class="mate-input" 
-                               value="${m.nombre}" 
-                               data-uid="${m.uid || ''}" 
-                               onkeyup="verificarUsuario(this)" 
-                               placeholder="Nombre usuario">`;
-                });
-            }
-            // Chequear visualmente los que ya tienen UID
+
+            (ticket.equipo.miembros||[]).forEach(m => {
+                inputsDiv.innerHTML += `
+                    <div class="mate-field">
+                        <span class="material-symbols-outlined">person_search</span>
+                        <input type="text" class="mate-input"
+                               value="${m.nombre}"
+                               data-uid="${m.uid||''}"
+                               onkeyup="verificarUsuario(this)"
+                               placeholder="Nombre de usuario">
+                    </div>`;
+            });
+
+            // Resaltar ya vinculados
             setTimeout(() => {
-                document.querySelectorAll(".mate-input").forEach(i => {
-                    if(i.getAttribute("data-uid")) i.classList.add("mate-found");
+                document.querySelectorAll(".mate-input").forEach(inp => {
+                    if (inp.getAttribute("data-uid")) inp.classList.add("mate-ok");
                 });
             }, 50);
 
-            document.getElementById("modal-edit").style.display = "flex";
-        }
+            abrirModal('modal-edit');
+        };
 
-        // ✅ FUNCIÓN RECUPERADA: BUSCAR USUARIO
+        /* ── VERIFICAR USUARIO — igual al original ── */
         window.verificarUsuario = async (input) => {
             const val = input.value.trim();
-            if(val.length < 2) { 
-                input.classList.remove('mate-found'); 
-                input.removeAttribute('data-uid'); 
-                return; 
+            if (val.length<2) {
+                input.classList.remove('mate-ok','mate-err');
+                input.removeAttribute('data-uid'); return;
             }
-            // Buscamos usuario exacto
-            const q = query(collection(db, "usuarios"), where("username", "==", val));
+            const q    = query(collection(db,"usuarios"), where("username","==",val));
             const snap = await getDocs(q);
-            
-            if(!snap.empty) { 
-                input.classList.add('mate-found'); 
-                input.setAttribute('data-uid', snap.docs[0].id); 
+            if (!snap.empty) {
+                input.classList.add('mate-ok'); input.classList.remove('mate-err');
+                input.setAttribute('data-uid', snap.docs[0].id);
             } else {
-                input.classList.remove('mate-found'); 
+                input.classList.remove('mate-ok'); input.classList.add('mate-err');
                 input.removeAttribute('data-uid');
             }
-        }
+        };
 
+        /* ── GUARDAR EDICIÓN — igual al original ── */
         window.guardarEdicion = async () => {
+            const btn = document.getElementById("btn-guardar-edit");
+            btn.disabled=true; btn.innerText="Guardando…";
             try {
-                const actRef = doc(db, "actividades", editActId);
-                const snap = await getDoc(actRef);
+                const actRef  = doc(db,"actividades",editActId);
+                const snap    = await getDoc(actRef);
                 const inscritos = snap.data().inscritos;
-                
+
                 const nuevosMiembros = [];
                 document.querySelectorAll(".mate-input").forEach(inp => {
-                    // ✅ GUARDAMOS EL UID SI EXISTE
-                    if(inp.value.trim()) {
-                        nuevosMiembros.push({ 
-                            nombre: inp.value.trim(), 
-                            uid: inp.getAttribute('data-uid') || null 
-                        });
-                    }
+                    if (inp.value.trim()) nuevosMiembros.push({
+                        nombre: inp.value.trim(),
+                        uid: inp.getAttribute('data-uid')||null
+                    });
                 });
 
                 const nuevosInscritos = inscritos.map(insc => {
-                    if(insc.capitan_uid === currentUser.uid) return { ...insc, miembros: nuevosMiembros };
+                    if (insc.capitan_uid===currentUser.uid)
+                        return { ...insc, miembros: nuevosMiembros };
                     return insc;
                 });
 
                 await updateDoc(actRef, { inscritos: nuevosInscritos });
-                alert("Equipo actualizado"); cerrarModal();
-            } catch(e) { alert(e.message); }
+                cerrarModal();
+                showToast("✅ Equipo actualizado");
+            } catch(e) { showToast("❌ "+e.message); }
+            btn.disabled=false; btn.innerText="Guardar cambios";
+        };
+
+        /* ── HELPERS UI ── */
+        function abrirModal(id) {
+            const m=document.getElementById(id);
+            m.style.display="flex"; document.body.style.overflow='hidden';
+            requestAnimationFrame(()=>m.classList.add('open'));
         }
+        function cerrarModalEl(id) {
+            const m=document.getElementById(id);
+            if (!m) return;
+            m.classList.remove('open');
+            setTimeout(()=>{ m.style.display="none"; document.body.style.overflow=''; },280);
+        }
+
+        window.showToast = (msg) => {
+            const t=document.getElementById('toast');
+            t.innerText=msg; t.classList.add('show');
+            clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+        };
     </script>
+
+    <style>
+        /* ── VARIABLES ──────────────────────────────────────────────── */
+        :root {
+            --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550;
+            --card:#fff; --border:rgba(0,0,0,0.07);
+            --accent:#e8400c; --gold:#f59e0b;
+            --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:18px;
+        }
+        html.dark-mode {
+            --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070;
+            --card:#241c14; --border:rgba(255,255,255,0.08);
+            --shadow:0 4px 20px rgba(0,0,0,0.45);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);
+             color:var(--text);min-height:100vh;padding-bottom:90px;}
+
+        /* ── TOPBAR ─────────────────────────────────────────────────── */
+        .topbar{
+            position:sticky;top:0;z-index:50;
+            background:var(--bg);border-bottom:1px solid var(--border);
+            backdrop-filter:blur(12px);padding:14px 18px;
+            display:flex;align-items:center;gap:12px;
+        }
+        .topbar-left{flex:1;min-width:0;}
+        .topbar-title{font-size:1.2rem;font-weight:800;}
+        .topbar-sub{font-size:.75rem;color:var(--text2);font-weight:600;margin-top:1px;}
+        .btn-ico{
+            background:var(--card);border:1px solid var(--border);
+            width:38px;height:38px;border-radius:50%;
+            display:flex;align-items:center;justify-content:center;
+            cursor:pointer;color:var(--text);transition:transform .15s;
+            box-shadow:var(--shadow);text-decoration:none;flex-shrink:0;
+        }
+        .btn-ico:active{transform:scale(.9);}
+
+        /* Toggle ocultar pasados */
+        .toggle-wrap{
+            display:flex;align-items:center;gap:8px;
+            background:var(--card);border:1px solid var(--border);
+            border-radius:30px;padding:7px 12px;font-size:.75rem;
+            font-weight:700;color:var(--text2);box-shadow:var(--shadow);
+            flex-shrink:0;cursor:pointer;white-space:nowrap;
+        }
+        .sw{position:relative;width:36px;height:20px;flex-shrink:0;}
+        .sw input{opacity:0;width:0;height:0;}
+        .sw-track{
+            position:absolute;inset:0;border-radius:20px;
+            background:#cbd5e1;transition:.3s;cursor:pointer;
+        }
+        .sw-track::before{
+            content:"";position:absolute;width:14px;height:14px;
+            left:3px;top:3px;border-radius:50%;background:white;
+            transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2);
+        }
+        input:checked + .sw-track{background:var(--accent);}
+        input:checked + .sw-track::before{transform:translateX(16px);}
+
+        /* ── MAIN ───────────────────────────────────────────────────── */
+        .main-wrap{max-width:680px;margin:0 auto;padding:20px 18px;}
+
+        /* ── EMPTY ──────────────────────────────────────────────────── */
+        .empty-state{
+            text-align:center;padding:60px 20px;
+            display:flex;flex-direction:column;align-items:center;gap:12px;
+        }
+        .es-emoji{font-size:3.5rem;}
+        .empty-state p{font-size:1rem;font-weight:800;color:var(--text);}
+        .btn-go-act{
+            display:inline-flex;align-items:center;gap:4px;
+            background:var(--accent);color:white;padding:11px 20px;
+            border-radius:30px;text-decoration:none;font-weight:800;font-size:.88rem;
+            box-shadow:0 4px 14px rgba(232,64,12,.35);transition:transform .15s;
+        }
+        .btn-go-act:hover{transform:translateY(-2px);}
+
+        /* ── TICKET ─────────────────────────────────────────────────── */
+        .ticket{
+            background:var(--card);border-radius:var(--radius);
+            border:1px solid var(--border);overflow:hidden;
+            display:flex;align-items:stretch;
+            box-shadow:var(--shadow);margin-bottom:14px;
+            cursor:pointer;transition:transform .2s,box-shadow .2s;
+            animation:fadeUp .3s ease backwards;
+        }
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+        .ticket:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.1);}
+        .ticket:active{transform:scale(.98);}
+        .ticket.past{opacity:.55;filter:grayscale(.6);}
+
+        /* Izquierda color */
+        .ticket-left{
+            width:60px;flex-shrink:0;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            padding:14px 6px;color:white;gap:1px;
+        }
+        .tl-day{font-size:.6rem;font-weight:800;text-transform:uppercase;opacity:.8;}
+        .tl-num{font-size:1.6rem;font-weight:800;line-height:1;}
+        .tl-mon{font-size:.6rem;font-weight:800;text-transform:uppercase;opacity:.8;}
+
+        /* Línea dentada */
+        .ticket-perf{
+            width:14px;flex-shrink:0;display:flex;flex-direction:column;
+            align-items:center;justify-content:space-between;
+            padding:0;position:relative;background:var(--card);
+        }
+        .perf-notch{
+            width:14px;height:14px;border-radius:50%;background:var(--bg);
+            flex-shrink:0;border:1px solid var(--border);
+        }
+        .perf-notch.top{margin-top:-7px;}
+        .perf-notch.bot{margin-bottom:-7px;}
+        .perf-line{
+            flex:1;border-left:2px dashed var(--border);
+            margin:2px 0;
+        }
+
+        /* Cuerpo */
+        .ticket-body{flex:1;padding:14px 12px;min-width:0;}
+        .tb-top{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+        .tb-rol{
+            font-size:.65rem;font-weight:800;text-transform:uppercase;
+            letter-spacing:.3px;padding:3px 9px;border-radius:20px;
+        }
+        .tb-upcoming{
+            font-size:.65rem;font-weight:800;background:#dcfce7;color:#166534;
+            padding:3px 9px;border-radius:20px;
+        }
+        .tb-past{
+            font-size:.65rem;font-weight:700;background:var(--bg2);color:var(--text2);
+            padding:3px 9px;border-radius:20px;
+        }
+        .tb-title{
+            font-size:.95rem;font-weight:800;line-height:1.25;
+            margin-bottom:8px;color:var(--text);
+        }
+        .tb-meta{display:flex;flex-direction:column;gap:4px;}
+        .tbm-item{
+            display:flex;align-items:center;gap:5px;
+            font-size:.75rem;color:var(--text2);font-weight:600;
+        }
+        .tbm-item .material-symbols-outlined{font-size:14px;}
+
+        /* Flecha */
+        .ticket-arr{
+            display:flex;align-items:center;padding:0 10px;
+            color:var(--text2);opacity:.4;flex-shrink:0;
+        }
+
+        /* ── MODALES ────────────────────────────────────────────────── */
+        .modal-overlay{
+            position:fixed;inset:0;z-index:2000;
+            background:rgba(0,0,0,.65);display:none;
+            justify-content:center;align-items:flex-end;
+            backdrop-filter:blur(6px);
+        }
+        .modal-overlay.open .modal-sheet{animation:sheetUp .3s cubic-bezier(.32,.72,0,1);}
+        @keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .modal-sheet{
+            background:var(--card);border-radius:28px 28px 0 0;
+            width:100%;max-width:600px;max-height:90vh;overflow-y:auto;
+        }
+        .modal-handle{width:40px;height:4px;background:var(--border);
+            border-radius:2px;margin:12px auto 0;}
+        .modal-close-row{
+            display:flex;justify-content:flex-end;padding:8px 16px 0;
+            position:sticky;top:0;background:var(--card);z-index:5;
+        }
+        .btn-close-m{
+            background:var(--bg2);border:none;color:var(--text);
+            width:34px;height:34px;border-radius:50%;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;
+        }
+
+        /* Header modal detalles */
+        .d-header{
+            height:130px;position:relative;
+            display:flex;align-items:flex-end;padding:16px 20px;
+            margin-bottom:40px;
+        }
+        .d-header-emoji{
+            position:absolute;bottom:-24px;left:20px;
+            width:52px;height:52px;border-radius:16px;
+            background:var(--card);box-shadow:0 4px 14px rgba(0,0,0,.15);
+            display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+        }
+        .d-rol-badge{
+            position:absolute;bottom:-22px;right:20px;
+            padding:4px 14px;border-radius:20px;
+            font-size:.72rem;font-weight:800;text-transform:uppercase;
+        }
+
+        /* Cuerpo modal */
+        .modal-body{padding:0 20px 44px;}
+        .d-title{font-size:1.4rem;font-weight:800;line-height:1.2;margin-bottom:14px;}
+        .d-meta-block{
+            background:var(--bg2);border-radius:14px;padding:14px 16px;
+            margin-bottom:18px;display:flex;flex-direction:column;gap:10px;
+        }
+        .dmi{display:flex;align-items:center;gap:10px;}
+        .dmi .material-symbols-outlined{font-size:18px;color:var(--accent);flex-shrink:0;}
+        .dmi-lbl{font-size:.65rem;font-weight:800;text-transform:uppercase;
+                 letter-spacing:.5px;color:var(--text2);display:block;}
+        .dmi-val{font-size:.88rem;font-weight:700;text-transform:capitalize;}
+
+        /* Lista equipo en modal */
+        .sec-lbl{
+            font-size:.72rem;font-weight:800;text-transform:uppercase;
+            letter-spacing:1px;color:var(--text2);
+            margin:18px 0 10px;display:flex;align-items:center;gap:8px;
+        }
+        .sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+
+        .d-row{
+            display:flex;align-items:center;gap:12px;
+            padding:10px 0;border-bottom:1px solid var(--border);
+        }
+        .d-row:last-child{border-bottom:none;}
+        .d-ava{
+            width:38px;height:38px;border-radius:50%;flex-shrink:0;
+            display:flex;align-items:center;justify-content:center;
+            color:white;font-weight:800;font-size:.95rem;
+        }
+        .d-info{flex:1;min-width:0;}
+        .d-name{font-size:.9rem;font-weight:800;}
+        .d-sub{font-size:.72rem;color:var(--text2);margin-top:2px;}
+        .d-badge{font-size:1rem;flex-shrink:0;}
+        .badge-cap,.badge-ok,.badge-warn{}
+
+        /* Acciones modal */
+        .actions-wrap{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+        .btn-act{
+            width:100%;padding:14px;border-radius:14px;border:none;
+            font-weight:800;font-size:.92rem;font-family:inherit;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            transition:transform .15s,opacity .2s;text-decoration:none;
+        }
+        .btn-act:active{transform:scale(.97);}
+        .btn-blue  {background:#dbeafe;color:#1d4ed8;}
+        .btn-red   {background:#fef2f2;color:#dc2626;border:2px solid #fecaca;}
+        .btn-purple{background:#f3e8ff;color:#7e22ce;}
+
+        /* ── MODAL EDICIÓN ──────────────────────────────────────────── */
+        .edit-body{padding:0 20px 40px;}
+        .edit-hint{
+            background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);
+            border-radius:12px;padding:12px 14px;
+            font-size:.8rem;color:#92400e;margin-bottom:16px;line-height:1.5;
+        }
+        html.dark-mode .edit-hint{color:#fcd34d;}
+        .mate-field{
+            display:flex;align-items:center;gap:10px;background:var(--bg2);
+            border-radius:12px;padding:12px 14px;margin-bottom:8px;
+            border:2px solid transparent;transition:border-color .2s;
+        }
+        .mate-field:focus-within{border-color:var(--accent);}
+        .mate-field .material-symbols-outlined{font-size:20px;color:var(--text2);flex-shrink:0;}
+        .mate-input{
+            flex:1;border:none;background:transparent;color:var(--text);
+            font-family:inherit;font-size:.9rem;outline:none;
+        }
+        .mate-input.mate-ok {color:#16a34a;font-weight:700;}
+        .mate-input.mate-err{color:#dc2626;}
+        .edit-btns{display:flex;gap:8px;margin-top:14px;}
+        .btn-cancel-edit{
+            flex:1;padding:14px;border-radius:14px;border:none;
+            background:var(--bg2);color:var(--text2);
+            font-weight:700;font-family:inherit;font-size:.9rem;cursor:pointer;
+        }
+        #btn-guardar-edit{
+            flex:2;padding:14px;border-radius:14px;border:none;
+            background:var(--accent);color:white;font-weight:800;
+            font-family:inherit;font-size:.92rem;cursor:pointer;
+            box-shadow:0 4px 14px rgba(232,64,12,.35);transition:opacity .2s;
+        }
+        #btn-guardar-edit:disabled{opacity:.6;cursor:not-allowed;}
+
+        /* ── TOAST ──────────────────────────────────────────────────── */
+        #toast{
+            position:fixed;bottom:88px;left:50%;
+            transform:translateX(-50%) translateY(14px);
+            background:#1a1208;color:white;padding:10px 22px;
+            border-radius:30px;font-size:.82rem;font-weight:700;
+            opacity:0;transition:all .26s;z-index:9999;
+            pointer-events:none;white-space:nowrap;
+        }
+        #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+        /* ── BOTTOM NAV ─────────────────────────────────────────────── */
+        .bottom-nav{
+            position:fixed;bottom:0;left:0;width:100%;background:var(--card);
+            border-top:1px solid var(--border);display:flex;justify-content:space-around;
+            padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:1000;
+            backdrop-filter:blur(12px);
+        }
+        .nav-item{
+            border:none;background:transparent;color:var(--text2);
+            display:flex;flex-direction:column;align-items:center;font-size:.68rem;
+            cursor:pointer;gap:3px;flex:1;text-decoration:none;
+            font-family:inherit;transition:color .15s;
+        }
+        .nav-item.active{color:var(--accent);font-weight:800;}
+        .nav-item .material-symbols-outlined{font-size:24px;}
+    </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header-area">
-            <h1>Mis Tickets</h1>
-            <label class="toggle-wrapper">
-                <span>Ocultar Pasados</span>
-                <div class="switch">
-                    <input type="checkbox" id="toggle-past" checked onchange="renderTickets()">
-                    <span class="slider"></span>
-                </div>
-            </label>
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <a href="panel.html" class="btn-ico" aria-label="Inicio">
+            <span class="material-symbols-outlined" style="font-size:20px">home</span>
+        </a>
+        <div class="topbar-left">
+            <div class="topbar-title">🎟️ Mis Tickets</div>
+            <div class="topbar-sub" id="header-count">Cargando…</div>
         </div>
-
-        <div id="tickets-list" class="tickets-list">
-            <p style="text-align:center; margin-top:40px;">Cargando tus eventos...</p>
-        </div>
+        <!-- Toggle ocultar pasados -->
+        <label class="toggle-wrap" title="Ocultar eventos pasados">
+            Pasados
+            <div class="sw">
+                <input type="checkbox" id="toggle-past" checked onchange="renderTickets()">
+                <span class="sw-track"></span>
+            </div>
+        </label>
     </div>
 
-    <div id="modal-detalles" class="modal-overlay" onclick="if(event.target===this) cerrarModal()">
-        <div class="modal">
-            <button class="close-btn" onclick="cerrarModal()"><span class="material-symbols-outlined">close</span></button>
-            <div class="modal-header-color"></div>
-            <div class="modal-icon"></div>
-            <div id="m-title" class="m-title">...</div>
-            <div class="m-sub"><span id="m-fecha">...</span> <br> 📍 <span id="m-lugar">...</span></div>
-            <div class="list-group" id="participants-list"></div>
-            <div id="modal-actions"></div>
-        </div>
-    </div>
-
-    <div id="modal-edit" class="modal-overlay">
-        <div class="modal" style="max-width:400px; margin: auto;">
-            <h2 style="margin-top:0">Editar Compañeros</h2>
-            <p style="font-size:0.8rem; color:gray; margin-top:-10px; margin-bottom:15px;">Escribe el nombre de usuario exacto para vincular cuenta (saldrá en verde).</p>
-            <div id="edit-inputs"></div>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="cerrarModal()" class="btn-action" style="background:#eee; color:gray;">Cancelar</button>
-                <button onclick="guardarEdicion()" class="btn-action" style="background:#FF5722; color:white;">Guardar</button>
+    <!-- LISTA -->
+    <div class="main-wrap">
+        <div id="tickets-list">
+            <div class="empty-state">
+                <span class="es-emoji">⏳</span>
+                <p>Cargando tus eventos…</p>
             </div>
         </div>
     </div>
 
+    <!-- ═══ MODAL DETALLES ════════════════════════════════════════════ -->
+    <div id="modal-detalles" class="modal-overlay"
+         onclick="if(event.target===this) cerrarModal()">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-close-row">
+                <button class="btn-close-m" onclick="cerrarModal()" aria-label="Cerrar">
+                    <span class="material-symbols-outlined" style="font-size:18px">close</span>
+                </button>
+            </div>
+
+            <!-- Header de color -->
+            <div id="d-header" class="d-header">
+                <div id="d-emoji" class="d-header-emoji">🎫</div>
+                <div id="d-rol" class="d-rol-badge"></div>
+            </div>
+
+            <div class="modal-body">
+                <h2 id="m-title" class="d-title"></h2>
+
+                <div class="d-meta-block">
+                    <div class="dmi">
+                        <span class="material-symbols-outlined">calendar_month</span>
+                        <div>
+                            <span class="dmi-lbl">Cuándo</span>
+                            <span class="dmi-val" id="m-fecha"></span>
+                        </div>
+                    </div>
+                    <div class="dmi">
+                        <span class="material-symbols-outlined">location_on</span>
+                        <div>
+                            <span class="dmi-lbl">Dónde</span>
+                            <span class="dmi-val" id="m-lugar"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sec-lbl">
+                    <span class="material-symbols-outlined" style="font-size:15px">group</span>
+                    Mi equipo / inscripción
+                </div>
+                <div id="participants-list"></div>
+
+                <div id="modal-actions" class="actions-wrap"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL EDICIÓN ════════════════════════════════════════════ -->
+    <div id="modal-edit" class="modal-overlay"
+         onclick="if(event.target===this) cerrarModal()">
+        <div class="modal-sheet" style="max-width:460px;">
+            <div class="modal-handle"></div>
+            <div class="modal-close-row">
+                <button class="btn-close-m" onclick="cerrarModal()" aria-label="Cerrar">
+                    <span class="material-symbols-outlined" style="font-size:18px">close</span>
+                </button>
+            </div>
+
+            <div class="edit-body">
+                <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:12px;">
+                    ✏️ Editar compañeros
+                </h2>
+                <div class="edit-hint">
+                    Escribe el nombre de usuario exacto de cada compañero.
+                    Si tiene cuenta en la app se pondrá en <strong style="color:#16a34a">verde</strong>.
+                </div>
+                <div id="edit-inputs"></div>
+                <div class="edit-btns">
+                    <button class="btn-cancel-edit" onclick="cerrarModal()">Cancelar</button>
+                    <button id="btn-guardar-edit" onclick="guardarEdicion()">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
     <nav class="bottom-nav">
-        <a href="panel.html" class="nav-item"><span class="material-symbols-outlined">home</span>Inicio</a>
-        <a href="actividades.html" class="nav-item"><span class="material-symbols-outlined">event</span>Fiestas</a>
-        <a href="#" class="nav-item active"><span class="material-symbols-outlined">confirmation_number</span>Tickets</a>
-        <a href="perfil.html" class="nav-item"><span class="material-symbols-outlined">person</span>Perfil</a>
+        <a href="panel.html"             class="nav-item">
+            <span class="material-symbols-outlined">home</span>Inicio
+        </a>
+        <a href="actividades.html"       class="nav-item">
+            <span class="material-symbols-outlined">event</span>Fiestas
+        </a>
+        <a href="#"                      class="nav-item active">
+            <span class="material-symbols-outlined">confirmation_number</span>Tickets
+        </a>
+        <a href="perfil.html"            class="nav-item">
+            <span class="material-symbols-outlined">person</span>Perfil
+        </a>
     </nav>
 
 </body>
