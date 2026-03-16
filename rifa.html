@@ -114,46 +114,60 @@
 
         /* ── TICKET HERO ────────────────────────────────────────────── */
         .ticket-section {
-            padding:28px 18px 0;
+            padding:32px 18px 0;
             display:flex; flex-direction:column; align-items:center;
         }
-        .ticket-wrap { width:100%; max-width:340px; position:relative; }
+        .ticket-wrap { width:100%; max-width:360px; position:relative; }
 
         .ticket-glow {
-            position:absolute; inset:-8px; border-radius:30px;
+            position:absolute; inset:-12px; border-radius:36px;
             background:linear-gradient(135deg,var(--accent),var(--gold));
-            opacity:.2; filter:blur(20px);
+            opacity:.25; filter:blur(28px);
             animation:glowPulse 3s ease-in-out infinite;
         }
-        @keyframes glowPulse{0%,100%{opacity:.2}50%{opacity:.32}}
+        @keyframes glowPulse{0%,100%{opacity:.22;filter:blur(28px)}50%{opacity:.38;filter:blur(22px)}}
 
         .ticket {
             position:relative; z-index:1;
             background:linear-gradient(145deg,#f59e0b 0%,#e8400c 100%);
-            border-radius:22px; overflow:hidden; color:white;
-            box-shadow:0 24px 60px rgba(232,64,12,.35);
+            border-radius:24px; overflow:hidden; color:white;
+            box-shadow:
+                0 30px 70px rgba(232,64,12,.4),
+                0 0 0 1px rgba(255,255,255,.1) inset;
         }
+
+        /* Patrón de puntos decorativo sobre el ticket */
+        .ticket::before{
+            content:'';
+            position:absolute; inset:0; pointer-events:none; z-index:0;
+            background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
+            background-size: 18px 18px;
+        }
+
         .ticket-header {
-            padding:24px 24px 0;
+            padding:26px 26px 0; position:relative; z-index:1;
             display:flex; align-items:center; justify-content:space-between;
         }
-        .t-logo{font-size:2rem; line-height:1;}
+        .t-logo{font-size:2.2rem; line-height:1;}
         .t-header-right{text-align:right;}
         .t-supra{font-size:.65rem; font-weight:800; text-transform:uppercase;
                  letter-spacing:2px; opacity:.8;}
-        .t-title{font-family:'Abril Fatface',serif; font-size:1.7rem; line-height:1; letter-spacing:1px;}
+        .t-title{font-family:'Abril Fatface',serif; font-size:1.9rem; line-height:1; letter-spacing:1px;}
 
-        .ticket-body{padding:18px 24px 8px; text-align:center;}
+        .ticket-body{padding:20px 26px 8px; text-align:center; position:relative; z-index:1;}
         .win-label{font-size:.65rem; font-weight:800; text-transform:uppercase;
-                   letter-spacing:3px; opacity:.75; margin-bottom:10px; display:block;}
+                   letter-spacing:3px; opacity:.75; margin-bottom:12px; display:block;}
 
         .win-number {
             font-family:'Roboto Mono',monospace;
-            font-size:clamp(3.2rem,16vw,4.8rem); font-weight:700; line-height:1;
-            background:rgba(255,255,255,.95); color:#c0300a;
-            display:inline-block; padding:10px 24px; border-radius:14px;
-            letter-spacing:6px; box-shadow:inset 0 2px 8px rgba(0,0,0,.15);
-            min-width:200px; text-align:center; transition:all .4s ease;
+            font-size:clamp(3.5rem,17vw,5rem); font-weight:700; line-height:1;
+            background:rgba(255,255,255,.97); color:#b92d0a;
+            display:inline-block; padding:12px 28px; border-radius:16px;
+            letter-spacing:8px;
+            box-shadow:
+                inset 0 2px 8px rgba(0,0,0,.15),
+                0 8px 24px rgba(0,0,0,.2);
+            min-width:210px; text-align:center; transition:all .4s ease;
         }
         .win-number.loading {
             color:transparent;
@@ -165,27 +179,39 @@
 
         .ticket-notch{
             display:flex; align-items:center; justify-content:space-between;
-            padding:14px 0 0;
+            padding:18px 0 0; position:relative; z-index:1;
         }
-        .notch{width:24px; height:24px; border-radius:50%; background:var(--bg); flex-shrink:0;}
-        .notch-line{flex:1; border-top:2px dashed rgba(255,255,255,.35); margin:0 -2px;}
+        .notch{width:26px; height:26px; border-radius:50%; background:var(--bg); flex-shrink:0;}
+        .notch-line{flex:1; border-top:2px dashed rgba(255,255,255,.3); margin:0 -2px;}
 
         .ticket-footer{
-            padding:10px 24px 22px;
+            padding:12px 26px 24px; position:relative; z-index:1;
             display:flex; flex-direction:column; align-items:center; gap:8px;
         }
         .draw-date{
-            background:rgba(255,255,255,.2); backdrop-filter:blur(6px);
-            padding:6px 16px; border-radius:30px;
-            font-size:.8rem; font-weight:700;
+            background:rgba(255,255,255,.22); backdrop-filter:blur(6px);
+            padding:7px 18px; border-radius:30px;
+            font-size:.82rem; font-weight:800; letter-spacing:.3px;
         }
         .ticket-serial{
-            font-size:.6rem; opacity:.45; letter-spacing:3px;
+            font-size:.6rem; opacity:.4; letter-spacing:3px;
             text-transform:uppercase; font-family:'Roboto Mono',monospace;
         }
 
+        /* ── HERO FONDO ─────────────────────────────────────────────── */
+        body {
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse 80% 30% at 50% 0%,
+                    rgba(232,64,12,.06) 0%, transparent 70%);
+        }
+
+        /* Ticket section mejorada */
+        .ticket-section { padding: 32px 18px 0; }
+        .ticket-wrap    { max-width: 360px; }
+
         /* ── HISTORIAL ──────────────────────────────────────────────── */
-        .section-wrap{max-width:700px; margin:0 auto; padding:32px 18px 0;}
+        .section-wrap{max-width:700px; margin:0 auto; padding:36px 18px 0;}
 
         .section-label {
             display:flex; align-items:center; gap:10px;
@@ -194,16 +220,15 @@
         }
         .section-label::after{content:''; flex:1; height:1px; background:var(--border);}
 
-        /* Grid masonry-feel: 3 columnas fijas, imágenes proporcionales */
+        /* Grid uniforme — todas las fotos del MISMO tamaño */
         .history-grid {
-            columns: 3;
-            column-gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
-        @media(max-width:420px){ .history-grid{ columns:2; } }
+        @media(max-width:380px){ .history-grid{ grid-template-columns: repeat(2,1fr); } }
 
         .history-item {
-            break-inside: avoid;
-            margin-bottom: 10px;
             border-radius: 12px; overflow: hidden;
             border: 2px solid var(--border);
             box-shadow: var(--shadow);
@@ -211,30 +236,33 @@
             transition: transform .22s, border-color .22s, box-shadow .22s;
             background: var(--bg2);
             position: relative;
-            display: block;
+            /* Proporción fija igual para todas */
+            aspect-ratio: 1 / 1;
         }
         .history-item img {
-            width:100%; height:auto; display:block;
+            width: 100%; height: 100%;
+            object-fit: cover; display: block;
             transition: transform .3s;
         }
         .history-item:hover {
-            transform:scale(1.03) translateY(-2px);
-            border-color:var(--gold);
-            box-shadow:0 10px 28px rgba(245,158,11,.28);
-            z-index:2; position:relative;
+            transform: scale(1.04) translateY(-2px);
+            border-color: var(--gold);
+            box-shadow: 0 10px 28px rgba(245,158,11,.3);
+            z-index: 2;
         }
-        .history-item:hover img{transform:scale(1.05);}
+        .history-item:hover img { transform: scale(1.08); }
 
-        /* Overlay número en hover */
+        /* Número en hover */
         .history-item::after {
             content: attr(data-n);
-            position:absolute; bottom:6px; right:8px;
-            background:rgba(0,0,0,.55); color:white;
-            font-size:.65rem; font-weight:800; letter-spacing:.5px;
-            padding:2px 7px; border-radius:8px;
-            opacity:0; transition:opacity .2s;
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,.45);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: .85rem; font-weight: 800;
+            letter-spacing: .5px; opacity: 0; transition: opacity .2s;
+            border-radius: 10px;
         }
-        .history-item:hover::after{opacity:1;}
+        .history-item:hover::after { opacity: 1; }
 
         /* ── LIGHTBOX ───────────────────────────────────────────────── */
         #lightbox {
