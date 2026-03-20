@@ -3,196 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Carrera</title>
+    <title>Gestión de Carrera · Fiestas Pantano</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ff5722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
-    </script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #4caf50; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
-        
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-back { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-
-        /* PODIO */
-        .podium-admin { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; align-items: flex-end; height: 150px; }
-        .podium-slot { flex: 1; max-width: 150px; border-radius: 10px 10px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 10px; color: white; text-align: center; position: relative; }
-        
-        .slot-1 { background: #ffd700; height: 100%; border: 2px solid #e6c200; }
-        .slot-2 { background: #c0c0c0; height: 80%; border: 2px solid #aaaaaa; }
-        .slot-3 { background: #cd7f32; height: 60%; border: 2px solid #b87333; }
-
-        .winner-name { font-weight: bold; margin-top: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .btn-clear-pos { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.2); border: none; color: white; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 10px; display: none; }
-        .podium-slot:hover .btn-clear-pos { display: block; }
-
-        .runner-list { list-style: none; padding: 0; }
-        .runner-item { background: var(--card); padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .runner-name { font-weight: bold; font-size: 1.1rem; }
-        
-        .medal-actions { display: flex; gap: 5px; }
-        .btn-medal { border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 1.2rem; transition: transform 0.2s; opacity: 0.5; filter: grayscale(100%); }
-        .btn-medal:hover { transform: scale(1.2); opacity: 1; filter: grayscale(0%); }
-        .gold { background: #fff9c4; } .gold:hover { background: #ffd700; }
-        .silver { background: #eceff1; } .silver:hover { background: #c0c0c0; }
-        .bronze { background: #efebe9; } .bronze:hover { background: #cd7f32; }
-
-        .assigned-1 .runner-item { border-left: 5px solid #ffd700; background: #fffde7; }
-        .assigned-2 .runner-item { border-left: 5px solid #c0c0c0; background: #f5f5f5; }
-        .assigned-3 .runner-item { border-left: 5px solid #cd7f32; background: #fff3e0; }
-    </style>
+    <meta name="theme-color" content="#e8400c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, doc, getDoc, updateDoc }
+          from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
-        authDomain: "fiestas-pantano.firebaseapp.com",
-        projectId: "fiestas-pantano",
-        storageBucket: "fiestas-pantano.firebasestorage.app",
-        messagingSenderId: "801380435613",
-        appId: "1:801380435613:web:a842572cf7cee93ac57674",
-        measurementId: "G-EG2MZGBT1B"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
+      const FB = { apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain:"fiestas-pantano.firebaseapp.com", projectId:"fiestas-pantano", storageBucket:"fiestas-pantano.firebasestorage.app", messagingSenderId:"801380435613", appId:"1:801380435613:web:a842572cf7cee93ac57674", measurementId:"G-EG2MZGBT1B" };
+      const app  = initializeApp(FB);
+      const db   = getFirestore(app);
       const auth = getAuth(app);
-      
-      let activityId = "";
-      let activityData = null;
+      let activityId = "", activityData = null;
 
       onAuthStateChanged(auth, async (user) => {
-          if (!user) window.location.href = "index.html";
-          const uDoc = await getDoc(doc(db, "usuarios", user.uid));
-          if(!uDoc.exists() || (uDoc.data().rol !== 'admin' && uDoc.data().rol !== 'festero')) {
-              window.location.href = "panel.html"; return;
-          }
-          if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
-
+          if (!user) { window.location.href="index.html"; return; }
+          const uDoc = await getDoc(doc(db,"usuarios",user.uid));
+          if (!uDoc.exists()||(uDoc.data().rol!=='admin'&&uDoc.data().rol!=='festero')) { window.location.href="panel.html"; return; }
           const params = new URLSearchParams(window.location.search);
           activityId = params.get("id");
-          if(!activityId) { window.location.href = "gestion.html"; }
+          if (!activityId) { window.location.href="gestion.html"; return; }
           cargarDatos();
       });
 
       async function cargarDatos() {
-          const docSnap = await getDoc(doc(db, "actividades", activityId));
-          if(!docSnap.exists()) return;
-          activityData = docSnap.data();
-          
-          document.getElementById("page-title").innerText = "Carrera: " + activityData.titulo;
+          const snap = await getDoc(doc(db,"actividades",activityId));
+          if (!snap.exists()) return;
+          activityData = snap.data();
+          document.getElementById("page-title").innerText = activityData.titulo;
           renderPodio();
           renderCorredores();
       }
 
       function renderPodio() {
-          const podio = activityData.podio || { p1: null, p2: null, p3: null };
-          updateSlot("slot-2", podio.p2);
-          updateSlot("slot-1", podio.p1);
-          updateSlot("slot-3", podio.p3);
+          const p = activityData.podio || { p1:null, p2:null, p3:null };
+          updateSlot("slot-1", p.p1, 1);
+          updateSlot("slot-2", p.p2, 2);
+          updateSlot("slot-3", p.p3, 3);
       }
 
-      function updateSlot(id, data) {
-          const el = document.getElementById(id);
-          const nameEl = el.querySelector(".winner-name");
-          const btnClear = el.querySelector(".btn-clear-pos");
-          if(data) {
+      function updateSlot(id, data, pos) {
+          const el     = document.getElementById(id);
+          const nameEl = el.querySelector(".slot-name");
+          const clearEl= el.querySelector(".btn-clear-slot");
+          if (data) {
               nameEl.innerText = data.nombre;
-              btnClear.style.display = "block";
-              btnClear.onclick = () => asignarMedalla(id === 'slot-1' ? 1 : id === 'slot-2' ? 2 : 3, null);
+              nameEl.classList.remove('empty');
+              clearEl.style.display = "flex";
+              clearEl.onclick = () => asignarMedalla(pos, null);
           } else {
-              nameEl.innerText = "-";
-              btnClear.style.display = "none";
+              nameEl.innerText = "Vacío";
+              nameEl.classList.add('empty');
+              clearEl.style.display = "none";
           }
       }
 
       function renderCorredores() {
-          const lista = document.getElementById("lista-corredores");
-          lista.innerHTML = "";
-          const inscritos = activityData.inscritos || [];
-          const podio = activityData.podio || {};
-          const getName = (p) => p.nombre_equipo || p.capitan; 
-
-          inscritos.forEach((p) => {
-              const nombre = getName(p);
-              let claseFila = "";
-              if (podio.p1 && podio.p1.nombre === nombre) claseFila = "assigned-1";
-              if (podio.p2 && podio.p2.nombre === nombre) claseFila = "assigned-2";
-              if (podio.p3 && podio.p3.nombre === nombre) claseFila = "assigned-3";
-
-              const div = document.createElement("div");
-              div.className = `runner-item ${claseFila}`;
-              div.innerHTML = `
-                  <span class="runner-name">${nombre}</span>
+          const ins  = activityData.inscritos||[];
+          const p    = activityData.podio||{};
+          document.getElementById("count-part").innerText = ins.length;
+          const c = document.getElementById("lista-corredores");
+          if (!ins.length) {
+              c.innerHTML='<div class="empty-list"><span class="material-symbols-outlined">group_off</span><p>Sin participantes</p></div>'; return;
+          }
+          c.innerHTML = ins.map(item => {
+              const nombre = item.nombre_equipo||item.capitan||"Participante";
+              let pos = 0;
+              if (p.p1?.nombre===nombre) pos=1;
+              if (p.p2?.nombre===nombre) pos=2;
+              if (p.p3?.nombre===nombre) pos=3;
+              const posClass = pos ? `assigned-${pos}` : '';
+              const badge = pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':'';
+              return `
+              <div class="runner-item ${posClass}">
+                  <div class="runner-left">
+                      <div class="runner-ava">${nombre[0]?.toUpperCase()||'?'}</div>
+                      <div class="runner-info">
+                          <div class="runner-name">${nombre}</div>
+                          ${pos?`<div class="runner-pos">${badge} ${pos===1?'1º puesto':pos===2?'2º puesto':'3º puesto'}</div>`:''}
+                      </div>
+                  </div>
                   <div class="medal-actions">
-                      <button class="btn-medal gold" onclick="asignarMedalla(1, '${nombre}')" title="Primer Puesto">🥇</button>
-                      <button class="btn-medal silver" onclick="asignarMedalla(2, '${nombre}')" title="Segundo Puesto">🥈</button>
-                      <button class="btn-medal bronze" onclick="asignarMedalla(3, '${nombre}')" title="Tercer Puesto">🥉</button>
-                  </div>`;
-              lista.appendChild(div);
-          });
-          document.getElementById("count-part").innerText = inscritos.length;
+                      <button class="btn-medal" title="Oro"    onclick="asignarMedalla(1,'${nombre.replace(/'/g,"\\'")}')">🥇</button>
+                      <button class="btn-medal" title="Plata"  onclick="asignarMedalla(2,'${nombre.replace(/'/g,"\\'")}')">🥈</button>
+                      <button class="btn-medal" title="Bronce" onclick="asignarMedalla(3,'${nombre.replace(/'/g,"\\'")}')">🥉</button>
+                  </div>
+              </div>`;
+          }).join('');
       }
 
-      window.asignarMedalla = async (posicion, nombreGanador) => {
-          let podio = activityData.podio || { p1: null, p2: null, p3: null };
-          if (nombreGanador) {
-              if(podio.p1 && podio.p1.nombre === nombreGanador) podio.p1 = null;
-              if(podio.p2 && podio.p2.nombre === nombreGanador) podio.p2 = null;
-              if(podio.p3 && podio.p3.nombre === nombreGanador) podio.p3 = null;
-              const nuevoGanador = { nombre: nombreGanador, fecha: new Date() };
-              if(posicion === 1) podio.p1 = nuevoGanador;
-              if(posicion === 2) podio.p2 = nuevoGanador;
-              if(posicion === 3) podio.p3 = nuevoGanador;
+      /* ── LÓGICA IDÉNTICA AL ORIGINAL ── */
+      window.asignarMedalla = async (posicion, nombre) => {
+          let podio = activityData.podio || { p1:null, p2:null, p3:null };
+          if (nombre) {
+              if (podio.p1?.nombre===nombre) podio.p1=null;
+              if (podio.p2?.nombre===nombre) podio.p2=null;
+              if (podio.p3?.nombre===nombre) podio.p3=null;
+              const nuevo = { nombre, fecha:new Date() };
+              if (posicion===1) podio.p1=nuevo;
+              if (posicion===2) podio.p2=nuevo;
+              if (posicion===3) podio.p3=nuevo;
           } else {
-              if(posicion === 1) podio.p1 = null;
-              if(posicion === 2) podio.p2 = null;
-              if(posicion === 3) podio.p3 = null;
+              if (posicion===1) podio.p1=null;
+              if (posicion===2) podio.p2=null;
+              if (posicion===3) podio.p3=null;
           }
           try {
-              await updateDoc(doc(db, "actividades", activityId), { podio: podio });
-              cargarDatos(); 
-          } catch(e) { console.error(e); alert("Error: " + e.message); }
-      }
+              await updateDoc(doc(db,"actividades",activityId), { podio });
+              cargarDatos();
+          } catch(e) { showToast("❌ "+e.message); }
+      };
+
+      window.showToast = (msg) => {
+          const t=document.getElementById('toast');
+          t.innerText=msg; t.classList.add('show');
+          clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+      };
     </script>
+
+    <style>
+        :root { --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550; --card:#fff; --border:rgba(0,0,0,0.07); --accent:#e8400c; --gold:#f59e0b; --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:16px; }
+        html.dark-mode { --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070; --card:#241c14; --border:rgba(255,255,255,0.08); --shadow:0 4px 20px rgba(0,0,0,0.45); }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body { font-family:'Bricolage Grotesque',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
+
+        /* TOPBAR */
+        .topbar { position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--bg); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+        .btn-ico { background:var(--card); border:1px solid var(--border); width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); box-shadow:var(--shadow); transition:transform .15s; text-decoration:none; }
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-info { flex:1; min-width:0; }
+        .topbar-title { font-size:.95rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .topbar-sub   { font-size:.68rem; color:var(--text2); }
+
+        .wrap { max-width:600px; margin:0 auto; padding:20px 18px; }
+
+        /* PODIO VISUAL */
+        .podio-section { margin-bottom:28px; }
+        .podio-label { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text2); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+        .podio-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        .podio-wrap { display:flex; align-items:flex-end; justify-content:center; gap:10px; height:160px; }
+        .podio-slot { display:flex; flex-direction:column; align-items:center; width:32%; position:relative; }
+
+        .slot-block { width:100%; border-radius:12px 12px 0 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:12px 8px 8px; position:relative; overflow:hidden; }
+        .slot-1 .slot-block { height:140px; background:linear-gradient(180deg,#fcd34d,#f59e0b); }
+        .slot-2 .slot-block { height:105px; background:linear-gradient(180deg,#e2e8f0,#94a3b8); }
+        .slot-3 .slot-block { height:78px;  background:linear-gradient(180deg,#d97706,#92400e); }
+
+        .slot-emoji { font-size:1.6rem; display:block; margin-bottom:4px; }
+        .slot-name { font-size:.72rem; font-weight:800; color:rgba(0,0,0,.6); text-align:center; line-height:1.3; max-width:100%; overflow:hidden; text-overflow:ellipsis; }
+        .slot-name.empty { font-weight:600; opacity:.45; font-style:italic; }
+        .slot-1 .slot-name, .slot-3 .slot-name { color:rgba(255,255,255,.8); }
+
+        .btn-clear-slot { position:absolute; top:5px; right:5px; background:rgba(0,0,0,.2); border:none; color:white; width:22px; height:22px; border-radius:50%; display:none; align-items:center; justify-content:center; cursor:pointer; transition:background .2s; }
+        .btn-clear-slot:hover { background:rgba(0,0,0,.4); }
+        .btn-clear-slot .material-symbols-outlined { font-size:14px; }
+
+        /* LISTA CORREDORES */
+        .list-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+        .list-title { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text2); display:flex; align-items:center; gap:8px; }
+        .list-title::after { content:''; flex:1; height:1px; background:var(--border); }
+        .list-count { background:var(--accent); color:white; font-size:.68rem; font-weight:800; padding:2px 8px; border-radius:20px; }
+
+        .runner-item { background:var(--card); border:2px solid var(--border); border-radius:14px; padding:13px 15px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:var(--shadow); transition:border-color .2s; animation:fadeUp .25s ease backwards; }
+        @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+        .runner-item.assigned-1 { border-color:#f59e0b; background:rgba(245,158,11,.05); }
+        .runner-item.assigned-2 { border-color:#94a3b8; background:rgba(148,163,184,.05); }
+        .runner-item.assigned-3 { border-color:#d97706; background:rgba(217,119,6,.05); }
+
+        .runner-left { display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
+        .runner-ava { width:40px; height:40px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,var(--accent),var(--gold)); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:.95rem; }
+        .runner-info { min-width:0; }
+        .runner-name { font-weight:800; font-size:.92rem; }
+        .runner-pos  { font-size:.72rem; color:var(--text2); margin-top:2px; }
+
+        .medal-actions { display:flex; gap:6px; flex-shrink:0; }
+        .btn-medal { background:var(--bg2); border:2px solid var(--border); width:38px; height:38px; border-radius:10px; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center; transition:transform .15s, border-color .15s, background .15s; }
+        .btn-medal:hover { transform:scale(1.12); border-color:var(--gold); background:rgba(245,158,11,.1); }
+        .btn-medal:active { transform:scale(.92); }
+
+        .empty-list { text-align:center; padding:36px; color:var(--text2); display:flex; flex-direction:column; align-items:center; gap:8px; }
+        .empty-list .material-symbols-outlined { font-size:40px; opacity:.2; }
+        .empty-list p { font-weight:800; color:var(--text); }
+
+        /* TOAST */
+        #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(14px); background:#1a1208; color:white; padding:10px 22px; border-radius:30px; font-size:.82rem; font-weight:700; opacity:0; transition:all .26s; z-index:9999; pointer-events:none; white-space:nowrap; }
+        #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1 id="page-title">Cargando...</h1>
-            <button class="btn-back" onclick="window.location.href='gestion.html'">Volver</button>
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <a href="gestion.html" class="btn-ico">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </a>
+        <div class="topbar-info">
+            <div class="topbar-title" id="page-title">Cargando…</div>
+            <div class="topbar-sub">Gestión de carrera / concurso</div>
         </div>
-        <div class="podium-admin">
-            <div id="slot-2" class="podium-slot slot-2">
-                <span style="font-size:1.5rem">🥈</span>
-                <span class="winner-name">-</span>
-                <button class="btn-clear-pos">X</button>
-            </div>
-            <div id="slot-1" class="podium-slot slot-1">
-                <span style="font-size:2rem">🥇</span>
-                <span class="winner-name">-</span>
-                <button class="btn-clear-pos">X</button>
-            </div>
-            <div id="slot-3" class="podium-slot slot-3">
-                <span style="font-size:1.2rem">🥉</span>
-                <span class="winner-name">-</span>
-                <button class="btn-clear-pos">X</button>
-            </div>
-        </div>
-        <h3>Participantes (<span id="count-part">0</span>)</h3>
-        <div id="lista-corredores" class="runner-list"></div>
     </div>
+
+    <div class="wrap">
+
+        <!-- PODIO VISUAL -->
+        <div class="podio-section">
+            <div class="podio-label">Podio actual</div>
+            <div class="podio-wrap">
+                <!-- 2º -->
+                <div class="podio-slot slot-2" id="slot-2">
+                    <div class="slot-block">
+                        <span class="slot-emoji">🥈</span>
+                        <span class="slot-name empty">Vacío</span>
+                        <button class="btn-clear-slot">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- 1º -->
+                <div class="podio-slot slot-1" id="slot-1">
+                    <div class="slot-block">
+                        <span class="slot-emoji">🥇</span>
+                        <span class="slot-name empty">Vacío</span>
+                        <button class="btn-clear-slot">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- 3º -->
+                <div class="podio-slot slot-3" id="slot-3">
+                    <div class="slot-block">
+                        <span class="slot-emoji">🥉</span>
+                        <span class="slot-name empty">Vacío</span>
+                        <button class="btn-clear-slot">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LISTA -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div class="list-title">
+                <span class="material-symbols-outlined" style="font-size:15px">group</span>
+                Participantes
+            </div>
+            <span id="count-part" class="list-count">0</span>
+        </div>
+        <p style="font-size:.78rem;color:var(--text2);margin-bottom:14px;">
+            Pulsa 🥇 🥈 🥉 en cada participante para asignarle su puesto en el podio.
+        </p>
+        <div id="lista-corredores"></div>
+
+    </div>
+
+    <div id="toast"></div>
 </body>
 </html>
