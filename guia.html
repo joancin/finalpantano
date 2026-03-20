@@ -3,253 +3,560 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centro de Ayuda</title>
+    <title>Centro de Ayuda · Fiestas Pantano</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ff5722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
+    <meta name="theme-color" content="#e8400c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
 
-    <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff5722; --admin: #673ab7; --success: #4caf50; --info: #2196f3; }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; }
-
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 20px; padding-bottom: 90px; max-width: 600px; margin: 0 auto; }
-
-        h1 { text-align: center; font-size: 1.8rem; margin-bottom: 5px; color: var(--accent); }
-        p.intro { text-align: center; font-size: 0.9rem; color: gray; margin-bottom: 30px; }
-
-        /* ESTILOS DEL ACORDEÓN */
-        .faq-section-title { font-size: 0.85rem; font-weight: 800; color: gray; margin: 25px 0 10px 5px; letter-spacing: 1px; text-transform: uppercase; }
-        
-        details {
-            background: var(--card);
-            margin-bottom: 10px;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        details[open] { box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--accent); }
-
-        summary {
-            padding: 15px 20px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            list-style: none;
-            user-select: none;
-        }
-        summary::-webkit-details-marker { display: none; }
-
-        summary:hover { background: rgba(0,0,0,0.02); }
-
-        .q-content { display: flex; align-items: center; gap: 12px; }
-        .icon { font-size: 24px; color: var(--accent); }
-        .arrow { font-size: 20px; color: gray; transition: transform 0.3s; }
-        
-        details[open] .arrow { transform: rotate(180deg); color: var(--accent); }
-
-        .answer {
-            padding: 0 20px 20px 20px;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: var(--text);
-            opacity: 0.9;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            margin-top: 5px;
-            padding-top: 15px;
-        }
-
-        /* ELEMENTOS VISUALES */
-        .step { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
-        .step-num { background: var(--accent); color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; flex-shrink: 0; margin-top: 3px; }
-        
-        .btn-sim {
-            display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
-            background: #eee; color: #555; border: 1px solid #ccc; vertical-align: middle;
-        }
-        .btn-sim.green { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
-        .btn-sim.orange { background: #fff3e0; color: #ef6c00; border-color: #ffcc80; }
-        .btn-sim.blue { background: #e3f2fd; color: #1976d2; border-color: #90caf9; }
-
-        /* ESTILOS DE ADMIN */
-        .admin-details { border-left: 4px solid var(--admin); }
-        .admin-details summary .icon { color: var(--admin); }
-        .admin-details[open] { border-color: var(--admin); }
-        .admin-details details[open] .arrow { color: var(--admin); }
-        .admin-section-title { color: var(--admin); }
-        .admin-step-num { background: var(--admin); }
-
-        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; }
-        
-        #admin-zone { display: none; }
-    </style>
-
+    <!-- ── FIREBASE — igual al original ── -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const FB = { apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain:"fiestas-pantano.firebaseapp.com", projectId:"fiestas-pantano", storageBucket:"fiestas-pantano.firebasestorage.app", messagingSenderId:"801380435613", appId:"1:801380435613:web:a842572cf7cee93ac57674", measurementId:"G-EG2MZGBT1B" };
+        const app  = initializeApp(FB);
+        const db   = getFirestore(app);
         const auth = getAuth(app);
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const uDoc = await getDoc(doc(db, "usuarios", user.uid));
+                const uDoc = await getDoc(doc(db,"usuarios",user.uid));
                 if (uDoc.exists()) {
                     const rol = uDoc.data().rol;
-                    if (rol === 'admin' || rol === 'festero') {
-                        document.getElementById('admin-zone').style.display = 'block';
-                    }
+                    if (rol==='admin'||rol==='festero')
+                        document.getElementById('admin-zone').style.display='block';
                 }
             }
         });
     </script>
+
+    <style>
+        /* ── VARIABLES ──────────────────────────────────────────────── */
+        :root {
+            --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550;
+            --card:#fff; --border:rgba(0,0,0,0.07);
+            --accent:#e8400c; --gold:#f59e0b;
+            --blue:#0ea5e9; --purple:#7c3aed; --green:#059669;
+            --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:18px;
+        }
+        html.dark-mode {
+            --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070;
+            --card:#241c14; --border:rgba(255,255,255,0.08);
+            --shadow:0 4px 20px rgba(0,0,0,0.45);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;padding-bottom:60px;}
+
+        /* ── TOPBAR ─────────────────────────────────────────────────── */
+        .topbar{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);padding:14px 18px;display:flex;align-items:center;gap:12px;}
+        .btn-ico{background:var(--card);border:1px solid var(--border);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);box-shadow:var(--shadow);transition:transform .15s;text-decoration:none;flex-shrink:0;}
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-title{font-size:1rem;font-weight:800;flex:1;}
+
+        /* ── HERO ───────────────────────────────────────────────────── */
+        .hero{
+            background:linear-gradient(160deg,#0d0608 0%,#1a0a04 60%,#0d0608 100%);
+            padding:48px 24px 0; text-align:center;
+            position:relative; overflow:hidden;
+        }
+        .hero::before{
+            content:'';position:absolute;inset:0;
+            background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(232,64,12,.22) 0%,transparent 65%);
+        }
+        .hero::after{
+            content:'';position:absolute;inset:0;pointer-events:none;
+            background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);
+            background-size:24px 24px;
+        }
+        .hero-content{position:relative;z-index:1;}
+        .hero-ico{font-size:3rem;margin-bottom:12px;display:block;animation:bounce 2.5s ease-in-out infinite;}
+        @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        .hero-title{font-size:clamp(2rem,10vw,3.2rem);font-weight:800;color:white;line-height:1;letter-spacing:-1px;margin-bottom:8px;}
+        .hero-sub{font-size:.88rem;color:rgba(255,255,255,.45);margin-bottom:0;}
+
+        /* Búsqueda rápida */
+        .search-wrap{position:relative;z-index:1;margin:24px auto 0;max-width:400px;}
+        .search-input{width:100%;padding:14px 16px 14px 44px;border:none;border-radius:14px;background:rgba(255,255,255,.09);color:white;font-family:inherit;font-size:.9rem;outline:none;backdrop-filter:blur(8px);transition:background .2s;}
+        .search-input::placeholder{color:rgba(255,255,255,.35);}
+        .search-input:focus{background:rgba(255,255,255,.14);}
+        .search-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.35);font-size:20px;}
+
+        /* Chips de categorías */
+        .cat-chips{position:relative;z-index:1;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:20px 0 32px;}
+        .chip{padding:6px 14px;border-radius:30px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);font-size:.72rem;font-weight:800;cursor:pointer;transition:all .2s;font-family:inherit;backdrop-filter:blur(4px);}
+        .chip.active,.chip:hover{background:var(--accent);border-color:var(--accent);color:white;}
+
+        /* Wave */
+        .hero-wave{width:100%;overflow:hidden;line-height:0;margin-top:-1px;position:relative;z-index:1;}
+        .hero-wave svg{display:block;width:100%;}
+
+        /* ── WRAP ───────────────────────────────────────────────────── */
+        .wrap{max-width:600px;margin:0 auto;padding:28px 18px;}
+
+        /* ── SECCIÓN LABEL ──────────────────────────────────────────── */
+        .sec-label{display:flex;align-items:center;gap:10px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);margin:0 0 14px;}
+        .sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
+        .sec-label .sl-ico{font-size:16px;}
+
+        /* ── TARJETA FAQ ────────────────────────────────────────────── */
+        .faq-group{display:flex;flex-direction:column;gap:8px;margin-bottom:28px;}
+
+        details.faq{
+            background:var(--card);border-radius:var(--radius);
+            border:2px solid var(--border);
+            box-shadow:var(--shadow);overflow:hidden;
+            transition:border-color .2s,box-shadow .2s;
+        }
+        details.faq[open]{border-color:var(--q-color,var(--accent));box-shadow:0 6px 24px rgba(0,0,0,.1);}
+
+        summary.faq-sum{
+            padding:16px 18px;cursor:pointer;list-style:none;
+            display:flex;align-items:center;gap:12px;
+            user-select:none;
+        }
+        summary.faq-sum::-webkit-details-marker{display:none;}
+
+        .sum-ico{
+            width:38px;height:38px;border-radius:12px;flex-shrink:0;
+            display:flex;align-items:center;justify-content:center;
+            background:var(--q-bg,rgba(232,64,12,.1));
+        }
+        .sum-ico .material-symbols-outlined{font-size:20px;color:var(--q-color,var(--accent));}
+
+        .sum-text{flex:1;font-size:.9rem;font-weight:800;line-height:1.3;}
+
+        .sum-arrow{
+            width:28px;height:28px;border-radius:8px;flex-shrink:0;
+            background:var(--bg2);display:flex;align-items:center;justify-content:center;
+            transition:transform .25s,background .2s;
+        }
+        .sum-arrow .material-symbols-outlined{font-size:18px;color:var(--text2);}
+        details.faq[open] .sum-arrow{transform:rotate(180deg);background:var(--q-color,var(--accent));}
+        details.faq[open] .sum-arrow .material-symbols-outlined{color:white;}
+
+        /* Contenido respuesta */
+        .faq-answer{
+            padding:0 18px 18px;
+            border-top:1px solid var(--border);
+            margin-top:0;
+        }
+        .faq-answer p,.faq-answer li{font-size:.85rem;line-height:1.7;color:var(--text2);margin-top:10px;}
+
+        /* Steps */
+        .steps{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+        .step{display:flex;gap:10px;align-items:flex-start;}
+        .step-n{
+            width:22px;height:22px;border-radius:50%;flex-shrink:0;
+            background:var(--q-color,var(--accent));color:white;
+            font-size:.7rem;font-weight:800;
+            display:flex;align-items:center;justify-content:center;margin-top:2px;
+        }
+        .step-txt{font-size:.85rem;line-height:1.5;color:var(--text2);}
+
+        /* Pill simulando botón */
+        .btn-sim{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:6px;font-size:.73rem;font-weight:800;vertical-align:middle;}
+        .bs-green {background:#dcfce7;color:#166534;}
+        .bs-orange{background:#ffedd5;color:#9a3412;}
+        .bs-blue  {background:#dbeafe;color:#1d4ed8;}
+        .bs-gray  {background:var(--bg2);color:var(--text2);}
+
+        /* Tip box */
+        .tip{background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.82rem;color:var(--blue);line-height:1.5;}
+        .tip strong{color:var(--blue);}
+
+        /* ── ZONA ADMIN ─────────────────────────────────────────────── */
+        #admin-zone{display:none;}
+        .admin-banner{
+            background:linear-gradient(135deg,var(--purple),#9333ea);
+            border-radius:16px;padding:16px 18px;
+            display:flex;align-items:center;gap:14px;
+            color:white;margin-bottom:16px;
+            box-shadow:0 4px 14px rgba(124,58,237,.3);
+        }
+        .admin-banner-ico{font-size:2rem;flex-shrink:0;}
+        .admin-banner strong{display:block;font-size:.95rem;font-weight:800;}
+        .admin-banner span{font-size:.78rem;opacity:.75;}
+
+        details.faq.admin-faq{--q-color:var(--purple);--q-bg:rgba(124,58,237,.1);}
+
+        /* ── CTA FINAL ──────────────────────────────────────────────── */
+        .cta-wrap{
+            background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+            padding:24px;text-align:center;box-shadow:var(--shadow);margin-top:8px;
+        }
+        .cta-emoji{font-size:2rem;display:block;margin-bottom:8px;}
+        .cta-title{font-size:1rem;font-weight:800;margin-bottom:6px;}
+        .cta-sub{font-size:.82rem;color:var(--text2);margin-bottom:16px;line-height:1.5;}
+        .btn-volver{
+            display:inline-flex;align-items:center;gap:8px;
+            background:var(--accent);color:white;border:none;
+            padding:13px 24px;border-radius:50px;font-weight:800;
+            font-family:inherit;font-size:.9rem;cursor:pointer;
+            box-shadow:0 4px 14px rgba(232,64,12,.35);
+            transition:transform .15s;text-decoration:none;
+        }
+        .btn-volver:hover{transform:translateY(-2px);}
+
+        /* ── ANIMACIONES ────────────────────────────────────────────── */
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        .faq-group{animation:fadeUp .4s ease backwards;}
+        .faq-group:nth-child(2){animation-delay:.06s;}
+        .faq-group:nth-child(3){animation-delay:.12s;}
+        .faq-group:nth-child(4){animation-delay:.18s;}
+    </style>
 </head>
 <body>
 
-    <h1>Ayuda y Guía</h1>
-    <p class="intro">Toca una pregunta para ver la respuesta.</p>
-
-    <div class="faq-section-title">Conceptos Básicos</div>
-
-    <details>
-        <summary>
-            <div class="q-content"><span class="material-symbols-outlined icon">celebration</span> ¿Cómo me apunto a una fiesta?</div>
-            <span class="material-symbols-outlined arrow">expand_more</span>
-        </summary>
-        <div class="answer">
-            <div class="step"><span class="step-num">1</span> Ve a la pestaña de abajo llamada <strong>Fiestas</strong>.</div>
-            <div class="step"><span class="step-num">2</span> Verás el calendario. Toca en el evento que te interese.</div>
-            <div class="step"><span class="step-num">3</span> Pulsa el botón verde <span class="btn-sim green">Inscribirse</span>.</div>
-            <div class="step"><span class="step-num">4</span> ¡Listo! Ya tienes tu plaza confirmada.</div>
-        </div>
-    </details>
-
-    <details>
-        <summary>
-            <div class="q-content"><span class="material-symbols-outlined icon" style="color:#2196f3">group_add</span> ¿Cómo vinculo a amigos/pareja?</div>
-            <span class="material-symbols-outlined arrow">expand_more</span>
-        </summary>
-        <div class="answer">
-            Al apuntarte a eventos de equipo (como torneos de pádel o grupos), te pedirá el nombre de tu compañero.
-            <br><br>
-            <strong>✨ Truco Mágico:</strong><br>
-            Si escribes su <strong>Nombre de Usuario</strong> exacto (el que usan en la App), ¡la inscripción aparecerá automáticamente en su móvil también! Así no tenéis que apuntaros dos veces.
-        </div>
-    </details>
-
-    <details>
-        <summary>
-            <div class="q-content"><span class="material-symbols-outlined icon" style="color:#ff9800">edit</span> ¿Puedo editar mi inscripción?</div>
-            <span class="material-symbols-outlined arrow">expand_more</span>
-        </summary>
-        <div class="answer">
-            ¡Sí! Si te has equivocado de nombre o quieres cambiar algo:
-            <div class="step"><span class="step-num">1</span> Ve a la pestaña <strong>Tickets</strong>.</div>
-            <div class="step"><span class="step-num">2</span> Busca el evento y pulsa en <span class="btn-sim blue">Editar</span> (lápiz).</div>
-            <p style="font-size:0.8rem; margin-top:5px;"><em>Nota: También puedes borrarte y volver a apuntarte si lo prefieres.</em></p>
-        </div>
-    </details>
-
-    <details>
-        <summary>
-            <div class="q-content"><span class="material-symbols-outlined icon">confirmation_number</span> ¿Dónde veo mis tickets?</div>
-            <span class="material-symbols-outlined arrow">expand_more</span>
-        </summary>
-        <div class="answer">
-            En la barra de abajo, pulsa en <strong>Tickets</strong>. <br><br>
-            Ahí verás una lista de todo a lo que te has apuntado tú (o a lo que te han vinculado tus amigos).
-        </div>
-    </details>
-
-    <details>
-        <summary>
-            <div class="q-content"><span class="material-symbols-outlined icon">emoji_events</span> ¿Cómo funcionan los torneos?</div>
-            <span class="material-symbols-outlined arrow">expand_more</span>
-        </summary>
-        <div class="answer">
-            <p>Si te apuntas a un torneo (Pádel, Truc, Parchís...), aparecerás en la lista de jugadores.</p>
-            <div class="step"><span class="step-num">1</span> Apúntate tú (y vincula a tu pareja si es necesario).</div>
-            <div class="step"><span class="step-num">2</span> Cuando empiece el torneo, el Festero generará el sorteo.</div>
-            <div class="step"><span class="step-num">3</span> Podrás ver contra quién te toca pulsando en el botón <span class="btn-sim orange">Ver Cuadro</span> dentro de la actividad.</div>
-        </div>
-    </details>
-
-    <div id="admin-zone">
-        <div class="faq-section-title admin-section-title">Zona Festeros / Admin</div>
-
-        <details class="admin-details">
-            <summary>
-                <div class="q-content"><span class="material-symbols-outlined icon">edit_calendar</span> Crear y Borrar Actividades</div>
-                <span class="material-symbols-outlined arrow">expand_more</span>
-            </summary>
-            <div class="answer">
-                Ve a tu <strong>Perfil</strong> ➜ <strong>Gestionar Eventos</strong>.
-                <br><br>
-                <ul>
-                    <li><strong>Crear:</strong> Pulsa el botón grande <span class="btn-sim">Nueva Actividad</span>. Rellena título, fecha, hora y tipo.</li>
-                    <li><strong>Borrar:</strong> En la lista, usa el icono de basura 🗑️. ¡Cuidado! Esto borra a todos los inscritos también.</li>
-                </ul>
-            </div>
-        </details>
-
-        <details class="admin-details">
-            <summary>
-                <div class="q-content"><span class="material-symbols-outlined icon">group</span> Gestionar Inscritos</div>
-                <span class="material-symbols-outlined arrow">expand_more</span>
-            </summary>
-            <div class="answer">
-                Dentro de la gestión de una actividad, pulsa en ella para entrar.
-                <br><br>
-                Verás la lista de vecinos apuntados. Puedes <strong>eliminarlos manualmente</strong> si alguien se ha equivocado o te lo pide en persona.
-            </div>
-        </details>
-
-        <details class="admin-details">
-            <summary>
-                <div class="q-content"><span class="material-symbols-outlined icon">trophy</span> Organizar un Torneo</div>
-                <span class="material-symbols-outlined arrow">expand_more</span>
-            </summary>
-            <div class="answer">
-                Si la actividad es tipo "Torneo":
-                <div class="step"><span class="step-num admin-step-num">1</span> Entra en la actividad desde Gestión.</div>
-                <div class="step"><span class="step-num admin-step-num">2</span> Verás una pestaña "Competición" o "Bracket".</div>
-                <div class="step"><span class="step-num admin-step-num">3</span> Cuando estén todos apuntados, pulsa <strong>Generar Sorteo</strong>.</div>
-                <div class="step"><span class="step-num admin-step-num">4</span> Ve tocando los ganadores para que pasen de ronda hasta la final.</div>
-                <p><em>Nota: ¡Esto envía estrellas de victoria automáticamente!</em> ⭐</p>
-            </div>
-        </details>
-
-        <details class="admin-details">
-            <summary>
-                <div class="q-content"><span class="material-symbols-outlined icon">confirmation_number</span> Invitar vecinos (Códigos)</div>
-                <span class="material-symbols-outlined arrow">expand_more</span>
-            </summary>
-            <div class="answer">
-                En el <strong>Inicio</strong> (o en el Panel de Gestión), verás un botón morado de <strong>Invitaciones</strong>.
-                <br><br>
-                Pulsa en "Generar Código". Te dará una clave (ej: <code>A8X922</code>). Copia y manda esa clave por WhatsApp al vecino. Solo podrá usarla una vez para registrarse.
-            </div>
-        </details>
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <a onclick="window.history.back()" class="btn-ico" style="cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </a>
+        <span class="topbar-title">Centro de Ayuda</span>
     </div>
 
-    <br>
-    <div style="text-align:center; margin-top:20px;">
-        <button onclick="window.history.back()" style="background:var(--text); color:var(--bg); border:none; padding:10px 20px; border-radius:30px; font-weight:bold; cursor:pointer;">
-            Entendido, volver atrás
-        </button>
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-content">
+            <span class="hero-ico">💬</span>
+            <h1 class="hero-title">¿En qué podemos<br>ayudarte?</h1>
+            <p class="hero-sub">Encuentra respuesta a tus dudas sobre la app</p>
+
+            <div class="search-wrap">
+                <span class="material-symbols-outlined search-ico">search</span>
+                <input type="text" class="search-input" id="search-input"
+                       placeholder="Busca una pregunta…"
+                       oninput="buscarFAQ(this.value)">
+            </div>
+
+            <div class="cat-chips">
+                <button class="chip active" onclick="filtrarCat('todo',this)">Todas</button>
+                <button class="chip" onclick="filtrarCat('inscripcion',this)">🎟️ Inscripción</button>
+                <button class="chip" onclick="filtrarCat('torneos',this)">🏆 Torneos</button>
+                <button class="chip" onclick="filtrarCat('cuenta',this)">👤 Cuenta</button>
+            </div>
+        </div>
+
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 55" preserveAspectRatio="none" style="height:45px">
+                <path d="M0,30 C480,65 960,5 1440,30 L1440,55 L0,55 Z" fill="var(--bg)"/>
+            </svg>
+        </div>
     </div>
 
+    <!-- CONTENIDO -->
+    <div class="wrap">
+
+        <!-- ── PARA VECINOS ──────────────────────────────────────────── -->
+        <div class="sec-label">
+            <span class="material-symbols-outlined sl-ico">person</span>
+            Para vecinos
+        </div>
+
+        <div class="faq-group" id="group-vecinos">
+
+            <details class="faq" data-cat="inscripcion" style="--q-color:#e8400c;--q-bg:rgba(232,64,12,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">celebration</span></div>
+                    <span class="sum-text">¿Cómo me apunto a una actividad?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <div class="steps">
+                        <div class="step"><span class="step-n">1</span><span class="step-txt">Ve a la pestaña <strong>Fiestas</strong> en la barra de abajo.</span></div>
+                        <div class="step"><span class="step-n">2</span><span class="step-txt">Elige el día con las pestañas de fechas y pulsa en el evento.</span></div>
+                        <div class="step"><span class="step-n">3</span><span class="step-txt">Pulsa el botón verde <span class="btn-sim bs-green">¡Apuntarme!</span> en el modal.</span></div>
+                        <div class="step"><span class="step-n">4</span><span class="step-txt">¡Listo! Tu ticket aparecerá en la sección <strong>Tickets</strong>.</span></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="inscripcion" style="--q-color:#0ea5e9;--q-bg:rgba(14,165,233,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">group_add</span></div>
+                    <span class="sum-text">¿Cómo me apunto con un amigo o pareja?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <p>Al apuntarte a un evento de parejas o equipos, te pedirá el nombre de tu compañero/a.</p>
+                    <div class="tip">
+                        <strong>✨ Truco:</strong> Si escribes su <strong>nombre de usuario exacto</strong> de la app, la inscripción aparecerá automáticamente en su móvil también. Así no tenéis que apuntaros dos veces.
+                    </div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="inscripcion" style="--q-color:#f59e0b;--q-bg:rgba(245,158,11,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">edit</span></div>
+                    <span class="sum-text">¿Puedo editar o cancelar mi inscripción?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <div class="steps">
+                        <div class="step"><span class="step-n" style="background:#f59e0b">1</span><span class="step-txt">Ve a <strong>Tickets</strong> en la barra de abajo.</span></div>
+                        <div class="step"><span class="step-n" style="background:#f59e0b">2</span><span class="step-txt">Pulsa en el ticket del evento.</span></div>
+                        <div class="step"><span class="step-n" style="background:#f59e0b">3</span><span class="step-txt">Si eres capitán, verás <span class="btn-sim bs-orange">Editar compañeros</span>. Para borrarte del todo, pulsa <strong>Darme de baja</strong>.</span></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="torneos" style="--q-color:#7c3aed;--q-bg:rgba(124,58,237,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">emoji_events</span></div>
+                    <span class="sum-text">¿Cómo funcionan los torneos?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <div class="steps">
+                        <div class="step"><span class="step-n" style="background:#7c3aed">1</span><span class="step-txt">Apúntate al torneo (vincula a tu pareja si es necesario).</span></div>
+                        <div class="step"><span class="step-n" style="background:#7c3aed">2</span><span class="step-txt">Cuando empiece, el festero generará el sorteo del cuadro.</span></div>
+                        <div class="step"><span class="step-n" style="background:#7c3aed">3</span><span class="step-txt">Pulsa <span class="btn-sim bs-blue">🏆 Cuadro</span> dentro de la actividad para ver tus partidos.</span></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="cuenta" style="--q-color:#059669;--q-bg:rgba(5,150,105,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">confirmation_number</span></div>
+                    <span class="sum-text">¿Dónde veo todos mis tickets?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <p>En la barra de abajo pulsa en <strong>Tickets</strong>. Verás todos los eventos a los que te has apuntado, incluyendo los que alguien te ha vinculado.</p>
+                    <div class="tip"><strong>💡 Tip:</strong> Activa el toggle "Pasados" para ver también eventos ya celebrados.</div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="cuenta" style="--q-color:#ec4899;--q-bg:rgba(236,72,153,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">smartphone</span></div>
+                    <span class="sum-text">¿Puedo instalar la app en mi móvil?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <p>¡Sí! Esta web funciona como una app nativa.</p>
+                    <div class="steps">
+                        <div class="step"><span class="step-n" style="background:#ec4899">1</span><span class="step-txt">En Safari (iPhone) o Chrome (Android), abre el menú del navegador.</span></div>
+                        <div class="step"><span class="step-n" style="background:#ec4899">2</span><span class="step-txt">Pulsa <strong>"Añadir a pantalla de inicio"</strong>.</span></div>
+                        <div class="step"><span class="step-n" style="background:#ec4899">3</span><span class="step-txt">Se instalará con su icono y funciona sin navegador.</span></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="cuenta" style="--q-color:#64748b;--q-bg:rgba(100,116,139,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">lock</span></div>
+                    <span class="sum-text">He olvidado mi contraseña, ¿qué hago?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <p>La app no tiene recuperación automática de contraseña. Si la has olvidado, contacta con un <strong>Festero</strong> para que restablezcan tu cuenta.</p>
+                    <div class="tip">⚠️ Por eso es importante recordar tu contraseña. ¡Apúntala en un sitio seguro!</div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="inscripcion" style="--q-color:#10b981;--q-bg:rgba(16,185,129,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">event_busy</span></div>
+                    <span class="sum-text">¿Hay límite de plazas en las actividades?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <p>Depende de la actividad. Algunas tienen aforo limitado y cuando se completen no se podrá inscribir más gente.</p>
+                    <div class="tip">💡 <strong>Consejo:</strong> Si ves una actividad que te interesa, apúntate cuanto antes. ¡Las plazas vuelan!</div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="torneos" style="--q-color:#f97316;--q-bg:rgba(249,115,22,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">sports</span></div>
+                    <span class="sum-text">¿Qué deportes y concursos habrá?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <p>El programa completo lo irán publicando los festeros en la sección <strong>Fiestas</strong> a medida que se confirmen las fechas y actividades.</p>
+                    <p>Los últimos años ha habido torneos de pádel, truc, parchís, carreras, concursos de paella y mucho más.</p>
+                    <div class="tip">🔔 Activa las notificaciones de la app para no perderte nada nuevo.</div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="cuenta" style="--q-color:#6366f1;--q-bg:rgba(99,102,241,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">notifications</span></div>
+                    <span class="sum-text">¿Cómo sé si hay novedades o cambios?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <p>Los festeros publicarán novedades en las redes sociales del equipo. También puedes consultar la sección <strong>Fiestas</strong> de la app para ver si hay actividades nuevas.</p>
+                    <div class="steps">
+                        <div class="step"><span class="step-n" style="background:#6366f1">1</span><span class="step-txt">Sigue a <strong>@festerospantano26</strong> en Instagram y TikTok.</span></div>
+                        <div class="step"><span class="step-n" style="background:#6366f1">2</span><span class="step-txt">Únete al grupo de WhatsApp del barrio desde la sección <strong>Redes</strong>.</span></div>
+                        <div class="step"><span class="step-n" style="background:#6366f1">3</span><span class="step-txt">Abre la app regularmente — las actividades aparecen en tiempo real.</span></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="faq" data-cat="cuenta" style="--q-color:#e8400c;--q-bg:rgba(232,64,12,.1)">
+                <summary class="faq-sum">
+                    <div class="sum-ico"><span class="material-symbols-outlined">person_add</span></div>
+                    <span class="sum-text">¿Cómo consigo un código de invitación?</span>
+                    <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                </summary>
+                <div class="faq-answer">
+                    <p>Los códigos los generan los festeros. Para conseguir el tuyo:</p>
+                    <div class="steps">
+                        <div class="step"><span class="step-n">1</span><span class="step-txt">Localiza a cualquier festero en persona durante las fiestas.</span></div>
+                        <div class="step"><span class="step-n">2</span><span class="step-txt">O escríbenos por las redes sociales — estaremos encantados de ayudarte.</span></div>
+                    </div>
+                    <div class="tip">ℹ️ Cada código solo funciona una vez y da acceso como vecino de la urbanización.</div>
+                </div>
+            </details>
+
+        </div>
+
+        <!-- ── ZONA ADMIN (oculta si no es festero/admin) ─────────── -->
+        <div id="admin-zone">
+
+            <div class="admin-banner">
+                <span class="admin-banner-ico">🛠️</span>
+                <div>
+                    <strong>Zona Festeros y Admin</strong>
+                    <span>Solo visible para el equipo organizador</span>
+                </div>
+            </div>
+
+            <div class="faq-group">
+
+                <details class="faq admin-faq">
+                    <summary class="faq-sum">
+                        <div class="sum-ico"><span class="material-symbols-outlined">edit_calendar</span></div>
+                        <span class="sum-text">Crear y borrar actividades</span>
+                        <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Ve a <strong>Perfil → Gestionar Eventos</strong> o usa el botón de gestión en el panel.</p>
+                        <div class="steps">
+                            <div class="step"><span class="step-n" style="background:var(--purple)">+</span><span class="step-txt"><strong>Crear:</strong> Rellena el formulario con título, fecha, tipo y modalidad. Pulsa <span class="btn-sim bs-gray">Publicar evento</span>.</span></div>
+                            <div class="step"><span class="step-n" style="background:#dc2626">🗑</span><span class="step-txt"><strong>Borrar:</strong> Usa el botón rojo en la lista. ¡Cuidado! Elimina también a todos los inscritos.</span></div>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="faq admin-faq">
+                    <summary class="faq-sum">
+                        <div class="sum-ico"><span class="material-symbols-outlined">group</span></div>
+                        <span class="sum-text">Gestionar inscritos manualmente</span>
+                        <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Desde la lista de eventos en Gestión, pulsa el botón <span class="btn-sim bs-gray">👥 Inscritos</span> de cualquier actividad.</p>
+                        <p>Puedes añadir participantes manualmente o eliminar a alguien si se ha equivocado o te lo pide en persona.</p>
+                    </div>
+                </details>
+
+                <details class="faq admin-faq">
+                    <summary class="faq-sum">
+                        <div class="sum-ico"><span class="material-symbols-outlined">emoji_events</span></div>
+                        <span class="sum-text">Organizar un torneo (bracket)</span>
+                        <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                    </summary>
+                    <div class="faq-answer">
+                        <div class="steps">
+                            <div class="step"><span class="step-n" style="background:var(--purple)">1</span><span class="step-txt">Desde Gestión, pulsa el botón <span class="btn-sim bs-gray">🏆 Bracket</span> del torneo.</span></div>
+                            <div class="step"><span class="step-n" style="background:var(--purple)">2</span><span class="step-txt">Pulsa <strong>Generar sorteo aleatorio</strong> cuando estén todos apuntados.</span></div>
+                            <div class="step"><span class="step-n" style="background:var(--purple)">3</span><span class="step-txt">Pulsa en el equipo ganador de cada partido para que pase de ronda.</span></div>
+                            <div class="step"><span class="step-n" style="background:var(--purple)">4</span><span class="step-txt">Al completar una ronda se genera automáticamente la siguiente.</span></div>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="faq admin-faq">
+                    <summary class="faq-sum">
+                        <div class="sum-ico"><span class="material-symbols-outlined">social_leaderboard</span></div>
+                        <span class="sum-text">Publicar el podio de una carrera</span>
+                        <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Para carreras y concursos, desde Gestión pulsa el botón <span class="btn-sim bs-gray">📊 Podio</span> del evento.</p>
+                        <p>Puedes asignar 🥇 🥈 🥉 desde esa pantalla — o ir tocando las medallas directamente en la lista de corredores.</p>
+                    </div>
+                </details>
+
+                <details class="faq admin-faq">
+                    <summary class="faq-sum">
+                        <div class="sum-ico"><span class="material-symbols-outlined">confirmation_number</span></div>
+                        <span class="sum-text">Invitar vecinos con códigos</span>
+                        <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Ve a <strong>Gestión → Códigos de invitación</strong>.</p>
+                        <div class="steps">
+                            <div class="step"><span class="step-n" style="background:var(--purple)">1</span><span class="step-txt">Genera un código vecino o VIP según el rol que quieras dar.</span></div>
+                            <div class="step"><span class="step-n" style="background:var(--purple)">2</span><span class="step-txt">Comparte el código por WhatsApp con el vecino.</span></div>
+                            <div class="step"><span class="step-n" style="background:var(--purple)">3</span><span class="step-txt">El código solo es válido una vez. Puedes ver si ya fue usado en la lista.</span></div>
+                        </div>
+                        <div class="tip"><strong>💡</strong> También puedes generar códigos en bulk (hasta 50 a la vez) para distribuir en papel.</div>
+                    </div>
+                </details>
+
+                <details class="faq admin-faq">
+                    <summary class="faq-sum">
+                        <div class="sum-ico"><span class="material-symbols-outlined">confirmation_number</span></div>
+                        <span class="sum-text">Actualizar el número ganador de la rifa</span>
+                        <div class="sum-arrow"><span class="material-symbols-outlined">expand_more</span></div>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Ve a <strong>Rifa</strong> desde el menú principal. Al ser festero/admin verás un panel al final de la página.</p>
+                        <p>Escribe el número ganador y la fecha del sorteo, y pulsa <span class="btn-sim bs-gray">Publicar número</span>. Se actualizará en tiempo real para todos los vecinos.</p>
+                    </div>
+                </details>
+
+            </div>
+        </div>
+
+        <!-- CTA FINAL -->
+        <div class="cta-wrap">
+            <span class="cta-emoji">🙋</span>
+            <div class="cta-title">¿Tienes otra duda?</div>
+            <p class="cta-sub">
+                Pregunta a cualquier festero, estaremos dispuestos<br>
+                a ayudaros en todo lo que necesitéis. 🎉
+            </p>
+            <a href="festeros.html" class="btn-volver">
+                <span class="material-symbols-outlined" style="font-size:18px">diversity_3</span>
+                Ver quiénes somos los festeros
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        /* ── BÚSQUEDA EN TIEMPO REAL ────────────────────────────────── */
+        window.buscarFAQ = (q) => {
+            const term = q.toLowerCase().trim();
+            document.querySelectorAll('details.faq').forEach(d => {
+                const text = d.innerText.toLowerCase();
+                d.style.display = (!term || text.includes(term)) ? '' : 'none';
+            });
+        };
+
+        /* ── FILTRO POR CATEGORÍA ───────────────────────────────────── */
+        window.filtrarCat = (cat, btn) => {
+            document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('search-input').value = '';
+            document.querySelectorAll('details.faq').forEach(d => {
+                const dc = d.dataset.cat || 'admin';
+                d.style.display = (cat==='todo' || dc===cat) ? '' : 'none';
+            });
+        };
+    </script>
 </body>
 </html>
