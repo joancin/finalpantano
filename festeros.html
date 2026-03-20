@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Los Festeros 2026 · Fiestas Pantano</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#e8400c">
+    <meta name="theme-color" content="#0d0608">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
@@ -14,342 +14,271 @@
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Lora:ital@0;1&display=swap" rel="stylesheet">
 
     <style>
-        /* ── VARIABLES ──────────────────────────────────────────────── */
         :root {
-            --bg: #fdf6ee; --bg2: #f0e4d4; --text: #1a1208; --text2: #7a6550;
-            --card: #ffffff; --border: rgba(0,0,0,0.07);
-            --accent: #e8400c; --gold: #f59e0b;
-            --green: #059669;
-            --shadow: 0 4px 20px rgba(0,0,0,0.07);
-            --radius: 18px;
+            --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550;
+            --card:#fff; --border:rgba(0,0,0,0.07);
+            --accent:#e8400c; --gold:#f59e0b;
+            --green:#059669; --purple:#7c3aed;
+            --shadow:0 4px 20px rgba(0,0,0,0.08); --radius:20px;
         }
         html.dark-mode {
-            --bg: #140e08; --bg2: #1e1610; --text: #f0e8dc; --text2: #a89070;
-            --card: #241c14; --border: rgba(255,255,255,0.08);
-            --shadow: 0 4px 20px rgba(0,0,0,0.45);
+            --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070;
+            --card:#241c14; --border:rgba(255,255,255,0.08);
+            --shadow:0 4px 20px rgba(0,0,0,0.45);
         }
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Bricolage Grotesque', sans-serif;
-            background: var(--bg); color: var(--text);
-            min-height: 100vh; overflow-x: hidden;
-            padding-bottom: 60px;
-        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;padding-bottom:60px;}
 
         /* ── HERO ───────────────────────────────────────────────────── */
-        .hero {
-            position: relative; overflow: hidden;
-            padding: 70px 24px 50px;
-            text-align: center;
-        }
+        .hero{background:#0d0608;min-height:100svh;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+        .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 100% 60% at 50% -5%,rgba(232,64,12,.25) 0%,transparent 65%),radial-gradient(ellipse 60% 40% at 100% 70%,rgba(245,158,11,.1) 0%,transparent 55%),radial-gradient(ellipse 50% 35% at 0% 80%,rgba(124,58,237,.08) 0%,transparent 50%);}
+        .hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:26px 26px;}
+        #hero-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
 
-        /* Fondo degradado festivo */
-        .hero::before {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(160deg, #e8400c 0%, #f59e0b 60%, #fdf6ee 100%);
-            opacity: 0.12;
-        }
-        html.dark-mode .hero::before { opacity: 0.18; }
+        .btn-back{position:fixed;top:18px;left:18px;z-index:200;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);color:rgba(255,255,255,.8);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;transition:background .2s,transform .15s;}
+        .btn-back:hover{background:rgba(255,255,255,.16);}
+        .btn-back:active{transform:scale(.9);}
 
-        /* Patrón de puntos decorativo */
-        .hero::after {
-            content: '';
-            position: absolute; inset: 0; pointer-events: none;
-            background-image: radial-gradient(circle, rgba(232,64,12,.12) 1px, transparent 1px);
-            background-size: 28px 28px;
-        }
+        .hero-body{flex:1;position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px 0;text-align:center;}
 
-        .btn-back {
-            position: fixed; top: 18px; left: 18px; z-index: 100;
-            background: var(--card); border: 1px solid var(--border);
-            width: 42px; height: 42px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text);
-            box-shadow: var(--shadow); transition: transform .15s;
-        }
-        .btn-back:active { transform: scale(.9); }
+        .hero-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(232,64,12,.15);color:rgba(255,140,80,.95);border:1px solid rgba(232,64,12,.25);padding:5px 16px;border-radius:30px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:22px;animation:fadeUp .6s ease .1s backwards;}
+        .tag-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.6s ease-in-out infinite;}
+        @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.8);opacity:.4}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
-        .hero-content { position: relative; z-index: 1; }
+        .hero-title{font-size:clamp(3.5rem,16vw,8rem);font-weight:800;line-height:.9;letter-spacing:-3px;color:white;animation:titleIn .9s cubic-bezier(.22,1,.36,1) .15s backwards;}
+        @keyframes titleIn{from{opacity:0;transform:translateY(30px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+        .hero-title em{font-style:normal;display:block;background:linear-gradient(135deg,#ff6b35,#e8400c,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(232,64,12,.4));}
 
-        .hero-eyebrow {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(232,64,12,.1); color: var(--accent);
-            border: 1px solid rgba(232,64,12,.2);
-            padding: 5px 14px; border-radius: 30px;
-            font-size: 0.75rem; font-weight: 800;
-            text-transform: uppercase; letter-spacing: .5px;
-            margin-bottom: 16px;
-        }
-        .hero-eyebrow-dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--accent);
-            animation: pulse 1.6s ease-in-out infinite;
-        }
-        @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.7);opacity:.4} }
+        .hero-sub{font-family:'Lora',serif;font-style:italic;color:rgba(255,255,255,.4);font-size:clamp(.95rem,3vw,1.15rem);margin-top:12px;margin-bottom:36px;animation:fadeUp .6s ease .35s backwards;}
 
-        .hero h1 {
-            font-size: clamp(3rem, 14vw, 5.5rem);
-            font-weight: 800; line-height: .95;
-            letter-spacing: -2px;
-        }
-        .hero h1 .line-plain { display: block; color: var(--text); }
-        .hero h1 .line-accent {
-            display: block;
-            background: linear-gradient(135deg, var(--accent), var(--gold));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+        .stats-row{display:flex;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden;backdrop-filter:blur(8px);animation:fadeUp .6s ease .45s backwards;}
+        .stat-item{padding:16px 24px;text-align:center;flex:1;position:relative;}
+        .stat-item+.stat-item::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:1px;background:rgba(255,255,255,.1);}
+        .stat-num{display:block;font-size:1.8rem;font-weight:800;color:white;line-height:1;}
+        .stat-num span{background:linear-gradient(135deg,#ff6b35,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+        .stat-lbl{display:block;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-top:3px;}
 
-        .hero-sub {
-            font-family: 'Lora', serif; font-style: italic;
-            font-size: 1rem; color: var(--text2);
-            margin-top: 10px;
-        }
+        .hero-scroll{position:relative;z-index:10;padding:28px 0 0;display:flex;justify-content:center;}
+        .scroll-ico{color:rgba(255,255,255,.2);font-size:28px;animation:bounce 2.5s ease-in-out infinite;}
+        @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
 
-        .hero-count {
-            display: inline-flex; gap: 20px;
-            margin-top: 24px;
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 50px; padding: 10px 24px;
-            box-shadow: var(--shadow);
-        }
-        .hc-item { text-align: center; }
-        .hc-num  { display: block; font-size: 1.4rem; font-weight: 800; color: var(--accent); line-height: 1; }
-        .hc-lbl  { display: block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); }
-        .hc-sep  { width: 1px; background: var(--border); align-self: stretch; }
+        .hero-wave{position:relative;z-index:10;width:100%;overflow:hidden;line-height:0;margin-top:-1px;}
+        .hero-wave svg{display:block;width:100%;}
 
-        /* ── SECCIÓN LABEL ──────────────────────────────────────────── */
-        .section-wrap { max-width: 680px; margin: 0 auto; padding: 0 18px; }
+        /* ── CONTENIDO ──────────────────────────────────────────────── */
+        .content{background:var(--bg);padding-bottom:60px;}
+        .wrap{max-width:700px;margin:0 auto;padding:28px 18px 0;}
 
-        .section-label {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 1.5px; color: var(--text2); margin: 32px 0 16px;
-        }
-        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-        .section-label .sl-badge {
-            background: var(--accent); color: white;
-            padding: 2px 8px; border-radius: 10px; font-size: 0.65rem;
-        }
-        .section-label.collab .sl-badge { background: var(--green); }
+        .sec-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+        .sec-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);}
+        .sec-badge{padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:800;}
+        .sec-badge.orange{background:var(--accent);color:white;}
+        .sec-badge.green{background:var(--green);color:white;}
+        .sec-header::after{content:'';flex:1;height:1px;background:var(--border);}
 
-        /* ── GRID ───────────────────────────────────────────────────── */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-            gap: 12px;
-        }
+        /* ── PRESIDENTA ─────────────────────────────────────────────── */
+        .presi-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px;display:flex;position:relative;animation:fadeUp .35s ease backwards;transition:transform .2s,box-shadow .2s;}
+        .presi-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.1);}
+        .presi-left{width:90px;flex-shrink:0;background:linear-gradient(160deg,#7c3aed,#e8400c,#f59e0b);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 10px;gap:8px;position:relative;overflow:hidden;}
+        .presi-left::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.08) 1px,transparent 1px);background-size:12px 12px;}
+        .presi-avatar{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:white;position:relative;z-index:1;}
+        .presi-crown{font-size:.9rem;position:relative;z-index:1;}
+        .presi-body{flex:1;padding:18px 16px;display:flex;flex-direction:column;justify-content:center;gap:6px;}
+        .presi-role{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(232,64,12,.1));color:var(--purple);border:1px solid rgba(124,58,237,.2);padding:3px 10px;border-radius:20px;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;width:fit-content;}
+        .presi-name{font-size:1.2rem;font-weight:800;line-height:1.2;}
+        .presi-meta{font-size:.72rem;color:var(--text2);}
+        .presi-id{position:absolute;top:12px;right:14px;font-size:.6rem;font-weight:800;letter-spacing:2px;color:var(--text2);opacity:.4;}
 
-        /* ── CARD ───────────────────────────────────────────────────── */
-        .card {
-            background: var(--card); border-radius: var(--radius);
-            border: 1px solid var(--border); overflow: hidden;
-            box-shadow: var(--shadow);
-            display: flex; flex-direction: column;
-            animation: fadeUp .4s ease backwards;
-            transition: transform .2s, box-shadow .2s;
-            position: relative;
-        }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,.1); }
-        .card:active { transform: scale(.97); }
+        /* ── CREDENCIALES GRID ──────────────────────────────────────── */
+        .cred-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: none; }
-        }
+        .cred{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;animation:fadeUp .35s ease backwards;transition:transform .2s,box-shadow .2s;position:relative;}
+        .cred:hover{transform:translateY(-4px) rotate(.5deg);box-shadow:0 14px 32px rgba(0,0,0,.12);}
+        .cred:active{transform:scale(.97);}
 
-        /* Barra de color top */
-        .card-stripe {
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent), var(--gold));
-        }
-        .card.collab .card-stripe {
-            background: linear-gradient(90deg, var(--green), #34d399);
-        }
-        .card.presi .card-stripe {
-            height: 5px;
-            background: linear-gradient(90deg, #7c3aed, #e8400c, #f59e0b);
-        }
+        .cred-header{height:64px;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:0 10px 8px;}
+        .cred-header::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.1) 1px,transparent 1px);background-size:10px 10px;}
+        .cred-num{font-size:.58rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:1px;position:relative;z-index:1;}
+        .cred-logo{position:absolute;top:8px;right:10px;z-index:1;font-size:.55rem;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;}
 
-        .card-num {
-            position: absolute; top: 10px; right: 12px;
-            font-size: 0.65rem; font-weight: 800; color: var(--text2);
-            letter-spacing: .5px; opacity: .5;
-        }
+        .cred-ava-wrap{display:flex;justify-content:center;margin-top:-22px;position:relative;z-index:10;}
+        .cred-ava{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:white;border:3px solid var(--card);box-shadow:0 4px 12px rgba(0,0,0,.15);flex-shrink:0;}
 
-        .card-body {
-            padding: 18px 14px 16px;
-            display: flex; flex-direction: column;
-            align-items: center; text-align: center;
-            flex: 1; gap: 8px;
-        }
+        .cred-body{padding:6px 12px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;}
+        .cred-name{font-size:.82rem;font-weight:800;line-height:1.25;color:var(--text);}
+        .cred-role{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;padding:2px 8px;border-radius:10px;}
+        .role-festero{background:rgba(232,64,12,.1);color:var(--accent);}
+        .role-collab{background:rgba(5,150,105,.1);color:var(--green);}
 
-        /* Avatar con iniciales */
-        .avatar {
-            width: 52px; height: 52px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; font-weight: 800; color: white;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, var(--avatar-c1, #e8400c), var(--avatar-c2, #f59e0b));
-        }
-        .card.presi .avatar {
-            width: 58px; height: 58px; font-size: 1.2rem;
-            box-shadow: 0 4px 14px rgba(232,64,12,.4);
-        }
+        .cred-perf{margin:0 12px;border-top:1px dashed var(--border);position:relative;}
+        .cred-perf::before,.cred-perf::after{content:'';position:absolute;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--bg);}
+        .cred-perf::before{left:-18px;} .cred-perf::after{right:-18px;}
 
-        .card-name {
-            font-size: 0.88rem; font-weight: 800;
-            line-height: 1.25; color: var(--text);
-        }
+        .cred-footer{padding:6px 12px 10px;text-align:center;font-size:.55rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);opacity:.45;}
 
-        .card-role {
-            font-size: 0.68rem; font-weight: 700;
-            padding: 3px 10px; border-radius: 20px;
-            text-transform: uppercase; letter-spacing: .3px;
-        }
-        .role-festero  { background: rgba(232,64,12,.08);  color: var(--accent); }
-        .role-presi    { background: linear-gradient(135deg,rgba(124,58,237,.12),rgba(232,64,12,.12)); color: #7c3aed; }
-        .role-collab   { background: rgba(5,150,105,.1); color: var(--green); }
-
-        /* Card especial presidenta */
-        .card.presi {
-            grid-column: span 2;
-            flex-direction: row;
-        }
-        .card.presi .card-stripe {
-            width: 5px; height: auto;
-            background: linear-gradient(180deg, #7c3aed, #e8400c, #f59e0b);
-        }
-        .card.presi .card-body {
-            flex-direction: row; text-align: left;
-            align-items: center; gap: 14px;
-            padding: 18px 16px;
-        }
-        .card.presi .card-num { top: 12px; right: 14px; }
-
-        @media (max-width: 360px) {
-            .card.presi { grid-column: span 1; flex-direction: column; }
-            .card.presi .card-stripe { width: auto; height: 4px; }
-            .card.presi .card-body { flex-direction: column; text-align: center; }
-        }
+        /* ── FILTRO ─────────────────────────────────────────────────── */
+        .filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+        .filter-btn{padding:7px 16px;border-radius:30px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);}
+        .filter-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
     </style>
 </head>
 <body>
 
-    <button class="btn-back" onclick="window.history.back()" aria-label="Volver">
+    <a href="javascript:history.back()" class="btn-back" aria-label="Volver">
         <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
-    </button>
+    </a>
 
     <!-- HERO -->
     <div class="hero">
-        <div class="hero-content">
-            <div class="hero-eyebrow">
-                <span class="hero-eyebrow-dot"></span>
-                Fiestas Pantano · Torrent
-            </div>
-            <h1>
-                <span class="line-plain">El equipo</span>
-                <span class="line-accent">Festero</span>
-            </h1>
+        <div class="hero-bg"></div>
+        <div class="hero-dots"></div>
+        <div id="hero-particles"></div>
+
+        <div class="hero-body">
+            <div class="hero-tag"><span class="tag-dot"></span>Fiestas Pantano · Torrent</div>
+            <h1 class="hero-title">El equipo<br><em>Festero</em></h1>
             <p class="hero-sub">La gente que lo hace posible</p>
-            <div class="hero-count">
-                <div class="hc-item">
-                    <span class="hc-num" id="cnt-festeros">21</span>
-                    <span class="hc-lbl">Festeros</span>
-                </div>
-                <div class="hc-sep"></div>
-                <div class="hc-item">
-                    <span class="hc-num" id="cnt-collab">3</span>
-                    <span class="hc-lbl">Colaboradores</span>
-                </div>
-                <div class="hc-sep"></div>
-                <div class="hc-item">
-                    <span class="hc-num">2026</span>
-                    <span class="hc-lbl">Edición</span>
-                </div>
+            <div class="stats-row">
+                <div class="stat-item"><span class="stat-num"><span id="cnt-festeros">21</span></span><span class="stat-lbl">Festeros</span></div>
+                <div class="stat-item"><span class="stat-num"><span id="cnt-collab">3</span></span><span class="stat-lbl">Colaboradores</span></div>
+                <div class="stat-item"><span class="stat-num"><span>2026</span></span><span class="stat-lbl">Edición</span></div>
             </div>
+        </div>
+
+        <div class="hero-scroll"><span class="material-symbols-outlined scroll-ico">keyboard_arrow_down</span></div>
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 55" preserveAspectRatio="none" style="height:45px">
+                <path d="M0,30 C480,65 960,5 1440,30 L1440,55 L0,55 Z" fill="var(--bg)"/>
+            </svg>
         </div>
     </div>
 
-    <!-- FESTEROS -->
-    <div class="section-wrap">
-        <div class="section-label">
-            Festeros oficiales
-            <span class="sl-badge" id="badge-festeros">21</span>
-        </div>
-        <div id="lista-festeros" class="grid"></div>
+    <!-- CONTENIDO -->
+    <div class="content">
+        <div class="wrap">
 
-        <!-- COLABORADORES -->
-        <div class="section-label collab">
-            Colaboradores
-            <span class="sl-badge" id="badge-collab">3</span>
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="filtrar('todos',this)">Todos</button>
+                <button class="filter-btn" onclick="filtrar('festeros',this)">🎉 Festeros</button>
+                <button class="filter-btn" onclick="filtrar('colaboradores',this)">🤝 Colaboradores</button>
+            </div>
+
+            <div id="zona-presidenta">
+                <div class="sec-header"><span class="sec-title">Presidenta</span><span class="sec-badge orange">👑</span></div>
+                <div id="lista-presidenta"></div>
+            </div>
+
+            <div id="zona-festeros" style="margin-top:28px;">
+                <div class="sec-header"><span class="sec-title">Festeros</span><span class="sec-badge orange" id="badge-festeros">20</span></div>
+                <div id="lista-festeros" class="cred-grid"></div>
+            </div>
+
+            <div id="zona-colaboradores" style="margin-top:28px;">
+                <div class="sec-header"><span class="sec-title">Colaboradores</span><span class="sec-badge green" id="badge-collab">3</span></div>
+                <div id="lista-colaboradores" class="cred-grid"></div>
+            </div>
+
         </div>
-        <div id="lista-colaboradores" class="grid"></div>
     </div>
 
     <script>
-        /* ── DATOS ── igual que el original, solo añado 2026 ─────── */
-        const nombres = [
-          "Rocio Gil","Mario Izquierdo","Idaira Lloria","Joan Chirivella",
-          "Paula Mata","Hugo Lopez","Isabel Lopez","Enrique Gil",
-          "Olga Moncholi","Dani Moncayo","Neus Adsuara","Paula Martínez",
-          "Miguel Santamaria","Carla Muñoz","Rebeca Muñoz","Nayara Muñoz",
-          "Alberto Lopez","Patri Lopez","Joan Ramirez","Enric Juan","Cristina Martín"
+        const festeros = [
+            "Rocio Gil","Mario Izquierdo","Idaira Lloria","Joan Chirivella",
+            "Paula Mata","Hugo Lopez","Isabel Lopez","Enrique Gil",
+            "Olga Moncholi","Dani Moncayo","Neus Adsuara","Paula Martínez",
+            "Miguel Santamaria","Carla Muñoz","Rebeca Muñoz","Nayara Muñoz",
+            "Alberto Lopez","Patri Lopez","Joan Ramirez","Enric Juan","Cristina Martín"
         ];
         const colaboradores = ["Celia Sastriques","Nicolas Santamaría","Inés Muñoz"];
 
-        /* Paleta de colores para avatares — cicla */
-        const avatarPalettes = [
-            ['#e8400c','#f59e0b'], ['#7c3aed','#e8400c'], ['#0ea5e9','#6366f1'],
-            ['#059669','#34d399'], ['#ec4899','#f97316'], ['#f59e0b','#84cc16'],
-            ['#6366f1','#0ea5e9'], ['#e8400c','#ec4899'],
+        const palettes = [
+            ['#e8400c','#f59e0b'],['#7c3aed','#e8400c'],['#0ea5e9','#6366f1'],
+            ['#059669','#34d399'],['#ec4899','#f97316'],['#f59e0b','#84cc16'],
+            ['#6366f1','#0ea5e9'],['#e8400c','#ec4899'],['#10b981','#0ea5e9'],
+            ['#8b5cf6','#ec4899'],['#f97316','#f59e0b'],['#06b6d4','#6366f1'],
         ];
 
-        function initials(name) {
-            return name.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
-        }
+        const initials = n => n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
 
-        function renderCards(lista, containerId, esColaborador) {
-            const container = document.getElementById(containerId);
-            lista.forEach((nombre, index) => {
-                const esPresidenta = index === 0 && !esColaborador;
-                const rol     = esPresidenta ? 'Presidenta' : esColaborador ? 'Colaborador/a' : 'Festero/a';
-                const rolCls  = esPresidenta ? 'role-presi'  : esColaborador ? 'role-collab' : 'role-festero';
-                const cardCls = esPresidenta ? 'card presi'  : esColaborador ? 'card collab' : 'card';
-                const num     = esColaborador ? 'C' + (index+1) : String(index+1).padStart(3,'0');
-                const pal     = avatarPalettes[index % avatarPalettes.length];
-                const delay   = index * 40;
-
-                const card = document.createElement('div');
-                card.className = cardCls;
-                card.style.animationDelay = delay + 'ms';
-                card.innerHTML = `
-                    <div class="card-stripe"></div>
-                    <div class="card-body">
-                        <div class="avatar" style="--avatar-c1:${pal[0]};--avatar-c2:${pal[1]}">
-                            ${initials(nombre)}
-                        </div>
-                        <div>
-                            <div class="card-name">${nombre}</div>
-                            <div class="card-role ${rolCls}">${rol}</div>
-                        </div>
+        function renderPresidenta(nombre) {
+            document.getElementById('lista-presidenta').innerHTML = `
+            <div class="presi-card">
+                <div class="presi-left">
+                    <div class="presi-crown">👑</div>
+                    <div class="presi-avatar">${initials(nombre)}</div>
+                </div>
+                <div class="presi-body">
+                    <div class="presi-role">
+                        <span class="material-symbols-outlined" style="font-size:12px">stars</span>
+                        Presidenta 2026
                     </div>
-                    <span class="card-num">${num}</span>
-                `;
-                container.appendChild(card);
-            });
+                    <div class="presi-name">${nombre}</div>
+                    <div class="presi-meta">Festeros Pantano · Torrent, Valencia</div>
+                </div>
+                <div class="presi-id">FP·2026·001</div>
+            </div>`;
         }
 
-        /* Actualizar contadores */
-        document.getElementById('cnt-festeros').innerText = nombres.length;
-        document.getElementById('cnt-collab').innerText   = colaboradores.length;
-        document.getElementById('badge-festeros').innerText = nombres.length;
-        document.getElementById('badge-collab').innerText   = colaboradores.length;
+        function renderCred(nombre, index, esColaborador) {
+            const num    = index + (esColaborador ? 22 : 2);
+            const numStr = 'FP·2026·' + String(num).padStart(3,'0');
+            const pal    = palettes[(index + (esColaborador?10:1)) % palettes.length];
+            const delay  = index * 35;
+            const rolCls = esColaborador ? 'role-collab' : 'role-festero';
+            const rolLbl = esColaborador ? 'Colaborador/a' : 'Festero/a';
+            return `
+            <div class="cred${esColaborador?' collab':''}" style="animation-delay:${delay}ms">
+                <div class="cred-header" style="background:linear-gradient(135deg,${pal[0]},${pal[1]})">
+                    <span class="cred-num">#${String(num).padStart(3,'0')}</span>
+                    <span class="cred-logo">FP26</span>
+                </div>
+                <div class="cred-ava-wrap">
+                    <div class="cred-ava" style="background:linear-gradient(135deg,${pal[0]},${pal[1]})">${initials(nombre)}</div>
+                </div>
+                <div class="cred-body">
+                    <div class="cred-name">${nombre}</div>
+                    <div class="cred-role ${rolCls}">${rolLbl}</div>
+                </div>
+                <div class="cred-perf"></div>
+                <div class="cred-footer">Fiestas Pantano 2026</div>
+            </div>`;
+        }
 
-        renderCards(nombres, 'lista-festeros', false);
-        renderCards(colaboradores, 'lista-colaboradores', true);
+        function render() {
+            const presidenta = festeros[0];
+            const resto      = festeros.slice(1);
+            document.getElementById('cnt-festeros').innerText   = festeros.length;
+            document.getElementById('cnt-collab').innerText     = colaboradores.length;
+            document.getElementById('badge-festeros').innerText = resto.length;
+            document.getElementById('badge-collab').innerText   = colaboradores.length;
+            renderPresidenta(presidenta);
+            document.getElementById('lista-festeros').innerHTML      = resto.map((n,i)=>renderCred(n,i,false)).join('');
+            document.getElementById('lista-colaboradores').innerHTML  = colaboradores.map((n,i)=>renderCred(n,i,true)).join('');
+        }
+        render();
+
+        window.filtrar = (tipo, btn) => {
+            document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('zona-presidenta').style.display  = tipo==='colaboradores' ? 'none' : '';
+            document.getElementById('zona-festeros').style.display     = tipo==='colaboradores' ? 'none' : '';
+            document.getElementById('zona-colaboradores').style.display = tipo==='festeros'      ? 'none' : '';
+        };
+
+        /* Confeti hero */
+        const hp=document.getElementById('hero-particles');
+        const cols=['#ff4d1a','#f59e0b','#fff','#ff8c5a','#ffd166','#7c3aed'];
+        const st=document.createElement('style');
+        st.textContent='@keyframes cfDrop{0%{transform:translateY(-20px) rotate(0deg);opacity:.85}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}';
+        document.head.appendChild(st);
+        for(let i=0;i<30;i++){
+            const el=document.createElement('div');
+            const sz=3+Math.random()*5;
+            el.style.cssText=`position:absolute;left:${Math.random()*100}%;width:${sz}px;height:${sz}px;background:${cols[i%cols.length]};border-radius:${Math.random()>.5?'50%':'2px'};opacity:0;animation:cfDrop ${6+Math.random()*8}s linear ${Math.random()*6}s infinite;`;
+            hp.appendChild(el);
+        }
     </script>
 </body>
 </html>
