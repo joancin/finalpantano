@@ -3,144 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --gold: #ffd700; --silver: #c0c0c0; --bronze: #cd7f32; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
-        
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        
-        h1 { text-align: center; font-size: 1.8rem; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: gray; margin-bottom: 40px; font-size: 0.9rem; }
-
-        /* PODIUM */
-        .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 10px; height: 250px; margin-bottom: 40px; }
-        
-        .podium-place { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 30%; position: relative; }
-        
-        .winner-name { font-weight: bold; font-size: 0.9rem; text-align: center; margin-bottom: 10px; text-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .block { width: 100%; border-radius: 10px 10px 0 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 10px; color: rgba(0,0,0,0.4); font-weight: 900; font-size: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        
-        /* ALTURAS Y COLORES */
-        .p-1 .block { height: 140px; background: var(--gold); }
-        .p-2 .block { height: 100px; background: var(--silver); }
-        .p-3 .block { height: 70px; background: var(--bronze); }
-        
-        .p-1 { order: 2; z-index: 10; } 
-        .p-2 { order: 1; } 
-        .p-3 { order: 3; } 
-
-        /* LISTA DE PARTICIPANTES */
-        .list-card { background: var(--card); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .list-title { font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px; }
-        .participant { padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px; }
-        .participant:last-child { border: none; }
-        
-        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; }
-
-        .pending { color: gray; font-style: italic; font-size: 0.8rem; }
-    </style>
+    <title>Resultados · Fiestas Pantano</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#e8400c">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // ✅ PERSISTENCIA AÑADIDA
-        import { getFirestore, doc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeFirestore, persistentLocalCache, doc, onSnapshot }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const FB = { apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain:"fiestas-pantano.firebaseapp.com", projectId:"fiestas-pantano", storageBucket:"fiestas-pantano.firebasestorage.app", messagingSenderId:"801380435613", appId:"1:801380435613:web:a842572cf7cee93ac57674" };
+        const app = initializeApp(FB);
+        const db  = initializeFirestore(app, { localCache: persistentLocalCache() });
+        const actId = new URLSearchParams(window.location.search).get("id");
+        if (!actId) window.location.href = "actividades.html";
 
-        // ✅ ACTIVAR PERSISTENCIA
-        enableIndexedDbPersistence(db).catch((err) => {
-            if (err.code == 'failed-precondition') console.log('Múltiples pestañas abiertas.');
-            else if (err.code == 'unimplemented') console.log('Navegador no soporta persistencia.');
-        });
-
-        const params = new URLSearchParams(window.location.search);
-        const actId = params.get("id");
-
-        if(!actId) window.location.href = "actividades.html";
-
-        onSnapshot(doc(db, "actividades", actId), (docSnap) => {
-            if(!docSnap.exists()) return;
-            const data = docSnap.data();
-            
+        onSnapshot(doc(db,"actividades",actId), (snap) => {
+            if (!snap.exists()) return;
+            const data = snap.data();
             document.getElementById("titulo").innerText = data.titulo;
-            renderPodium(data.ganadores || {});
-            renderLista(data.inscritos || []);
+            renderPodium(data.ganadores||{});
+            renderLista(data.inscritos||[]);
         });
 
-        function renderPodium(ganadores) {
-            document.getElementById("name-1").innerText = ganadores.oro || "...";
-            document.getElementById("name-2").innerText = ganadores.plata || "...";
-            document.getElementById("name-3").innerText = ganadores.bronce || "...";
-            
-            if(!ganadores.oro && !ganadores.plata && !ganadores.bronce) {
-                document.querySelectorAll('.winner-name').forEach(el => {
-                    el.innerHTML = "<span class='pending'>Pendiente</span>";
-                });
+        function renderPodium(g) {
+            const pending = !g.oro && !g.plata && !g.bronce;
+            document.getElementById("name-1").innerText = g.oro    || (pending?"Pendiente":"—");
+            document.getElementById("name-2").innerText = g.plata  || (pending?"Pendiente":"—");
+            document.getElementById("name-3").innerText = g.bronce || (pending?"Pendiente":"—");
+            if (pending) {
+                document.querySelectorAll('.winner-name').forEach(el => el.classList.add('pending'));
+            } else {
+                document.querySelectorAll('.winner-name').forEach(el => el.classList.remove('pending'));
             }
         }
 
-        function renderLista(inscritos) {
-            const container = document.getElementById("full-list");
-            container.innerHTML = "";
-            if(inscritos.length === 0) {
-                container.innerHTML = "<p style='color:gray'>No hay inscritos.</p>";
-                return;
-            }
-
-            inscritos.forEach(i => {
-                const nombre = i.nombre_equipo || i.capitan || "Participante";
-                container.innerHTML += `
-                    <div class="participant">
-                        <span class="material-symbols-outlined" style="color:gray; font-size:18px;">person</span>
-                        ${nombre}
-                    </div>`;
-            });
+        function renderLista(ins) {
+            const c = document.getElementById("full-list");
+            if (!ins.length) { c.innerHTML='<p class="empty-list">No hay inscritos.</p>'; return; }
+            c.innerHTML = ins.map(i => {
+                const n = i.nombre_equipo||i.capitan||"Participante";
+                const m = i.miembros?.filter(x=>x.nombre).map(x=>x.nombre).join(', ')||'';
+                return `
+                <div class="p-row">
+                    <div class="p-ava">${n[0]?.toUpperCase()||'?'}</div>
+                    <div class="p-info">
+                        <div class="p-name">${n}</div>
+                        ${m?`<div class="p-mems">${m}</div>`:''}
+                    </div>
+                </div>`;
+            }).join('');
         }
     </script>
+
+    <style>
+        :root { --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550; --card:#fff; --border:rgba(0,0,0,0.07); --accent:#e8400c; --gold:#f59e0b; --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:18px; }
+        html.dark-mode { --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070; --card:#241c14; --border:rgba(255,255,255,0.08); --shadow:0 4px 20px rgba(0,0,0,0.45); }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body { font-family:'Bricolage Grotesque',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:60px; }
+
+        /* TOPBAR */
+        .topbar { position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--bg); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+        .btn-ico { background:var(--card); border:1px solid var(--border); width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); box-shadow:var(--shadow); transition:transform .15s; text-decoration:none; }
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-title { font-size:1rem; font-weight:800; flex:1; }
+
+        .wrap { max-width:600px; margin:0 auto; padding:20px 18px; }
+
+        /* HERO título */
+        .event-title { font-size:1.5rem; font-weight:800; text-align:center; margin-bottom:4px; }
+        .event-sub   { text-align:center; font-size:.82rem; color:var(--text2); margin-bottom:32px; }
+
+        /* PODIO */
+        .podium-wrap { display:flex; align-items:flex-end; justify-content:center; gap:10px; margin-bottom:36px; }
+
+        .podium-place { display:flex; flex-direction:column; align-items:center; width:32%; }
+        .winner-name {
+            font-weight:800; font-size:.85rem; text-align:center;
+            margin-bottom:10px; line-height:1.3;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+            max-width:100%;
+        }
+        .winner-name.pending { color:var(--text2); font-weight:600; font-style:italic; font-size:.78rem; }
+
+        .podium-block {
+            width:100%; border-radius:12px 12px 0 0;
+            display:flex; flex-direction:column; align-items:center;
+            justify-content:flex-start; padding-top:12px;
+            font-size:1.6rem; font-weight:800;
+            color:rgba(0,0,0,.25); box-shadow:0 -4px 16px rgba(0,0,0,.1);
+        }
+        .p-1 { order:2; } .p-2 { order:1; } .p-3 { order:3; }
+        .p-1 .podium-block { height:150px; background:linear-gradient(180deg,#fcd34d,#f59e0b); }
+        .p-2 .podium-block { height:110px; background:linear-gradient(180deg,#e2e8f0,#94a3b8); }
+        .p-3 .podium-block { height:80px;  background:linear-gradient(180deg,#d97706,#92400e); color:rgba(255,255,255,.4); }
+
+        .p-medal { display:block; font-size:1.8rem; margin-bottom:6px; }
+
+        /* Lista participantes */
+        .sec-label { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text2); margin:0 0 12px; display:flex; align-items:center; gap:8px; }
+        .sec-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        .list-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px; box-shadow:var(--shadow); }
+        .p-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+        .p-row:last-child{border-bottom:none;}
+        .p-ava { width:36px; height:36px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,var(--accent),var(--gold)); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:.9rem; }
+        .p-name { font-weight:700; font-size:.88rem; }
+        .p-mems { font-size:.72rem; color:var(--text2); margin-top:2px; }
+        .empty-list { text-align:center; padding:20px; color:var(--text2); font-size:.85rem; }
+    </style>
 </head>
 <body>
+    <div class="topbar">
+        <a onclick="window.history.back()" class="btn-ico" style="cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </a>
+        <span class="topbar-title">🏆 Resultados</span>
+    </div>
 
-    <div class="container">
-        <h1 id="titulo">Cargando...</h1>
-        <p class="subtitle">Clasificación Oficial</p>
+    <div class="wrap">
+        <div class="event-title" id="titulo">Cargando…</div>
+        <div class="event-sub">Clasificación oficial</div>
 
-        <div class="podium-container">
+        <!-- PODIO -->
+        <div class="podium-wrap">
             <div class="podium-place p-2">
-                <div id="name-2" class="winner-name">...</div>
-                <div class="block">2</div>
+                <div id="name-2" class="winner-name pending">Pendiente</div>
+                <div class="podium-block">
+                    <span class="p-medal">🥈</span>
+                    2
+                </div>
             </div>
-            
             <div class="podium-place p-1">
-                <span style="font-size:2rem; margin-bottom:-10px;">👑</span>
-                <div id="name-1" class="winner-name">...</div>
-                <div class="block">1</div>
+                <div id="name-1" class="winner-name pending">Pendiente</div>
+                <div class="podium-block">
+                    <span class="p-medal">🥇</span>
+                    1
+                </div>
             </div>
-            
             <div class="podium-place p-3">
-                <div id="name-3" class="winner-name">...</div>
-                <div class="block">3</div>
+                <div id="name-3" class="winner-name pending">Pendiente</div>
+                <div class="podium-block">
+                    <span class="p-medal">🥉</span>
+                    3
+                </div>
             </div>
         </div>
 
+        <!-- LISTA -->
+        <div class="sec-label">
+            <span class="material-symbols-outlined" style="font-size:15px">group</span>
+            Todos los participantes
+        </div>
         <div class="list-card">
-            <div class="list-title">Lista de Participantes</div>
             <div id="full-list"></div>
         </div>
     </div>
-
-    <button class="btn-back-float" onclick="window.history.back()">
-        <span class="material-symbols-outlined">arrow_back</span>
-    </button>
-
 </body>
 </html>

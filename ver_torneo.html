@@ -3,108 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cuadro del Torneo</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --bg: #f4f7f6; --text: #333; --card: white; --win-bg: #e8f5e9; --win-text: #2e7d32; --accent: #e91e63; }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --win-bg: #1b5e20; --win-text: #a5d6a7; }
-        
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 90px; }
-        .container { max-width: 100%; overflow-x: auto; }
-        
-        h1 { text-align: center; margin-bottom: 30px; font-weight: 800; font-size: 1.8rem; }
-        
-        .bracket-container { display: flex; padding: 20px; gap: 40px; justify-content: flex-start; min-width: fit-content; }
-        .round { display: flex; flex-direction: column; justify-content: space-around; gap: 20px; min-width: 180px; }
-        .round-title { text-align: center; font-weight: bold; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; font-size: 0.9rem; }
-
-        .match { background: var(--card); border-radius: 10px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 5px; position: relative; border: 1px solid rgba(0,0,0,0.05); }
-        .team { padding: 8px 12px; background: rgba(0,0,0,0.03); border-radius: 6px; font-weight: 600; text-align: center; font-size: 0.9rem; transition: all 0.2s; }
-        .team.winner { background: var(--win-bg); color: var(--win-text); font-weight: 800; border: 1px solid var(--win-text); }
-        .team.bye { opacity: 0.6; font-style: italic; font-size: 0.8rem; }
-
-        /* LÍNEAS CONECTORAS */
-        .round:not(:last-child) .match::after {
-            content: ''; position: absolute; right: -40px; top: 50%; width: 40px; height: 2px; background: #ccc; z-index: -1;
-        }
-
-        .btn-back-float { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; border: none; z-index: 100; }
-        .loading { text-align: center; margin-top: 50px; color: gray; }
-    </style>
+    <title>Cuadro del Torneo · Fiestas Pantano</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#e8400c">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎾</text></svg>">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeFirestore, persistentLocalCache, doc, onSnapshot }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        enableIndexedDbPersistence(db).catch(() => {});
+        const FB = { apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain:"fiestas-pantano.firebaseapp.com", projectId:"fiestas-pantano", storageBucket:"fiestas-pantano.firebasestorage.app", messagingSenderId:"801380435613", appId:"1:801380435613:web:a842572cf7cee93ac57674" };
+        const app = initializeApp(FB);
+        const db  = initializeFirestore(app, { localCache: persistentLocalCache() });
+        const actId = new URLSearchParams(window.location.search).get("id");
+        if (!actId) window.location.href = "actividades.html";
 
-        const params = new URLSearchParams(window.location.search);
-        const actId = params.get("id");
-        if(!actId) window.location.href = "actividades.html";
-
-        onSnapshot(doc(db, "actividades", actId), (docSnap) => {
-            if(!docSnap.exists()) return;
-            const data = docSnap.data();
+        onSnapshot(doc(db,"actividades",actId), (snap) => {
+            if (!snap.exists()) return;
+            const data = snap.data();
             document.getElementById("titulo").innerText = data.titulo;
             renderBracket(data.bracket);
         });
 
-        function renderBracket(bracketData) {
-            const container = document.getElementById("bracket-view");
-            container.innerHTML = "";
-
-            if(!bracketData || !bracketData.rounds || bracketData.rounds.length === 0) {
-                container.innerHTML = "<div class='loading'>El cuadro no está disponible o no se ha sorteado aún.</div>";
-                container.style.display = "block"; 
+        function renderBracket(b) {
+            const c = document.getElementById("bracket-view");
+            if (!b?.rounds?.length) {
+                c.innerHTML = `<div class="empty-bracket">
+                    <span class="material-symbols-outlined">event_busy</span>
+                    <p>El cuadro no está disponible aún</p>
+                    <span>El organizador generará el sorteo próximamente</span>
+                </div>`;
                 return;
             }
-            container.style.display = "flex";
-
-            bracketData.rounds.forEach((round, roundIndex) => {
-                let roundTitle = `Ronda ${roundIndex + 1}`;
-                if (bracketData.rounds.length > 1) {
-                    if (roundIndex === bracketData.rounds.length - 1) roundTitle = "🏆 FINAL";
-                    else if (roundIndex === bracketData.rounds.length - 2) roundTitle = "SEMIFINAL";
+            c.innerHTML = "";
+            b.rounds.forEach((round, rIdx) => {
+                let title = `Ronda ${rIdx+1}`;
+                if (b.rounds.length > 1) {
+                    if (rIdx === b.rounds.length-1) title = "🏆 Final";
+                    else if (rIdx === b.rounds.length-2) title = "Semifinal";
                 }
-
-                let roundHtml = `<div class="round"><div class="round-title">${roundTitle}</div>`;
-                
+                const rd = document.createElement("div"); rd.className = "round";
+                rd.innerHTML = `<div class="round-title">${title}</div>`;
                 round.matches.forEach(match => {
-                    if(match.bye) {
-                         roundHtml += `
-                            <div class="match">
-                                <div class="team winner bye">${match.team1} (Pasa directo)</div>
-                            </div>`;
+                    const m = document.createElement("div"); m.className = "match";
+                    if (match.bye) {
+                        m.innerHTML = `<div class="team winner bye">${match.team1}<span>Pasa directo</span></div>`;
                     } else {
-                        roundHtml += `
-                            <div class="match">
-                                <div class="team ${match.winner === match.team1 ? 'winner' : ''}">${match.team1}</div>
-                                <div class="team ${match.winner === match.team2 ? 'winner' : ''}">${match.team2}</div>
-                            </div>`;
+                        m.innerHTML = `
+                          <div class="team ${match.winner===match.team1?'winner':''}">
+                              ${match.team1}
+                              ${match.winner===match.team1?'<span class="material-symbols-outlined wico">check_circle</span>':''}
+                          </div>
+                          <div class="vs-sep">VS</div>
+                          <div class="team ${match.winner===match.team2?'winner':''}">
+                              ${match.team2}
+                              ${match.winner===match.team2?'<span class="material-symbols-outlined wico">check_circle</span>':''}
+                          </div>`;
                     }
+                    rd.appendChild(m);
                 });
-                roundHtml += "</div>";
-                container.innerHTML += roundHtml;
+                c.appendChild(rd);
             });
         }
     </script>
+
+    <style>
+        :root { --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550; --card:#fff; --border:rgba(0,0,0,0.07); --accent:#e8400c; --gold:#f59e0b; --green:#16a34a; --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:16px; }
+        html.dark-mode { --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070; --card:#241c14; --border:rgba(255,255,255,0.08); --shadow:0 4px 20px rgba(0,0,0,0.45); }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body { font-family:'Bricolage Grotesque',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
+
+        .topbar { position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--bg); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+        .btn-ico { background:var(--card); border:1px solid var(--border); width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); box-shadow:var(--shadow); transition:transform .15s; }
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-title { font-size:1rem; font-weight:800; flex:1; }
+
+        .wrap { padding:20px 18px; }
+
+        .event-title { font-size:1.3rem; font-weight:800; text-align:center; margin-bottom:4px; }
+        .event-sub   { text-align:center; font-size:.8rem; color:var(--text2); margin-bottom:24px; }
+
+        /* Bracket scroll */
+        .bracket-scroll { overflow-x:auto; padding-bottom:12px; }
+        #bracket-view { display:flex; gap:28px; min-width:fit-content; padding:8px 4px; }
+
+        .round { display:flex; flex-direction:column; gap:14px; min-width:180px; }
+        .round-title { text-align:center; font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--accent); padding-bottom:8px; border-bottom:2px solid rgba(232,64,12,.18); margin-bottom:4px; }
+
+        .match { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:10px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:5px; }
+        .vs-sep { text-align:center; font-size:.58rem; font-weight:800; letter-spacing:2px; color:var(--text2); padding:1px 0; }
+
+        .team { padding:10px 12px; border-radius:10px; background:var(--bg2); border:2px solid transparent; font-weight:700; font-size:.84rem; display:flex; align-items:center; justify-content:space-between; }
+        .team.winner { background:#dcfce7; border-color:#16a34a; color:#166534; }
+        .team.bye { opacity:.6; font-size:.78rem; flex-direction:column; align-items:flex-start; gap:2px; border-style:dashed; }
+        .team.bye span { font-size:.65rem; opacity:.6; }
+        .wico { font-size:16px; color:#16a34a; flex-shrink:0; }
+
+        /* Empty */
+        .empty-bracket { text-align:center; padding:50px 20px; color:var(--text2); display:flex; flex-direction:column; align-items:center; gap:10px; }
+        .empty-bracket .material-symbols-outlined { font-size:48px; opacity:.2; }
+        .empty-bracket p { font-size:1rem; font-weight:800; color:var(--text); }
+        .empty-bracket span { font-size:.82rem; }
+
+        /* Live badge */
+        .live-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(232,64,12,.1); color:var(--accent); border:1px solid rgba(232,64,12,.2); padding:4px 12px; border-radius:20px; font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin:0 auto 20px; }
+        .live-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:lp 1.5s ease-in-out infinite; }
+        @keyframes lp{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.8);opacity:.4}}
+        .live-wrap { display:flex; justify-content:center; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 id="titulo">...</h1>
-        <div id="bracket-view" class="bracket-container">
-            <div class="loading">Cargando cuadro...</div>
+    <div class="topbar">
+        <button class="btn-ico" onclick="window.history.back()">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </button>
+        <span class="topbar-title">🎾 Cuadro del Torneo</span>
+    </div>
+
+    <div class="wrap">
+        <div class="event-title" id="titulo">Cargando…</div>
+        <div class="event-sub">Cuadro de eliminación directa</div>
+
+        <div class="live-wrap">
+            <div class="live-badge">
+                <span class="live-dot"></span>
+                En directo
+            </div>
+        </div>
+
+        <div class="bracket-scroll">
+            <div id="bracket-view">
+                <div class="empty-bracket">
+                    <span class="material-symbols-outlined">hourglass_empty</span>
+                    <p>Cargando cuadro…</p>
+                </div>
+            </div>
         </div>
     </div>
-    <button class="btn-back-float" onclick="window.history.back()">
-        <span class="material-symbols-outlined">arrow_back</span>
-    </button>
 </body>
 </html>

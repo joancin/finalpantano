@@ -3,199 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Cuadro</title>
+    <title>Gestionar Cuadro · Fiestas Pantano</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ff5722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #673ab7; --win-bg: #c8e6c9; --win-text: #2e7d32; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; --win-bg: #1b5e20; --win-text: #a5d6a7; }
-        
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 100%; overflow-x: auto; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); min-width: fit-content; }
-        h1 { margin-top: 0; text-align: center; }
-
-        .bracket-container { display: flex; padding: 20px 0; gap: 40px; }
-        .round { display: flex; flex-direction: column; justify-content: space-around; gap: 20px; min-width: 220px; }
-        .round-title { text-align: center; font-weight: bold; margin-bottom: 10px; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 5px; }
-
-        .match { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 8px; position: relative; }
-        
-        /* Líneas conectoras */
-        .round:not(:last-child) .match::after {
-            content: ''; position: absolute; right: -40px; top: 50%; width: 40px; height: 2px; background: #ccc; z-index: -1;
-        }
-
-        .team { padding: 10px; background: var(--card); border: 2px solid #ddd; border-radius: 6px; cursor: pointer; text-align: center; font-weight: bold; transition: all 0.2s; user-select: none; font-size: 0.9rem; }
-        .team:hover { border-color: var(--accent); }
-        .team.winner { background: var(--win-bg); border-color: var(--win-text); color: var(--win-text); }
-        .team.bye { opacity: 0.6; border-style: dashed; cursor: default; background: #eee; }
-
-        .btn-gen { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-reset { width: 100%; padding: 10px; background: transparent; color: #ff5252; border: 2px solid #ff5252; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .btn-back { background: transparent; border: none; cursor: pointer; margin-bottom: 10px; font-size: 1rem; color: gray; }
-    </style>
+    <meta name="theme-color" content="#e8400c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎾</text></svg>">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeFirestore, persistentLocalCache, doc, getDoc, updateDoc }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        enableIndexedDbPersistence(db).catch(err => console.log(err));
+        const FB = { apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain:"fiestas-pantano.firebaseapp.com", projectId:"fiestas-pantano", storageBucket:"fiestas-pantano.firebasestorage.app", messagingSenderId:"801380435613", appId:"1:801380435613:web:a842572cf7cee93ac57674" };
+        const app  = initializeApp(FB);
+        const db   = initializeFirestore(app, { localCache: persistentLocalCache() });
         const auth = getAuth(app);
-        const params = new URLSearchParams(window.location.search);
-        const actId = params.get("id");
+        const actId = new URLSearchParams(window.location.search).get("id");
         let currentData = null;
 
         onAuthStateChanged(auth, async (user) => {
-            if(!user || !actId) window.location.href="index.html";
+            if (!user || !actId) { window.location.href="index.html"; return; }
             cargarTorneo();
         });
 
         async function cargarTorneo() {
-            const snap = await getDoc(doc(db, "actividades", actId));
+            const snap = await getDoc(doc(db,"actividades",actId));
             if (!snap.exists()) return;
             currentData = snap.data();
             document.getElementById("titulo").innerText = currentData.titulo;
-            
-            // Verificamos si existe bracket y si tiene la estructura nueva (rounds)
-            if(currentData.bracket && currentData.bracket.rounds && currentData.bracket.rounds.length > 0) {
+            if (currentData.bracket?.rounds?.length > 0) {
                 renderBracket(currentData.bracket);
-                document.getElementById("btn-gen").style.display = "none";
-                document.getElementById("btn-reset").style.display = "block";
+                document.getElementById("btn-gen").style.display   = "none";
+                document.getElementById("btn-reset").style.display = "flex";
             } else {
-                document.getElementById("bracket-view").innerHTML = `<p style="text-align:center; color:gray">Sin sorteo realizado.<br>Inscritos: ${currentData.inscritos ? currentData.inscritos.length : 0}</p>`;
-                document.getElementById("btn-gen").style.display = "flex";
+                document.getElementById("bracket-view").innerHTML =
+                    `<div class="empty-bracket">
+                        <span class="material-symbols-outlined">emoji_events</span>
+                        <p>Sin sorteo realizado</p>
+                        <span>${currentData.inscritos?.length||0} equipos inscritos</span>
+                    </div>`;
+                document.getElementById("btn-gen").style.display   = "flex";
                 document.getElementById("btn-reset").style.display = "none";
             }
         }
 
         window.generarSorteo = async () => {
-            const inscritos = currentData.inscritos || [];
-            if(inscritos.length < 2) return alert("Mínimo 2 equipos");
-            if(!confirm(`¿Generar cuadro para ${inscritos.length} equipos?`)) return;
-
-            const teams = inscritos.map(i => i.nombre_equipo || i.capitan || "Participante").filter(n => n);
-            teams.sort(() => Math.random() - 0.5);
-
-            let round1Matches = [];
-            for(let i=0; i < teams.length; i += 2) {
-                if(i + 1 < teams.length) {
-                    round1Matches.push({ team1: teams[i], team2: teams[i+1], winner: null });
-                } else {
-                    round1Matches.push({ team1: teams[i], team2: null, winner: teams[i], bye: true });
-                }
+            const ins = currentData.inscritos || [];
+            if (ins.length < 2) return showToast("⚠️ Mínimo 2 equipos");
+            if (!confirm(`¿Generar cuadro para ${ins.length} equipos?`)) return;
+            const teams = ins.map(i => i.nombre_equipo||i.capitan||"Participante").filter(Boolean);
+            teams.sort(() => Math.random() - .5);
+            let r1 = [];
+            for (let i=0; i<teams.length; i+=2) {
+                if (i+1 < teams.length) r1.push({team1:teams[i], team2:teams[i+1], winner:null});
+                else                    r1.push({team1:teams[i], team2:null, winner:teams[i], bye:true});
             }
-
-            // ESTRUCTURA CORREGIDA: Objeto con propiedad 'rounds'
-            const bracketStructure = {
-                rounds: [
-                    { matches: round1Matches }
-                ]
-            };
-
             try {
-                await updateDoc(doc(db, "actividades", actId), { bracket: bracketStructure });
-                alert("✅ Cuadro generado");
-                location.reload();
-            } catch(e) { alert("Error: " + e.message); }
-        }
+                await updateDoc(doc(db,"actividades",actId), { bracket:{ rounds:[{ matches:r1 }] } });
+                showToast("✅ Cuadro generado"); location.reload();
+            } catch(e) { showToast("❌ "+e.message); }
+        };
 
         function renderBracket(bracketData) {
-            const container = document.getElementById("bracket-view");
-            container.innerHTML = "";
-
-            bracketData.rounds.forEach((round, roundIndex) => {
-                let roundHtml = `<div class="round"><div class="round-title">Ronda ${roundIndex + 1}</div>`;
-                
-                round.matches.forEach((match, matchIndex) => {
-                    if(match.bye) {
-                         roundHtml += `
-                            <div class="match">
-                                <div class="team winner bye">${match.team1} (Pasa directo)</div>
-                            </div>`;
+            const c = document.getElementById("bracket-view");
+            c.innerHTML = "";
+            bracketData.rounds.forEach((round, rIdx) => {
+                let title = `Ronda ${rIdx+1}`;
+                if (bracketData.rounds.length > 1) {
+                    if (rIdx === bracketData.rounds.length-1) title = "🏆 Final";
+                    else if (rIdx === bracketData.rounds.length-2) title = "Semifinal";
+                }
+                const rd = document.createElement("div"); rd.className = "round";
+                rd.innerHTML = `<div class="round-title">${title}</div>`;
+                round.matches.forEach((match, mIdx) => {
+                    const m = document.createElement("div"); m.className = "match";
+                    if (match.bye) {
+                        m.innerHTML = `<div class="team winner bye">${match.team1}<span>Pasa directo</span></div>`;
                     } else {
-                        roundHtml += `
-                            <div class="match">
-                                <div class="team ${match.winner === match.team1 ? 'winner' : ''}" onclick="setWinner(${roundIndex}, ${matchIndex}, '${match.team1}')">${match.team1}</div>
-                                <div class="team ${match.winner === match.team2 ? 'winner' : ''}" onclick="setWinner(${roundIndex}, ${matchIndex}, '${match.team2}')">${match.team2}</div>
-                            </div>`;
+                        m.innerHTML = `
+                          <div class="team ${match.winner===match.team1?'winner':''}"
+                               onclick="setWinner(${rIdx},${mIdx},'${match.team1.replace(/'/g,"\\'")}')">
+                              ${match.team1}
+                              ${match.winner===match.team1?'<span class="material-symbols-outlined win-ico">check_circle</span>':''}
+                          </div>
+                          <div class="vs">VS</div>
+                          <div class="team ${match.winner===match.team2?'winner':''}"
+                               onclick="setWinner(${rIdx},${mIdx},'${match.team2.replace(/'/g,"\\'")}')">
+                              ${match.team2}
+                              ${match.winner===match.team2?'<span class="material-symbols-outlined win-ico">check_circle</span>':''}
+                          </div>`;
                     }
+                    rd.appendChild(m);
                 });
-                roundHtml += "</div>";
-                container.innerHTML += roundHtml;
+                c.appendChild(rd);
             });
         }
 
-        window.setWinner = async (roundIndex, matchIndex, winnerName) => {
-            let bracket = currentData.bracket; // Copia local
-            const currentMatch = bracket.rounds[roundIndex].matches[matchIndex];
-
-            // Si ya hay ganador, preguntar si se quiere cambiar
-            if(currentMatch.winner && currentMatch.winner !== winnerName) {
-                if(!confirm(`¿Cambiar ganador de ${currentMatch.winner} a ${winnerName}?`)) return;
-            } else if (!currentMatch.winner) {
-                if(!confirm(`¿Confirmar que gana ${winnerName}?`)) return;
-            }
-
-            // Establecer ganador
-            bracket.rounds[roundIndex].matches[matchIndex].winner = winnerName;
-
-            // Lógica para avanzar de ronda
-            const currentRoundMatches = bracket.rounds[roundIndex].matches;
-            const roundComplete = currentRoundMatches.every(m => m.winner !== null);
-
-            // Si la ronda está completa y no es la última ya generada
-            if (roundComplete && roundIndex === bracket.rounds.length - 1) {
-                const winners = currentRoundMatches.map(m => m.winner);
-                
+        window.setWinner = async (rIdx, mIdx, name) => {
+            const match = currentData.bracket.rounds[rIdx].matches[mIdx];
+            if (match.winner && match.winner!==name) { if (!confirm(`¿Cambiar ganador a ${name}?`)) return; }
+            else if (!match.winner) { if (!confirm(`¿Confirmar ganador: ${name}?`)) return; }
+            let bracket = currentData.bracket;
+            bracket.rounds[rIdx].matches[mIdx].winner = name;
+            const allDone = bracket.rounds[rIdx].matches.every(m => m.winner);
+            if (allDone && rIdx === bracket.rounds.length-1) {
+                const winners = bracket.rounds[rIdx].matches.map(m=>m.winner);
                 if (winners.length > 1) {
-                    let nextRoundMatches = [];
-                    for(let i=0; i < winners.length; i += 2) {
-                         if(i + 1 < winners.length) {
-                            nextRoundMatches.push({ team1: winners[i], team2: winners[i+1], winner: null });
-                        } else {
-                            nextRoundMatches.push({ team1: winners[i], team2: null, winner: winners[i], bye: true });
-                        }
-                    }
-                    // Añadimos nueva ronda al array de rounds
-                    bracket.rounds.push({ matches: nextRoundMatches });
-                    alert("¡Nueva ronda generada!");
+                    let next = [];
+                    for (let i=0; i<winners.length; i+=2)
+                        if (i+1<winners.length) next.push({team1:winners[i],team2:winners[i+1],winner:null});
+                        else next.push({team1:winners[i],team2:null,winner:winners[i],bye:true});
+                    bracket.rounds.push({ matches:next });
+                    showToast("🎉 ¡Nueva ronda generada!");
                 } else {
-                    alert(`🏆 ¡TORNEO FINALIZADO! GANADOR: ${winners[0]} 🏆`);
+                    showToast(`🏆 ¡GANADOR: ${winners[0]}!`);
                 }
             }
-
-            await updateDoc(doc(db, "actividades", actId), { bracket: bracket });
+            await updateDoc(doc(db,"actividades",actId), { bracket });
             location.reload();
-        }
+        };
 
         window.resetSorteo = async () => {
-            if(confirm("⚠ ¿Borrar todo el cuadro y empezar de cero?")) {
-                await updateDoc(doc(db, "actividades", actId), { bracket: null });
+            if (confirm("⚠️ ¿Borrar el cuadro y empezar de cero?")) {
+                await updateDoc(doc(db,"actividades",actId), { bracket:null });
                 location.reload();
             }
-        }
+        };
+
+        window.showToast = (msg) => {
+            const t=document.getElementById('toast');
+            t.innerText=msg; t.classList.add('show');
+            clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+        };
     </script>
+
+    <style>
+        :root { --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550; --card:#fff; --border:rgba(0,0,0,0.07); --accent:#e8400c; --gold:#f59e0b; --green:#16a34a; --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:16px; }
+        html.dark-mode { --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070; --card:#241c14; --border:rgba(255,255,255,0.08); --shadow:0 4px 20px rgba(0,0,0,0.45); }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body { font-family:'Bricolage Grotesque',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
+
+        /* TOPBAR */
+        .topbar { position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--bg); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+        .btn-ico { background:var(--card); border:1px solid var(--border); width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); box-shadow:var(--shadow); transition:transform .15s; text-decoration:none; }
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-title { font-size:1rem; font-weight:800; flex:1; }
+
+        /* WRAP */
+        .wrap { max-width:900px; margin:0 auto; padding:20px 18px; }
+
+        /* TITULO EVENTO */
+        .event-header { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); margin-bottom:20px; display:flex; align-items:center; gap:14px; }
+        .event-ico { width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg,#e8400c,#f59e0b); display:flex; align-items:center; justify-content:center; color:white; font-size:22px; flex-shrink:0; }
+        .event-titulo { font-size:1.1rem; font-weight:800; }
+        .event-sub { font-size:.75rem; color:var(--text2); margin-top:3px; }
+
+        /* BOTONES */
+        .btn-gen { width:100%; padding:16px; border-radius:14px; border:none; background:linear-gradient(135deg,var(--accent),var(--gold)); color:white; font-weight:800; font-size:1rem; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(232,64,12,.35); transition:transform .15s; margin-bottom:16px; }
+        .btn-gen:active{transform:scale(.97);}
+        .btn-reset { width:100%; padding:13px; border-radius:14px; border:2px solid #dc2626; background:transparent; color:#dc2626; font-weight:800; font-family:inherit; font-size:.9rem; cursor:pointer; display:none; align-items:center; justify-content:center; gap:8px; margin-top:16px; transition:background .2s; }
+        .btn-reset:hover{background:#fef2f2;}
+
+        /* BRACKET scroll horizontal */
+        .bracket-scroll { overflow-x:auto; padding-bottom:12px; }
+        .bracket-view { display:flex; gap:32px; min-width:fit-content; padding:8px 4px; }
+
+        .round { display:flex; flex-direction:column; gap:16px; min-width:200px; }
+        .round-title { text-align:center; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--accent); padding-bottom:8px; border-bottom:2px solid rgba(232,64,12,.2); margin-bottom:4px; }
+
+        .match { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:10px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:6px; }
+        .vs { text-align:center; font-size:.6rem; font-weight:800; color:var(--text2); letter-spacing:2px; }
+
+        .team { padding:10px 12px; border-radius:10px; background:var(--bg2); border:2px solid transparent; cursor:pointer; font-weight:700; font-size:.85rem; display:flex; align-items:center; justify-content:space-between; transition:all .15s; user-select:none; }
+        .team:hover { border-color:var(--accent); background:rgba(232,64,12,.06); }
+        .team.winner { background:#dcfce7; border-color:#16a34a; color:#166534; }
+        .team.bye { opacity:.6; cursor:default; border-style:dashed; font-size:.8rem; flex-direction:column; align-items:flex-start; gap:2px; }
+        .team.bye span { font-size:.68rem; opacity:.6; }
+        .win-ico { font-size:18px; color:#16a34a; flex-shrink:0; }
+
+        /* Empty state */
+        .empty-bracket { text-align:center; padding:40px 20px; color:var(--text2); display:flex; flex-direction:column; align-items:center; gap:8px; }
+        .empty-bracket .material-symbols-outlined { font-size:48px; opacity:.2; }
+        .empty-bracket p { font-size:1rem; font-weight:800; color:var(--text); }
+        .empty-bracket span { font-size:.82rem; }
+
+        /* TOAST */
+        #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(14px); background:#1a1208; color:white; padding:10px 22px; border-radius:30px; font-size:.82rem; font-weight:700; opacity:0; transition:all .26s; z-index:9999; pointer-events:none; white-space:nowrap; }
+        #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <button class="btn-back" onclick="window.history.back()">⬅ Volver</button>
-        <div class="card">
-            <h1 id="titulo">...</h1>
-            <button id="btn-gen" class="btn-gen" onclick="generarSorteo()">🎲 GENERAR CUADRO</button>
-            <div id="bracket-view" class="bracket-container"></div>
-            <button id="btn-reset" class="btn-reset" onclick="resetSorteo()">♻️ REINICIAR CUADRO</button>
-        </div>
+    <div class="topbar">
+        <a href="gestion.html" class="btn-ico"><span class="material-symbols-outlined" style="font-size:20px">arrow_back</span></a>
+        <span class="topbar-title">🏆 Gestionar Cuadro</span>
     </div>
+
+    <div class="wrap">
+        <div class="event-header">
+            <div class="event-ico"><span class="material-symbols-outlined">emoji_events</span></div>
+            <div>
+                <div class="event-titulo" id="titulo">Cargando…</div>
+                <div class="event-sub">Torneo de eliminación directa</div>
+            </div>
+        </div>
+
+        <button id="btn-gen" class="btn-gen" onclick="generarSorteo()" style="display:none;">
+            <span class="material-symbols-outlined">casino</span>
+            Generar sorteo aleatorio
+        </button>
+
+        <div class="bracket-scroll">
+            <div id="bracket-view" class="bracket-view">
+                <div class="empty-bracket">
+                    <span class="material-symbols-outlined">hourglass_empty</span>
+                    <p>Cargando cuadro…</p>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-reset" class="btn-reset" onclick="resetSorteo()">
+            <span class="material-symbols-outlined">restart_alt</span>
+            Reiniciar cuadro
+        </button>
+    </div>
+
+    <div id="toast"></div>
 </body>
 </html>

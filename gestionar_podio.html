@@ -3,97 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Podio</title>
+    <title>Gestionar Podio · Fiestas Pantano</title>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#ff5722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <style>
-        :root { --bg: #f0f2f5; --text: #333; --card: white; --accent: #ff9800; }
-        html.dark-mode { --bg: #18191a; --text: #e4e6eb; --card: #242526; }
-        
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; }
-        .card { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { text-align: center; margin-top: 0; }
-        
-        select { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 10px; border: 1px solid #ccc; background: var(--bg); color: var(--text); font-size: 1rem; }
-        .btn-save { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-    </style>
+    <meta name="theme-color" content="#e8400c">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeFirestore, persistentLocalCache, doc, getDoc, updateDoc }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain: "fiestas-pantano.firebaseapp.com", projectId: "fiestas-pantano", storageBucket: "fiestas-pantano.firebasestorage.app", messagingSenderId: "801380435613", appId: "1:801380435613:web:a842572cf7cee93ac57674", measurementId: "G-EG2MZGBT1B" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        enableIndexedDbPersistence(db).catch(console.log);
-
+        const FB = { apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain:"fiestas-pantano.firebaseapp.com", projectId:"fiestas-pantano", storageBucket:"fiestas-pantano.firebasestorage.app", messagingSenderId:"801380435613", appId:"1:801380435613:web:a842572cf7cee93ac57674" };
+        const app  = initializeApp(FB);
+        const db   = initializeFirestore(app, { localCache: persistentLocalCache() });
         const auth = getAuth(app);
-        const params = new URLSearchParams(window.location.search);
-        const actId = params.get("id");
+        const actId = new URLSearchParams(window.location.search).get("id");
 
         onAuthStateChanged(auth, async (user) => {
-            if(!user || !actId) window.location.href="index.html";
+            if (!user || !actId) { window.location.href="index.html"; return; }
             cargarDatos();
         });
 
         async function cargarDatos() {
-            const snap = await getDoc(doc(db, "actividades", actId));
-            if(!snap.exists()) return;
+            const snap = await getDoc(doc(db,"actividades",actId));
+            if (!snap.exists()) return;
             const data = snap.data();
-            
             document.getElementById("titulo").innerText = data.titulo;
-            const inscritos = data.inscritos || [];
-            
-            // FIX UNDEFINED
-            const options = inscritos.map(i => `<option value="${i.nombre_equipo || i.capitan || 'Anónimo'}">${i.nombre_equipo || i.capitan || 'Anónimo'}</option>`).join("");
-            const defaultOpt = '<option value="">-- Desierto --</option>';
-
-            ["oro", "plata", "bronce"].forEach(m => {
-                document.getElementById(m).innerHTML = defaultOpt + options;
-                if(data.ganadores && data.ganadores[m]) document.getElementById(m).value = data.ganadores[m];
+            const ins = data.inscritos || [];
+            const opts = ins.map(i => `<option value="${i.nombre_equipo||i.capitan||'Anónimo'}">${i.nombre_equipo||i.capitan||'Anónimo'}</option>`).join("");
+            const def  = '<option value="">— Desierto —</option>';
+            ["oro","plata","bronce"].forEach(m => {
+                document.getElementById(m).innerHTML = def + opts;
+                if (data.ganadores?.[m]) document.getElementById(m).value = data.ganadores[m];
             });
         }
 
         window.guardar = async () => {
             const ganadores = {
-                oro: document.getElementById("oro").value,
-                plata: document.getElementById("plata").value,
+                oro:    document.getElementById("oro").value,
+                plata:  document.getElementById("plata").value,
                 bronce: document.getElementById("bronce").value
             };
+            const btn = document.getElementById("btn-guardar");
+            btn.disabled=true; btn.innerText="Guardando…";
             try {
-                await updateDoc(doc(db, "actividades", actId), { ganadores });
-                alert("✅ Guardado");
-                window.history.back();
-            } catch(e) { alert(e.message); }
-        }
+                await updateDoc(doc(db,"actividades",actId), { ganadores });
+                showToast("✅ Resultados guardados");
+                setTimeout(() => window.history.back(), 1000);
+            } catch(e) { showToast("❌ "+e.message); }
+            btn.disabled=false; btn.innerText="Publicar resultados";
+        };
+
+        window.showToast = (msg) => {
+            const t=document.getElementById('toast');
+            t.innerText=msg; t.classList.add('show');
+            clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+        };
     </script>
+
+    <style>
+        :root { --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550; --card:#fff; --border:rgba(0,0,0,0.07); --accent:#e8400c; --gold:#f59e0b; --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:16px; }
+        html.dark-mode { --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070; --card:#241c14; --border:rgba(255,255,255,0.08); --shadow:0 4px 20px rgba(0,0,0,0.45); }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body { font-family:'Bricolage Grotesque',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
+
+        .topbar { position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--bg); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+        .btn-ico { background:var(--card); border:1px solid var(--border); width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); box-shadow:var(--shadow); transition:transform .15s; text-decoration:none; }
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-title { font-size:1rem; font-weight:800; flex:1; }
+
+        .wrap { max-width:480px; margin:0 auto; padding:20px 18px; }
+
+        .event-header { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); margin-bottom:24px; display:flex; align-items:center; gap:14px; }
+        .event-ico { width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg,#f59e0b,#e8400c); display:flex; align-items:center; justify-content:center; color:white; font-size:22px; flex-shrink:0; }
+        .event-titulo { font-size:1rem; font-weight:800; }
+        .event-sub { font-size:.72rem; color:var(--text2); margin-top:2px; }
+
+        /* Podio visual decorativo */
+        .podio-preview { display:flex; align-items:flex-end; justify-content:center; gap:10px; height:100px; margin-bottom:28px; }
+        .pp-item { display:flex; flex-direction:column; align-items:center; gap:6px; }
+        .pp-emoji { font-size:1.6rem; }
+        .pp-block { width:72px; border-radius:10px 10px 0 0; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800; color:rgba(0,0,0,.3); }
+        .pp-1 .pp-block { height:60px; background:linear-gradient(135deg,#f59e0b,#fcd34d); }
+        .pp-2 .pp-block { height:44px; background:linear-gradient(135deg,#94a3b8,#cbd5e1); }
+        .pp-3 .pp-block { height:32px; background:linear-gradient(135deg,#cd7f32,#d97706); }
+
+        /* Selectores */
+        .medal-block { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:12px; box-shadow:var(--shadow); display:flex; align-items:center; gap:14px; }
+        .medal-ico { font-size:2rem; flex-shrink:0; }
+        .medal-right { flex:1; min-width:0; }
+        .medal-lbl { font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); margin-bottom:6px; display:block; }
+        .medal-select { width:100%; padding:10px 12px; border:2px solid var(--border); border-radius:10px; background:var(--bg2); color:var(--text); font-family:inherit; font-size:.9rem; font-weight:700; outline:none; transition:border-color .2s; cursor:pointer; }
+        .medal-select:focus { border-color:var(--accent); }
+
+        /* Botón guardar */
+        .btn-guardar { width:100%; padding:16px; border-radius:14px; border:none; background:linear-gradient(135deg,var(--accent),var(--gold)); color:white; font-weight:800; font-size:1rem; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(232,64,12,.35); transition:transform .15s, opacity .2s; margin-top:20px; }
+        .btn-guardar:active{transform:scale(.97);}
+        .btn-guardar:disabled{opacity:.6;cursor:not-allowed;}
+
+        #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(14px); background:#1a1208; color:white; padding:10px 22px; border-radius:30px; font-size:.82rem; font-weight:700; opacity:0; transition:all .26s; z-index:9999; pointer-events:none; white-space:nowrap; }
+        #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <button onclick="window.history.back()" style="border:none; background:none; cursor:pointer; margin-bottom:10px;">⬅ Volver</button>
-        <div class="card">
-            <h1 id="titulo">...</h1>
-            
-            <label>🥇 Ganador (ORO)</label>
-            <select id="oro"></select>
-            
-            <label>🥈 Segundo (PLATA)</label>
-            <select id="plata"></select>
-            
-            <label>🥉 Tercero (BRONCE)</label>
-            <select id="bronce"></select>
-            
-            <button class="btn-save" onclick="guardar()">GUARDAR RESULTADOS</button>
-        </div>
+    <div class="topbar">
+        <a onclick="window.history.back()" class="btn-ico" style="cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </a>
+        <span class="topbar-title">🏅 Gestionar Podio</span>
     </div>
+
+    <div class="wrap">
+        <div class="event-header">
+            <div class="event-ico"><span class="material-symbols-outlined">social_leaderboard</span></div>
+            <div>
+                <div class="event-titulo" id="titulo">Cargando…</div>
+                <div class="event-sub">Selecciona los ganadores del podio</div>
+            </div>
+        </div>
+
+        <!-- Podio decorativo -->
+        <div class="podio-preview">
+            <div class="pp-item pp-2">
+                <span class="pp-emoji">🥈</span>
+                <div class="pp-block">2</div>
+            </div>
+            <div class="pp-item pp-1">
+                <span class="pp-emoji">🥇</span>
+                <div class="pp-block">1</div>
+            </div>
+            <div class="pp-item pp-3">
+                <span class="pp-emoji">🥉</span>
+                <div class="pp-block">3</div>
+            </div>
+        </div>
+
+        <!-- Selectores -->
+        <div class="medal-block">
+            <span class="medal-ico">🥇</span>
+            <div class="medal-right">
+                <span class="medal-lbl">Primer puesto · Oro</span>
+                <select id="oro" class="medal-select"></select>
+            </div>
+        </div>
+
+        <div class="medal-block">
+            <span class="medal-ico">🥈</span>
+            <div class="medal-right">
+                <span class="medal-lbl">Segundo puesto · Plata</span>
+                <select id="plata" class="medal-select"></select>
+            </div>
+        </div>
+
+        <div class="medal-block">
+            <span class="medal-ico">🥉</span>
+            <div class="medal-right">
+                <span class="medal-lbl">Tercer puesto · Bronce</span>
+                <select id="bronce" class="medal-select"></select>
+            </div>
+        </div>
+
+        <button id="btn-guardar" class="btn-guardar" onclick="guardar()">
+            <span class="material-symbols-outlined">publish</span>
+            Publicar resultados
+        </button>
+    </div>
+
+    <div id="toast"></div>
 </body>
 </html>
