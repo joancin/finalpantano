@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería · Fiestas Pantano 2026</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d0608">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fiestas Pantano">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📸</text></svg>">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
+
+    <!-- ── FIREBASE ── -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { initializeFirestore, persistentLocalCache, collection, query,
+                 orderBy, onSnapshot, addDoc, deleteDoc, doc, getDoc, serverTimestamp }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const FB = { apiKey:"AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E", authDomain:"fiestas-pantano.firebaseapp.com", projectId:"fiestas-pantano", storageBucket:"fiestas-pantano.firebasestorage.app", messagingSenderId:"801380435613", appId:"1:801380435613:web:a842572cf7cee93ac57674", measurementId:"G-EG2MZGBT1B" };
+        const app  = initializeApp(FB);
+        const db   = initializeFirestore(app, { localCache: persistentLocalCache() });
+        const auth = getAuth(app);
+
+        let currentUser = null, isAdmin = false;
+        let allFotos = [], currentIdx = 0, currentFilter = 'todas';
+
+        /* ── AUTH ── */
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                const uDoc = await getDoc(doc(db,"usuarios",user.uid));
+                if (uDoc.exists()) {
+                    const rol = uDoc.data().rol;
+                    isAdmin = (rol==='admin'||rol==='festero');
+                    if (isAdmin) {
+                        document.getElementById('admin-bar').style.display='flex';
+                    }
+                }
+            }
+            escucharFotos();
+        });
+
+        /* ── ESCUCHAR FOTOS ── */
+        function escucharFotos() {
+            const q = query(collection(db,"galeria"), orderBy("fecha","desc"));
+            onSnapshot(q, (snap) => {
+                allFotos = [];
+                snap.forEach(d => allFotos.push({ id:d.id, ...d.data() }));
+                renderGaleria();
+                actualizarFiltros();
+            });
+        }
+
+        /* ── RENDER ── */
+        window.renderGaleria = () => {
+            const grid = document.getElementById("galeria-grid");
+            const filtered = currentFilter==='todas'
+                ? allFotos
+                : allFotos.filter(f => f.categoria===currentFilter);
+
+            if (!filtered.length) {
+                grid.innerHTML = `<div class="empty-gallery">
+                    <span class="material-symbols-outlined">photo_library</span>
+                    <p>${allFotos.length ? 'Sin fotos en esta categoría' : 'La galería está vacía'}</p>
+                    <span>${isAdmin ? 'Sé el primero en añadir una foto.' : 'Los festeros añadirán fotos pronto.'}</span>
+                </div>`; return;
+            }
+
+            grid.innerHTML = filtered.map((foto, i) => `
+                <div class="foto-item" onclick="abrirLightbox(${i})"
+                     style="animation-delay:${(i%12)*35}ms">
+                    <img src="${foto.url}" alt="${foto.titulo||''}" loading="lazy"
+                         onerror="this.parentElement.classList.add('img-error')">
+                    <div class="foto-overlay">
+                        <div class="foto-info">
+                            ${foto.titulo?`<div class="foto-titulo">${foto.titulo}</div>`:''}
+                            ${foto.categoria?`<div class="foto-cat">${foto.categoria}</div>`:''}
+                        </div>
+                        ${isAdmin?`<button class="btn-del-foto" onclick="event.stopPropagation();borrarFoto('${foto.id}')" title="Eliminar">
+                            <span class="material-symbols-outlined" style="font-size:18px">delete</span>
+                        </button>`:''}
+                    </div>
+                </div>`).join('');
+
+            // Actualizar índices para lightbox
+            window._fotosFiltered = filtered;
+        };
+
+        window._fotosFiltered = [];
+
+        function actualizarFiltros() {
+            const cats = [...new Set(allFotos.map(f=>f.categoria).filter(Boolean))];
+            const bar = document.getElementById('filter-bar');
+            bar.innerHTML = `<button class="filter-btn ${currentFilter==='todas'?'active':''}" onclick="setFilter('todas',this)">📸 Todas (${allFotos.length})</button>`;
+            cats.forEach(c => {
+                const n = allFotos.filter(f=>f.categoria===c).length;
+                bar.innerHTML += `<button class="filter-btn ${currentFilter===c?'active':''}" onclick="setFilter('${c}',this)">${c} (${n})</button>`;
+            });
+        }
+
+        window.setFilter = (cat, btn) => {
+            currentFilter = cat;
+            document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            renderGaleria();
+        };
+
+        /* ── LIGHTBOX ── */
+        window.abrirLightbox = (idx) => {
+            currentIdx = idx;
+            mostrarFotoLb(idx);
+            const lb = document.getElementById('lightbox');
+            lb.style.display='flex'; document.body.style.overflow='hidden';
+            requestAnimationFrame(()=>lb.classList.add('open'));
+        };
+
+        function mostrarFotoLb(idx) {
+            const foto = window._fotosFiltered[idx];
+            if (!foto) return;
+            const img = document.getElementById('lb-img');
+            img.style.opacity='0'; img.style.transform='scale(.92)';
+            img.src = foto.url;
+            img.onload = () => { img.style.opacity=''; img.style.transform=''; };
+            document.getElementById('lb-titulo').innerText    = foto.titulo||'';
+            document.getElementById('lb-cat').innerText       = foto.categoria||'';
+            document.getElementById('lb-counter').innerText   = `${idx+1} / ${window._fotosFiltered.length}`;
+        }
+
+        window.cerrarLightbox = () => {
+            const lb=document.getElementById('lightbox');
+            lb.classList.remove('open');
+            setTimeout(()=>{ lb.style.display='none'; document.body.style.overflow=''; },280);
+        };
+        window.moverLb = (dir) => {
+            currentIdx = (currentIdx+dir+window._fotosFiltered.length)%window._fotosFiltered.length;
+            mostrarFotoLb(currentIdx);
+        };
+
+        // Teclado
+        document.addEventListener('keydown', e => {
+            if (!document.getElementById('lightbox').classList.contains('open')) return;
+            if (e.key==='ArrowRight') moverLb(1);
+            if (e.key==='ArrowLeft')  moverLb(-1);
+            if (e.key==='Escape')     cerrarLightbox();
+        });
+
+        // Swipe en móvil
+        let tsx=0;
+        document.getElementById('lightbox')?.addEventListener('touchstart', e=>tsx=e.touches[0].clientX,{passive:true});
+        document.getElementById('lightbox')?.addEventListener('touchend', e=>{
+            const dx=e.changedTouches[0].clientX-tsx;
+            if(Math.abs(dx)>40) moverLb(dx<0?1:-1);
+        });
+
+        /* ── AÑADIR FOTO (admin) ── */
+        window.abrirModalFoto = () => {
+            document.getElementById('inp-url').value='';
+            document.getElementById('inp-titulo').value='';
+            document.getElementById('inp-cat').value='';
+            document.getElementById('modal-preview').style.display='none';
+            abrirModal('modal-add');
+        };
+        window.cerrarModalFoto = () => cerrarModal('modal-add');
+
+        window.previewUrl = () => {
+            const url = document.getElementById('inp-url').value.trim();
+            const prev = document.getElementById('modal-preview');
+            if (url) { prev.src=url; prev.style.display='block'; }
+            else prev.style.display='none';
+        };
+
+        window.guardarFoto = async () => {
+            const url     = document.getElementById('inp-url').value.trim();
+            const titulo  = document.getElementById('inp-titulo').value.trim();
+            const cat     = document.getElementById('inp-cat').value.trim()||'Sin categoría';
+            if (!url) return showToast("⚠️ Pega una URL de imagen");
+            const btn = document.getElementById('btn-guardar-foto');
+            btn.disabled=true; btn.innerText='Guardando…';
+            try {
+                await addDoc(collection(db,"galeria"), { url, titulo, categoria:cat, fecha:serverTimestamp(), subido_por:currentUser?.uid||'anon' });
+                cerrarModal('modal-add');
+                showToast("✅ Foto añadida");
+            } catch(e) { showToast("❌ "+e.message); }
+            btn.disabled=false; btn.innerText='Añadir a la galería';
+        };
+
+        window.borrarFoto = async (id) => {
+            if (!confirm("¿Eliminar esta foto de la galería?")) return;
+            try {
+                await deleteDoc(doc(db,"galeria",id));
+                showToast("🗑️ Foto eliminada");
+            } catch(e) { showToast("❌ "+e.message); }
+        };
+
+        /* ── HELPERS ── */
+        function abrirModal(id) { const m=document.getElementById(id); m.style.display="flex"; document.body.style.overflow='hidden'; requestAnimationFrame(()=>m.classList.add('open')); }
+        function cerrarModal(id) { const m=document.getElementById(id); m.classList.remove('open'); setTimeout(()=>{ m.style.display="none"; document.body.style.overflow=''; },280); }
+        window.showToast = (msg) => { const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800); };
+    </script>
+
+    <style>
+        :root { --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550; --card:#fff; --border:rgba(0,0,0,0.07); --accent:#e8400c; --gold:#f59e0b; --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:18px; }
+        html.dark-mode { --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070; --card:#241c14; --border:rgba(255,255,255,0.08); --shadow:0 4px 20px rgba(0,0,0,0.45); }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;}
+
+        /* ── TOPBAR ─────────────────────────────────────────────────── */
+        .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+        .btn-ico{background:var(--card);border:1px solid var(--border);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);box-shadow:var(--shadow);transition:transform .15s;text-decoration:none;flex-shrink:0;}
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-title{font-size:1rem;font-weight:800;flex:1;}
+
+        /* ── HERO ───────────────────────────────────────────────────── */
+        .hero{
+            background:#0d0608; padding:50px 24px 0;
+            text-align:center; position:relative; overflow:hidden;
+        }
+        .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(232,64,12,.2) 0%,transparent 65%);}
+        .hero::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:24px 24px;}
+        .hero-content{position:relative;z-index:1;margin-bottom:0;}
+        .hero-ico{font-size:3rem;display:block;margin-bottom:10px;}
+        .hero-title{font-size:clamp(2.2rem,11vw,3.8rem);font-weight:800;color:white;line-height:1;letter-spacing:-2px;margin-bottom:8px;}
+        .hero-title span{background:linear-gradient(135deg,#ff6b35,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+        .hero-sub{font-size:.88rem;color:rgba(255,255,255,.4);margin-bottom:0;}
+        .hero-wave{width:100%;overflow:hidden;line-height:0;position:relative;z-index:1;margin-top:28px;}
+        .hero-wave svg{display:block;width:100%;}
+
+        /* ── ADMIN BAR ──────────────────────────────────────────────── */
+        #admin-bar{
+            display:none; background:linear-gradient(135deg,var(--accent),var(--gold));
+            padding:12px 18px; align-items:center; justify-content:space-between; gap:10px;
+        }
+        .admin-bar-txt{font-size:.82rem;font-weight:800;color:white;}
+        .btn-add-foto{
+            background:white;color:var(--accent);border:none;
+            padding:8px 16px;border-radius:30px;font-weight:800;font-size:.8rem;
+            font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;
+            transition:transform .15s;flex-shrink:0;
+        }
+        .btn-add-foto:active{transform:scale(.95);}
+
+        /* ── WRAP ───────────────────────────────────────────────────── */
+        .wrap{max-width:900px;margin:0 auto;padding:20px 16px;}
+
+        /* ── FILTROS ────────────────────────────────────────────────── */
+        #filter-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px;scrollbar-width:none;}
+        #filter-bar::-webkit-scrollbar{display:none;}
+        .filter-btn{padding:7px 14px;border-radius:30px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;box-shadow:var(--shadow);}
+        .filter-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+
+        /* ── GRID MASONRY ───────────────────────────────────────────── */
+        #galeria-grid{columns:2;column-gap:10px;}
+        @media(min-width:480px){#galeria-grid{columns:3;}}
+        @media(min-width:700px){#galeria-grid{columns:4;}}
+
+        .foto-item{
+            break-inside:avoid;margin-bottom:10px;
+            border-radius:14px;overflow:hidden;
+            position:relative;cursor:pointer;
+            background:var(--bg2);
+            transition:transform .22s,box-shadow .22s;
+            animation:fadeUp .35s ease backwards;
+        }
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        .foto-item:hover{transform:scale(1.02);box-shadow:0 10px 28px rgba(0,0,0,.15);}
+        .foto-item:active{transform:scale(.98);}
+        .foto-item img{width:100%;height:auto;display:block;transition:transform .3s;}
+        .foto-item:hover img{transform:scale(1.04);}
+        .foto-item.img-error{min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:.7rem;}
+
+        /* Overlay */
+        .foto-overlay{
+            position:absolute;inset:0;
+            background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.65));
+            opacity:0;transition:opacity .2s;
+            display:flex;flex-direction:column;justify-content:flex-end;
+            padding:10px;
+        }
+        .foto-item:hover .foto-overlay{opacity:1;}
+        .foto-titulo{font-size:.72rem;font-weight:800;color:white;line-height:1.3;}
+        .foto-cat{font-size:.6rem;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+        .btn-del-foto{position:absolute;top:8px;right:8px;background:rgba(220,38,38,.85);border:none;color:white;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;backdrop-filter:blur(4px);}
+        .btn-del-foto:hover{background:#dc2626;}
+
+        /* ── EMPTY ──────────────────────────────────────────────────── */
+        .empty-gallery{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text2);display:flex;flex-direction:column;align-items:center;gap:10px;}
+        .empty-gallery .material-symbols-outlined{font-size:48px;opacity:.2;}
+        .empty-gallery p{font-size:1rem;font-weight:800;color:var(--text);}
+        .empty-gallery span{font-size:.82rem;}
+
+        /* ── LIGHTBOX ───────────────────────────────────────────────── */
+        #lightbox{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px);}
+        #lightbox.open{display:flex;}
+
+        .lb-close{position:fixed;top:18px;right:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;z-index:10;}
+        .lb-close:hover{background:rgba(255,255,255,.2);}
+
+        .lb-content{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:90vw;}
+        #lb-img{max-width:min(560px,88vw);max-height:78vh;border-radius:16px;object-fit:contain;box-shadow:0 30px 80px rgba(0,0,0,.7);transition:opacity .2s,transform .2s;}
+
+        .lb-info{text-align:center;color:white;}
+        #lb-titulo{font-size:.95rem;font-weight:800;margin-bottom:3px;}
+        #lb-cat{font-size:.72rem;opacity:.5;text-transform:uppercase;letter-spacing:.5px;}
+
+        .lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;}
+        .lb-nav:hover{background:rgba(255,255,255,.2);}
+        .lb-prev{left:16px;} .lb-next{right:16px;}
+        #lb-counter{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.4);font-size:.75rem;font-weight:700;}
+
+        /* ── MODAL AÑADIR ───────────────────────────────────────────── */
+        .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.65);display:none;justify-content:center;align-items:flex-end;backdrop-filter:blur(6px);}
+        .modal-overlay.open .modal-sheet{animation:sheetUp .3s cubic-bezier(.32,.72,0,1);}
+        @keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .modal-sheet{background:var(--card);border-radius:28px 28px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;}
+        .modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;}
+        .modal-close-row{display:flex;justify-content:flex-end;padding:8px 16px 0;}
+        .btn-close-m{background:var(--bg2);border:none;color:var(--text);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+        .modal-body{padding:4px 20px 36px;}
+        .modal-title{font-size:1.1rem;font-weight:800;margin-bottom:16px;}
+        .fg{margin-bottom:12px;}
+        .fg label{display:block;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--text2);margin-bottom:6px;}
+        .fg input{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:.9rem;outline:none;transition:border-color .2s;}
+        .fg input:focus{border-color:var(--accent);}
+        #modal-preview{width:100%;border-radius:12px;object-fit:cover;max-height:180px;margin-top:8px;display:none;}
+        #btn-guardar-foto{width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:white;font-weight:800;font-size:.95rem;font-family:inherit;cursor:pointer;box-shadow:0 4px 14px rgba(232,64,12,.35);transition:opacity .2s;margin-top:8px;}
+        #btn-guardar-foto:disabled{opacity:.6;cursor:not-allowed;}
+
+        /* ── TOAST ──────────────────────────────────────────────────── */
+        #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:#1a1208;color:white;padding:10px 22px;border-radius:30px;font-size:.82rem;font-weight:700;opacity:0;transition:all .26s;z-index:9999;pointer-events:none;white-space:nowrap;}
+        #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    </style>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <a onclick="window.history.back()" class="btn-ico" style="cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </a>
+        <span class="topbar-title">📸 Galería</span>
+    </div>
+
+    <!-- ADMIN BAR -->
+    <div id="admin-bar">
+        <span class="admin-bar-txt">🛠️ Modo festero — puedes añadir y eliminar fotos</span>
+        <button class="btn-add-foto" onclick="abrirModalFoto()">
+            <span class="material-symbols-outlined" style="font-size:18px">add_photo_alternate</span>
+            Añadir foto
+        </button>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-content">
+            <span class="hero-ico">📸</span>
+            <h1 class="hero-title">Galería<br><span>Pantano 2026</span></h1>
+            <p class="hero-sub">Los mejores momentos de nuestras fiestas</p>
+        </div>
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 55" preserveAspectRatio="none" style="height:45px">
+                <path d="M0,30 C480,65 960,5 1440,30 L1440,55 L0,55 Z" fill="var(--bg)"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- CONTENIDO -->
+    <div class="wrap">
+        <div id="filter-bar">
+            <button class="filter-btn active" onclick="setFilter('todas',this)">📸 Todas</button>
+        </div>
+        <div id="galeria-grid">
+            <div class="empty-gallery">
+                <span class="material-symbols-outlined">hourglass_empty</span>
+                <p>Cargando galería…</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div id="lightbox" onclick="if(event.target===this) cerrarLightbox()">
+        <button class="lb-close" onclick="cerrarLightbox()">
+            <span class="material-symbols-outlined" style="font-size:20px">close</span>
+        </button>
+        <button class="lb-nav lb-prev" onclick="moverLb(-1)">
+            <span class="material-symbols-outlined" style="font-size:20px">chevron_left</span>
+        </button>
+        <div class="lb-content">
+            <img id="lb-img" src="" alt="">
+            <div class="lb-info">
+                <div id="lb-titulo"></div>
+                <div id="lb-cat"></div>
+            </div>
+        </div>
+        <button class="lb-nav lb-next" onclick="moverLb(1)">
+            <span class="material-symbols-outlined" style="font-size:20px">chevron_right</span>
+        </button>
+        <div id="lb-counter"></div>
+    </div>
+
+    <!-- MODAL AÑADIR FOTO -->
+    <div id="modal-add" class="modal-overlay" onclick="if(event.target===this) cerrarModalFoto()">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-close-row">
+                <button class="btn-close-m" onclick="cerrarModalFoto()">
+                    <span class="material-symbols-outlined" style="font-size:18px">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-title">📷 Añadir foto a la galería</div>
+                <div class="fg">
+                    <label>URL de la imagen <span style="color:var(--accent)">*</span></label>
+                    <input type="text" id="inp-url" placeholder="https://i.postimg.cc/…" oninput="previewUrl()">
+                    <img id="modal-preview" alt="Preview">
+                </div>
+                <div class="fg">
+                    <label>Título (opcional)</label>
+                    <input type="text" id="inp-titulo" placeholder="Ej: Paella 2025, Torneo Pádel…">
+                </div>
+                <div class="fg">
+                    <label>Categoría (opcional)</label>
+                    <input type="text" id="inp-cat" placeholder="Ej: 2025, Mig Any, Deportes…">
+                </div>
+                <button id="btn-guardar-foto" onclick="guardarFoto()">
+                    Añadir a la galería
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        /* Swipe lightbox */
+        let tsx=0;
+        const lb=document.getElementById('lightbox');
+        lb.addEventListener('touchstart',e=>tsx=e.touches[0].clientX,{passive:true});
+        lb.addEventListener('touchend',e=>{
+            const dx=e.changedTouches[0].clientX-tsx;
+            if(Math.abs(dx)>40) moverLb(dx<0?1:-1);
+        });
+    </script>
+</body>
+</html>
