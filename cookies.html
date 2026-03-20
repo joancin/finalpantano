@@ -3,37 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Política de Cookies</title>
+    <title>Cookies · Fiestas Pantano 2026</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#e8400c">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #f4f7f6; --text: #333; --card: white; }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 20px; line-height: 1.6; }
-        .container { max-width: 800px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { color: #2196f3; }
-        h2 { margin-top: 20px; font-size: 1.2rem; }
-        .btn-back { display: inline-block; margin-bottom: 20px; text-decoration: none; color: gray; font-weight: bold; }
+        :root { --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550; --card:#fff; --border:rgba(0,0,0,0.07); --accent:#e8400c; --gold:#f59e0b; --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:16px; }
+        html.dark-mode { --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070; --card:#241c14; --border:rgba(255,255,255,0.08); --shadow:0 4px 20px rgba(0,0,0,0.45); }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;}
+        .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+        .btn-ico{background:var(--card);border:1px solid var(--border);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);box-shadow:var(--shadow);transition:transform .15s;text-decoration:none;flex-shrink:0;}
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-title{font-size:1rem;font-weight:800;flex:1;}
+        .hero{background:#0d0608;padding:40px 24px 0;text-align:center;position:relative;overflow:hidden;}
+        .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(245,158,11,.18) 0%,transparent 65%);}
+        .hero::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:24px 24px;}
+        .hero-content{position:relative;z-index:1;}
+        .hero-ico{font-size:2.5rem;display:block;margin-bottom:10px;}
+        .hero-title{font-size:clamp(1.8rem,8vw,2.8rem);font-weight:800;color:white;line-height:1;letter-spacing:-1px;margin-bottom:8px;}
+        .hero-sub{font-size:.82rem;color:rgba(255,255,255,.35);margin-bottom:0;}
+        .hero-date{display:inline-block;margin-top:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);padding:4px 14px;border-radius:20px;font-size:.7rem;font-weight:700;}
+        .hero-wave{width:100%;overflow:hidden;line-height:0;position:relative;z-index:1;margin-top:24px;}
+        .hero-wave svg{display:block;width:100%;}
+        .wrap{max-width:680px;margin:0 auto;padding:28px 18px;}
+        .legal-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+        .legal-nav a{padding:6px 14px;border-radius:30px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:.75rem;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:var(--shadow);}
+        .legal-nav a.active{background:var(--gold);color:white;border-color:var(--gold);}
+        .legal-nav a:hover:not(.active){border-color:var(--accent);color:var(--accent);}
+        .legal-section{margin-bottom:28px;}
+        .legal-section h2{font-size:1rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+        .sec-ico{width:32px;height:32px;border-radius:10px;background:rgba(245,158,11,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .sec-ico .material-symbols-outlined{font-size:18px;color:var(--gold);}
+        .legal-section p,.legal-section li{font-size:.85rem;line-height:1.75;color:var(--text2);margin-bottom:8px;}
+        .legal-section ul{padding-left:18px;margin-bottom:8px;}
+        .legal-section ul li{margin-bottom:4px;}
+        .legal-section strong{color:var(--text);font-weight:800;}
+        .divider{height:1px;background:var(--border);margin:24px 0;}
+        .info-box{border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:.82rem;line-height:1.6;}
+        .info-box.green{background:rgba(5,150,105,.07);border:1px solid rgba(5,150,105,.15);color:var(--text2);}
+        .info-box.green strong{color:#059669;}
+        .info-box.orange{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.15);color:var(--text2);}
+        .info-box.orange strong{color:var(--gold);}
+
+        /* Tabla cookies */
+        .cookie-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.8rem;}
+        .cookie-table th{background:rgba(245,158,11,.08);color:var(--text);font-weight:800;padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);}
+        .cookie-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;}
+        .cookie-table tr:last-child td{border-bottom:none;}
+        .badge-nec{background:#dcfce7;color:#166534;padding:2px 8px;border-radius:6px;font-size:.68rem;font-weight:800;}
+        .badge-func{background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:.68rem;font-weight:800;}
+
+        /* Switch local */
+        .pref-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:8px;box-shadow:var(--shadow);}
+        .pref-info strong{display:block;font-size:.88rem;font-weight:800;margin-bottom:2px;}
+        .pref-info span{font-size:.75rem;color:var(--text2);}
+        .pref-badge{font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:6px;background:var(--bg2);color:var(--text2);}
+
+        .legal-footer{text-align:center;padding-top:20px;border-top:1px solid var(--border);}
+        .legal-footer p{font-size:.75rem;color:var(--text2);line-height:1.7;}
+        .legal-links{display:flex;justify-content:center;gap:16px;margin-top:10px;flex-wrap:wrap;}
+        .legal-links a{font-size:.75rem;color:var(--text2);text-decoration:none;font-weight:700;}
+        .legal-links a:hover{color:var(--accent);}
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="javascript:history.back()" class="btn-back">← Volver</a>
-        <h1>Política de Cookies</h1>
 
-        <h2>¿Qué son las cookies?</h2>
-        <p>Una cookie es un pequeño archivo de texto que se almacena en tu navegador cuando visitas casi cualquier página web. Su utilidad es que la web sea capaz de recordar tu visita cuando vuelvas a navegar por esa página.</p>
+    <div class="topbar">
+        <a onclick="window.history.back()" class="btn-ico" style="cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </a>
+        <span class="topbar-title">Política de Cookies</span>
+    </div>
 
-        <h2>Cookies que utiliza esta App</h2>
-        <p>Esta aplicación utiliza únicamente <strong>cookies técnicas y esenciales</strong> proporcionadas por Google Firebase:</p>
-        <ul>
-            <li><strong>Cookies de Autenticación:</strong> Sirven para mantener tu sesión iniciada de forma segura para que no tengas que introducir tu contraseña cada vez que entras.</li>
-            <li><strong>Cookies de Seguridad:</strong> Utilizadas para prevenir ataques y garantizar la seguridad de los datos.</li>
-        </ul>
+    <div class="hero">
+        <div class="hero-content">
+            <span class="hero-ico">🍪</span>
+            <h1 class="hero-title">Política de<br>Cookies</h1>
+            <p class="hero-sub">Qué guardamos en tu dispositivo</p>
+            <span class="hero-date">Última actualización: Enero 2026</span>
+        </div>
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 55" preserveAspectRatio="none" style="height:40px">
+                <path d="M0,30 C480,65 960,5 1440,30 L1440,55 L0,55 Z" fill="var(--bg)"/>
+            </svg>
+        </div>
+    </div>
 
-        <h2>Gestión de Cookies</h2>
-        <p>Al ser cookies estrictamente necesarias para el funcionamiento de la App, no requieren consentimiento previo, pero tienes derecho a conocer su uso. Puedes bloquearlas desde tu navegador, pero la App dejará de funcionar (no podrás iniciar sesión).</p>
+    <div class="wrap">
+
+        <div class="legal-nav">
+            <a href="terminos.html">📋 Términos</a>
+            <a href="privacidad.html">🔒 Privacidad</a>
+            <a href="cookies.html" class="active">🍪 Cookies</a>
+        </div>
+
+        <div class="info-box green">
+            <strong>Buenas noticias:</strong> Esta app usa muy pocas cookies y todas son necesarias para que funcione correctamente. No usamos cookies de publicidad, rastreo ni analítica de terceros.
+        </div>
+
+        <div class="legal-section">
+            <h2>
+                <div class="sec-ico"><span class="material-symbols-outlined">cookie</span></div>
+                1. ¿Qué son las cookies?
+            </h2>
+            <p>Las cookies son pequeños archivos de texto que se guardan en tu dispositivo cuando usas una web o app. Sirven para recordar preferencias y mantener tu sesión activa.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <div class="sec-ico"><span class="material-symbols-outlined">list</span></div>
+                2. Lo mínimo indispensable
+            </h2>
+            <p>Guardamos únicamente lo <strong>mínimo indispensable</strong> para el correcto funcionamiento de la app: tu preferencia de tema visual (modo claro u oscuro) y los datos técnicos necesarios para mantener tu sesión activa y permitir que la app funcione sin conexión.</p>
+            <p>No guardamos nada más. Sin rastreadores, sin analítica, sin publicidad.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <div class="sec-ico"><span class="material-symbols-outlined">analytics</span></div>
+                3. Analítica y publicidad
+            </h2>
+            <div class="info-box orange">
+                <strong>No usamos ninguna cookie de analítica ni publicidad.</strong> No hay Google Analytics, Facebook Pixel, ni ningún otro rastreador de terceros en esta aplicación.
+            </div>
+            <p>La app incluye el SDK de Firebase que puede registrar eventos básicos de uso de forma anónima para el correcto funcionamiento del servicio de autenticación. No se usa para publicidad.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <div class="sec-ico"><span class="material-symbols-outlined">tune</span></div>
+                4. Tus preferencias
+            </h2>
+            <p>Estas son las preferencias que guardamos en tu dispositivo y que puedes gestionar:</p>
+
+            <div class="pref-row">
+                <div class="pref-info">
+                    <strong>🌙 Modo oscuro / claro</strong>
+                    <span>Guardado en localStorage bajo la clave "theme"</span>
+                </div>
+                <span class="pref-badge">Opcional</span>
+            </div>
+            <div class="pref-row">
+                <div class="pref-info">
+                    <strong>🔐 Sesión activa</strong>
+                    <span>Firebase guarda tu login para no pedirte contraseña cada vez</span>
+                </div>
+                <span class="pref-badge">Necesaria</span>
+            </div>
+
+            <p style="margin-top:14px;">Puedes borrar estas preferencias en cualquier momento desde los <strong>ajustes de tu navegador</strong> → "Limpiar datos del sitio".</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <div class="sec-ico"><span class="material-symbols-outlined">block</span></div>
+                5. Cómo bloquear cookies
+            </h2>
+            <p>Puedes configurar tu navegador para rechazar o eliminar cookies. Ten en cuenta que si bloqueas las cookies necesarias, la app <strong>no podrá mantener tu sesión</strong> y tendrás que iniciar sesión cada vez.</p>
+            <ul>
+                <li><strong>Chrome:</strong> Ajustes → Privacidad → Cookies</li>
+                <li><strong>Safari:</strong> Ajustes → Safari → Privacidad</li>
+                <li><strong>Firefox:</strong> Ajustes → Privacidad → Cookies</li>
+            </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <div class="sec-ico"><span class="material-symbols-outlined">edit_document</span></div>
+                6. Cambios en esta política
+            </h2>
+            <p>Si en el futuro añadimos nuevas funcionalidades que requieran cookies adicionales, actualizaremos esta página y lo notificaremos en la app.</p>
+        </div>
+
+        <div class="legal-footer">
+            <p>© 2026 Comisión de Festeros · Urb. El Pantano · Torrent, Valencia</p>
+            <div class="legal-links">
+                <a href="terminos.html">Términos de Uso</a>
+                <a href="privacidad.html">Política de Privacidad</a>
+                <a href="guia.html">Centro de Ayuda</a>
+            </div>
+        </div>
+
     </div>
 </body>
 </html>

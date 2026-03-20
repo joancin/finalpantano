@@ -3,42 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Términos y Condiciones</title>
+    <title>Términos de Uso · Fiestas Pantano 2026</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#e8400c">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
-    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script>if(localStorage.getItem('theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #f4f7f6; --text: #333; --card: white; }
-        html.dark-mode { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 20px; line-height: 1.6; }
-        .container { max-width: 800px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { color: #673ab7; }
-        h2 { margin-top: 20px; font-size: 1.2rem; }
-        .btn-back { display: inline-block; margin-bottom: 20px; text-decoration: none; color: gray; font-weight: bold; }
+        :root { --bg:#fdf6ee; --bg2:#f0e4d4; --text:#1a1208; --text2:#7a6550; --card:#fff; --border:rgba(0,0,0,0.07); --accent:#e8400c; --gold:#f59e0b; --shadow:0 4px 20px rgba(0,0,0,0.07); --radius:16px; }
+        html.dark-mode { --bg:#140e08; --bg2:#1e1610; --text:#f0e8dc; --text2:#a89070; --card:#241c14; --border:rgba(255,255,255,0.08); --shadow:0 4px 20px rgba(0,0,0,0.45); }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;}
+
+        .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+        .btn-ico{background:var(--card);border:1px solid var(--border);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);box-shadow:var(--shadow);transition:transform .15s;text-decoration:none;flex-shrink:0;}
+        .btn-ico:active{transform:scale(.9);}
+        .topbar-title{font-size:1rem;font-weight:800;flex:1;}
+
+        /* Hero mini */
+        .hero{background:#0d0608;padding:40px 24px 0;text-align:center;position:relative;overflow:hidden;}
+        .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(232,64,12,.18) 0%,transparent 65%);}
+        .hero::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:24px 24px;}
+        .hero-content{position:relative;z-index:1;}
+        .hero-ico{font-size:2.5rem;display:block;margin-bottom:10px;}
+        .hero-title{font-size:clamp(1.8rem,8vw,2.8rem);font-weight:800;color:white;line-height:1;letter-spacing:-1px;margin-bottom:8px;}
+        .hero-sub{font-size:.82rem;color:rgba(255,255,255,.35);margin-bottom:0;}
+        .hero-date{display:inline-block;margin-top:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);padding:4px 14px;border-radius:20px;font-size:.7rem;font-weight:700;}
+        .hero-wave{width:100%;overflow:hidden;line-height:0;position:relative;z-index:1;margin-top:24px;}
+        .hero-wave svg{display:block;width:100%;}
+
+        /* Contenido */
+        .wrap{max-width:680px;margin:0 auto;padding:28px 18px;}
+
+        /* Nav legal */
+        .legal-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+        .legal-nav a{padding:6px 14px;border-radius:30px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:.75rem;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:var(--shadow);}
+        .legal-nav a.active{background:var(--accent);color:white;border-color:var(--accent);}
+        .legal-nav a:hover:not(.active){border-color:var(--accent);color:var(--accent);}
+
+        /* Secciones */
+        .legal-section{margin-bottom:28px;}
+        .legal-section h2{font-size:1rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--text);}
+        .legal-section h2 .sec-ico{width:32px;height:32px;border-radius:10px;background:rgba(232,64,12,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .legal-section h2 .sec-ico .material-symbols-outlined{font-size:18px;color:var(--accent);}
+        .legal-section p,.legal-section li{font-size:.85rem;line-height:1.75;color:var(--text2);margin-bottom:8px;}
+        .legal-section ul{padding-left:18px;margin-bottom:8px;}
+        .legal-section ul li{margin-bottom:4px;}
+        .legal-section strong{color:var(--text);font-weight:800;}
+
+        .divider{height:1px;background:var(--border);margin:24px 0;}
+
+        /* Caja destacada */
+        .info-box{background:rgba(232,64,12,.07);border:1px solid rgba(232,64,12,.15);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:.82rem;color:var(--text2);line-height:1.6;}
+        .info-box strong{color:var(--accent);}
+
+        /* Footer legal */
+        .legal-footer{text-align:center;padding-top:20px;border-top:1px solid var(--border);}
+        .legal-footer p{font-size:.75rem;color:var(--text2);line-height:1.7;}
+        .legal-links{display:flex;justify-content:center;gap:16px;margin-top:10px;flex-wrap:wrap;}
+        .legal-links a{font-size:.75rem;color:var(--text2);text-decoration:none;font-weight:700;}
+        .legal-links a:hover{color:var(--accent);}
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="javascript:history.back()" class="btn-back">← Volver</a>
-        <h1>Términos y Condiciones</h1>
 
-        <h2>1. Aceptación</h2>
-        <p>Al registrarte en "Fiestas Pantano", aceptas cumplir estas normas de uso.</p>
+    <div class="topbar">
+        <a onclick="window.history.back()" class="btn-ico" style="cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:20px">arrow_back</span>
+        </a>
+        <span class="topbar-title">Términos de Uso</span>
+    </div>
 
-        <h2>2. Normas de Conducta</h2>
-        <p>Se espera un comportamiento cívico y respetuoso. Está prohibido:</p>
-        <ul>
-            <li>El uso de lenguaje ofensivo, insultos o acoso en los chats.</li>
-            <li>Subir contenido ilegal o inapropiado.</li>
-            <li>Intentar sabotear el funcionamiento de la App.</li>
-        </ul>
-        <p>Los administradores se reservan el derecho de <strong>expulsar o banear</strong> a cualquier usuario que incumpla estas normas.</p>
+    <div class="hero">
+        <div class="hero-content">
+            <span class="hero-ico">📋</span>
+            <h1 class="hero-title">Términos de Uso</h1>
+            <p class="hero-sub">Lee esto antes de usar la app</p>
+            <span class="hero-date">Última actualización: Enero 2026</span>
+        </div>
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 55" preserveAspectRatio="none" style="height:40px">
+                <path d="M0,30 C480,65 960,5 1440,30 L1440,55 L0,55 Z" fill="var(--bg)"/>
+            </svg>
+        </div>
+    </div>
 
-        <h2>3. Responsabilidad</h2>
-        <p>La organización no se hace responsable de las opiniones vertidas por los usuarios en el chat. Asimismo, la participación en eventos deportivos o lúdicos es bajo la propia responsabilidad del usuario.</p>
+    <div class="wrap">
 
-        <h2>4. Modificaciones</h2>
-        <p>Nos reservamos el derecho de modificar o cancelar eventos anunciados en la App por causas de fuerza mayor.</p>
+        <div class="legal-nav">
+            <a href="terminos.html" class="active">📋 Términos</a>
+            <a href="privacidad.html">🔒 Privacidad</a>
+            <a href="cookies.html">🍪 Cookies</a>
+        </div>
+
+        <div class="info-box">
+            <strong>Resumen sencillo:</strong> Esta es una app gratuita hecha por vecinos para vecinos de la Urb. El Pantano de Torrent (Valencia). No hay fines comerciales. Solo queremos que las fiestas sean más fáciles y divertidas para todos.
+        </div>
+
+        <div class="legal-section">
+            <h2>
+                <span class="sec-ico"><span class="material-symbols-outlined">info</span></span>
+                1. ¿Qué es esta aplicación?
+            </h2>
+            <p><strong>Fiestas Pantano 2026</strong> es una aplicación web progresiva (PWA) de carácter <strong>no comercial</strong>, desarrollada y gestionada por la Comisión de Festeros de la Urbanización El Pantano (Torrent, Valencia) para facilitar la organización y participación en las fiestas patronales de 2026.</p>
+            <p>El acceso está restringido a vecinos y colaboradores con código de invitación válido.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <span class="sec-ico"><span class="material-symbols-outlined">person</span></span>
+                2. Registro y cuenta
+            </h2>
+            <ul>
+                <li>El registro requiere un <strong>código de invitación</strong> proporcionado por los festeros.</li>
+                <li>Cada código solo puede usarse una vez. No está permitido compartirlo públicamente.</li>
+                <li>Eres responsable de mantener tu contraseña segura. La app <strong>no dispone de recuperación automática</strong> de contraseña.</li>
+                <li>Puedes solicitar la eliminación de tu cuenta en cualquier momento desde tu perfil.</li>
+            </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <span class="sec-ico"><span class="material-symbols-outlined">calendar_month</span></span>
+                3. Inscripciones a actividades
+            </h2>
+            <ul>
+                <li>Las inscripciones son voluntarias y gratuitas.</li>
+                <li>Los festeros pueden modificar, cancelar o limitar el aforo de cualquier actividad sin previo aviso.</li>
+                <li>Al inscribirte, aceptas que tu nombre de usuario sea visible para los organizadores y otros participantes del mismo evento.</li>
+                <li>Si vinculas a otro usuario en tu equipo, ese usuario podrá ver la inscripción en su perfil.</li>
+            </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <span class="sec-ico"><span class="material-symbols-outlined">block</span></span>
+                4. Uso aceptable
+            </h2>
+            <p>Está prohibido:</p>
+            <ul>
+                <li>Crear cuentas falsas o suplantar la identidad de otros vecinos.</li>
+                <li>Intentar acceder a datos o funciones no autorizadas.</li>
+                <li>Usar la app con fines comerciales o publicitarios.</li>
+                <li>Compartir códigos de invitación fuera del ámbito de los vecinos.</li>
+            </ul>
+            <p>Los festeros y administradores se reservan el derecho de <strong>suspender o eliminar cuentas</strong> que incumplan estas normas.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <span class="sec-ico"><span class="material-symbols-outlined">handshake</span></span>
+                5. Exención de responsabilidad
+            </h2>
+            <p>La Comisión de Festeros no se hace responsable de:</p>
+            <ul>
+                <li>Interrupciones del servicio por causas técnicas o de fuerza mayor.</li>
+                <li>Pérdida de datos derivada de fallos en los servicios de terceros (Firebase/Google).</li>
+                <li>Cambios de última hora en el programa de fiestas.</li>
+            </ul>
+            <p>Esta app se ofrece <strong>"tal cual"</strong>, sin garantías de disponibilidad continua.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <span class="sec-ico"><span class="material-symbols-outlined">edit_document</span></span>
+                6. Cambios en los términos
+            </h2>
+            <p>Podemos actualizar estos términos en cualquier momento. Los cambios se notificarán mediante la propia app. El uso continuado de la aplicación implica la aceptación de los términos vigentes.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="legal-section">
+            <h2>
+                <span class="sec-ico"><span class="material-symbols-outlined">mail</span></span>
+                7. Contacto
+            </h2>
+            <p>Para cualquier duda sobre estos términos, contacta con el equipo de festeros a través de las <a href="social.html" style="color:var(--accent);font-weight:700;">redes sociales</a> o en persona durante las fiestas.</p>
+        </div>
+
+        <div class="legal-footer">
+            <p>© 2026 Comisión de Festeros · Urb. El Pantano · Torrent, Valencia<br>Aplicación sin fines comerciales.</p>
+            <div class="legal-links">
+                <a href="privacidad.html">Política de Privacidad</a>
+                <a href="cookies.html">Política de Cookies</a>
+                <a href="guia.html">Centro de Ayuda</a>
+            </div>
+        </div>
+
     </div>
 </body>
 </html>
