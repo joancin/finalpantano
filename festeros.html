@@ -218,8 +218,13 @@
         }
 
         function renderCred(nombre, index, esColaborador) {
-            const num    = index + (esColaborador ? 22 : 2);
-            const numStr = 'FP·2026·' + String(num).padStart(3,'0');
+            const num    = index + (esColaborador ? 1 : 1);
+            const numStr = esColaborador
+                ? 'FP·2026·C' + String(num).padStart(2,'0')
+                : 'FP·2026·' + String(num).padStart(3,'0');
+            const numLabel = esColaborador
+                ? '#C' + String(num).padStart(2,'0')
+                : '#' + String(num).padStart(3,'0');
             const pal    = palettes[(index + (esColaborador?10:1)) % palettes.length];
             const delay  = index * 35;
             const rolCls = esColaborador ? 'role-collab' : 'role-festero';
@@ -227,7 +232,7 @@
             return `
             <div class="cred${esColaborador?' collab':''}" style="animation-delay:${delay}ms">
                 <div class="cred-header" style="background:linear-gradient(135deg,${pal[0]},${pal[1]})">
-                    <span class="cred-num">#${String(num).padStart(3,'0')}</span>
+                    <span class="cred-num">${numLabel}</span>
                     <span class="cred-logo">FP26</span>
                 </div>
                 <div class="cred-ava-wrap">
