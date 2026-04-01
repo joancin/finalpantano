@@ -165,13 +165,8 @@
                 <button class="filter-btn" onclick="filtrar('colaboradores',this)">🤝 Colaboradores</button>
             </div>
 
-            <div id="zona-presidenta">
-                <div class="sec-header"><span class="sec-title">Presidenta</span><span class="sec-badge orange">👑</span></div>
-                <div id="lista-presidenta"></div>
-            </div>
-
-            <div id="zona-festeros" style="margin-top:28px;">
-                <div class="sec-header"><span class="sec-title">Festeros</span><span class="sec-badge orange" id="badge-festeros">20</span></div>
+            <div id="zona-festeros">
+                <div class="sec-header"><span class="sec-title">Festeros</span><span class="sec-badge orange" id="badge-festeros">24</span></div>
                 <div id="lista-festeros" class="cred-grid"></div>
             </div>
 
@@ -189,8 +184,10 @@
             "Paula Mata","Hugo Lopez","Isabel Lopez","Enrique Gil",
             "Olga Moncholi","Dani Moncayo","Neus Adsuara","Paula Martínez",
             "Miguel Santamaria","Carla Muñoz","Rebeca Muñoz","Nayara Muñoz",
-            "Alberto Lopez","Patri Lopez","Joan Ramirez","Enric Juan","Cristina Martín"
+            "Alberto Lopez","Patri Lopez","Joan Ramirez","Enric Juan","Cristina Martín",
+            "Laura Molina","Vicent"
         ];
+        const colaboradores = ["Celia Sastriques","Nicolas Santamaría","Inés Muñoz","Denisa"];
         const colaboradores = ["Celia Sastriques","Nicolas Santamaría","Inés Muñoz"];
 
         const palettes = [
@@ -247,14 +244,11 @@
         }
 
         function render() {
-            const presidenta = festeros[0];
-            const resto      = festeros.slice(1);
             document.getElementById('cnt-festeros').innerText   = festeros.length;
             document.getElementById('cnt-collab').innerText     = colaboradores.length;
-            document.getElementById('badge-festeros').innerText = resto.length;
+            document.getElementById('badge-festeros').innerText = festeros.length;
             document.getElementById('badge-collab').innerText   = colaboradores.length;
-            renderPresidenta(presidenta);
-            document.getElementById('lista-festeros').innerHTML      = resto.map((n,i)=>renderCred(n,i,false)).join('');
+            document.getElementById('lista-festeros').innerHTML      = festeros.map((n,i)=>renderCred(n,i,false)).join('');
             document.getElementById('lista-colaboradores').innerHTML  = colaboradores.map((n,i)=>renderCred(n,i,true)).join('');
         }
         render();
@@ -262,9 +256,8 @@
         window.filtrar = (tipo, btn) => {
             document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById('zona-presidenta').style.display  = tipo==='colaboradores' ? 'none' : '';
-            document.getElementById('zona-festeros').style.display     = tipo==='colaboradores' ? 'none' : '';
-            document.getElementById('zona-colaboradores').style.display = tipo==='festeros'      ? 'none' : '';
+            document.getElementById('zona-festeros').style.display      = tipo==='colaboradores' ? 'none' : '';
+            document.getElementById('zona-colaboradores').style.display  = tipo==='festeros'      ? 'none' : '';
         };
 
         /* Confeti hero */
