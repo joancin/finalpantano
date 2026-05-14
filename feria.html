@@ -734,7 +734,7 @@
                         <div class="prog-ico pi-fin">🌙</div>
                         <div class="prog-txt">
                             <h4>Cierre</h4>
-                            <p>Última canción. Hasta el año que viene.</p>
+                            <p>Última canción. Demomento.</p>
                         </div>
                     </div>
                 </div>
@@ -869,69 +869,101 @@
 
 <!-- ── SCRIPTS ─────────────────────────────────────────────────────── -->
 <script>
-    /* ── COUNTDOWN ──────────────────────────────────────────────── */
-    const FERIA = new Date('2026-08-16T18:00:00');
-    function updateFd() {
-        const diff = FERIA - Date.now();
-        if (diff <= 0) {
-            document.querySelector('.countdown-feria').innerHTML =
-                '<div style="font-size:1.4rem;font-weight:900;color:var(--rojo);text-align:center;">🎉 ¡La Feria ha empezado! ¡Olé!</div>';
-            return;
-        }
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        document.getElementById('fd-d').innerText = String(d).padStart(2,'0');
-        document.getElementById('fd-h').innerText = String(h).padStart(2,'0');
-        document.getElementById('fd-m').innerText = String(m).padStart(2,'0');
-        document.getElementById('fd-s').innerText = String(s).padStart(2,'0');
-    }
-    updateFd();
-    setInterval(updateFd, 1000);
+ /* ── COUNTDOWN ──────────────────────────────────────────────── */
+// Definimos la fecha con el offset de España en verano (UTC+2)
+const FERIA = new Date('2026-08-16T18:00:00+02:00');
+let timerInterval;
 
-    /* ── COMPARTIR ──────────────────────────────────────────────── */
-    window.compartir = async () => {
-        const texto = '💃 ¡Feria de Sevilla en el Pantano! Sábado 16 de agosto: quinto, tapa y discomóvil hasta las 2 am. ¡No te lo pierdas! 🎧🌹 pantano2026.es/feria.html';
-        if (navigator.share) {
-            try {
-                await navigator.share({ title: 'Feria de Sevilla · Pantano 2026', text: texto, url: window.location.href });
-            } catch {}
-        } else {
-            try {
-                await navigator.clipboard.writeText(texto);
-                showToast('¡Texto copiado! Pégalo donde quieras 🎉');
-            } catch {
-                showToast('Copia este link: pantano2026.es/feria.html');
-            }
-        }
-    };
+function updateFd() {
+    const ahora = new Date().getTime();
+    const diff = FERIA - ahora;
 
-    /* ── TOAST ──────────────────────────────────────────────────── */
-    function showToast(msg) {
-        const t = document.getElementById('_toast');
-        t.innerText = msg; t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
-        clearTimeout(t._timer);
-        t._timer = setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, 2800);
+    if (diff <= 0) {
+        const wrap = document.querySelector('.countdown-feria');
+        if (wrap) {
+            wrap.innerHTML = '<div style="font-size:1.4rem;font-weight:900;color:var(--rojo);text-align:center;padding:10px;">🎉 ¡La Feria ha empezado! ¡Olé!</div>';
+        }
+        clearInterval(timerInterval); // Detenemos el reloj
+        return;
     }
 
-    /* ── SCROLL REVEAL ───────────────────────────────────────────── */
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-            if (e.isIntersecting) {
-                e.target.style.opacity = '1';
-                e.target.style.transform = 'translateY(0)';
-                observer.unobserve(e.target);
-            }
-        });
-    }, { threshold: 0.1 });
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-    document.querySelectorAll('.card-trio, .info-card, .azulejo, .cta-final').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(16px)';
-        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        observer.observe(el);
+    // Actualizamos solo si los elementos existen para evitar errores en consola
+    const elD = document.getElementById('fd-d');
+    const elH = document.getElementById('fd-h');
+    const elM = document.getElementById('fd-m');
+    const elS = document.getElementById('fd-s');
+
+    if (elD) elD.innerText = String(d).padStart(2, '0');
+    if (elH) elH.innerText = String(h).padStart(2, '0');
+    if (elM) elM.innerText = String(m).padStart(2, '0');
+    if (elS) elS.innerText = String(s).padStart(2, '0');
+}
+
+// Ejecutar inmediatamente y luego cada segundo
+updateFd();
+timerInterval = setInterval(updateFd, 1000);
+
+/* ── COMPARTIR ──────────────────────────────────────────────── */
+window.compartir = async () => {
+    const texto = '💃 ¡Feria de Sevilla en el Pantano! Sábado 16 de agosto: quinto, tapa y discomóvil hasta las 2 am. ¡No te lo pierdas! 🎧🌹';
+    const url = 'https://pantano2026.es/feria.html'; // URL absoluta mejor para compartir
+    
+    if (navigator.share) {
+        try {
+            await navigator.share({ 
+                title: 'Feria de Sevilla · Pantano 2026', 
+                text: texto, 
+                url: url 
+            });
+        } catch (err) {
+            console.log("Error al compartir:", err);
+        }
+    } else {
+        try {
+            await navigator.clipboard.writeText(`${texto} ${url}`);
+            showToast('¡Texto copiado! Pégalo donde quieras 🎉');
+        } catch {
+            showToast('Copia el link: ' + url);
+        }
+    }
+};
+
+/* ── TOAST ──────────────────────────────────────────────────── */
+function showToast(msg) {
+    const t = document.getElementById('_toast');
+    if (!t) return;
+    t.innerText = msg; 
+    t.style.opacity = '1'; 
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { 
+        t.style.opacity='0'; 
+        t.style.transform='translateX(-50%) translateY(20px)'; 
+    }, 2800);
+}
+
+/* ── SCROLL REVEAL ───────────────────────────────────────────── */
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'translateY(0)';
+            observer.unobserve(e.target);
+        }
     });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.card-trio, .info-card, .azulejo, .cta-final').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+});
 </script>
 
 </body>
