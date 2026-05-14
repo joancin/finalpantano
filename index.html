@@ -353,6 +353,24 @@
         .ic-migany   { background: linear-gradient(135deg,#f59e0b,#ef4444); }
         .ic-social   { background: linear-gradient(135deg,#E1306C,#F56040); }
         .ic-fotos    { background: linear-gradient(135deg,#11998e,#38ef7d); }
+        .ic-feria    { background: linear-gradient(135deg,#c0392b,#f39c12); }
+
+        /* ── CARD FERIA (destacada con borde especial) ──────────────── */
+        .pub-card.feria-card {
+            border: 2px solid rgba(192,57,43,0.3);
+            background: linear-gradient(135deg, rgba(192,57,43,0.04) 0%, rgba(243,156,18,0.04) 100%);
+            position: relative;
+        }
+        .pub-card.feria-card::after {
+            content: '¡NUEVO!';
+            position: absolute;
+            top: 10px; right: 12px;
+            background: linear-gradient(135deg,#c0392b,#f39c12);
+            color: white; font-size: 0.58rem; font-weight: 800;
+            letter-spacing: 0.8px; padding: 3px 8px; border-radius: 20px;
+            z-index: 2;
+        }
+        .pub-card.feria-card:hover { border-color: transparent; }
 
         /* ── COUNTDOWN ──────────────────────────────────────────────── */
         .countdown-section {
@@ -507,6 +525,7 @@
         .pub-card:nth-child(4) { animation-delay: 0.20s; }
         .pub-card:nth-child(5) { animation-delay: 0.25s; }
         .pub-card:nth-child(6) { animation-delay: 0.30s; }
+        .pub-card:nth-child(7) { animation-delay: 0.35s; }
 
         /* ── RESPONSIVE ─────────────────────────────────────────────── */
         @media (max-width: 400px) {
@@ -639,6 +658,18 @@
             <div class="card-txt">
                 <h3>Mig Any</h3>
                 <span>Fiesta Vaquera</span>
+            </div>
+        </a>
+
+        <!-- ══ CARD FERIA DE SEVILLA (NUEVO) ══ -->
+        <a href="feria.html" class="pub-card card-full feria-card" role="listitem"
+           style="--c1:#c0392b;--c2:#f39c12;" aria-label="Ver información de la Feria de Sevilla del barrio">
+            <div class="card-ico ic-feria" aria-hidden="true">
+                <span style="font-size:22px">💃</span>
+            </div>
+            <div class="card-txt">
+                <h3>Feria de Sevilla</h3>
+                <span>Sábado 16 · Quinto, tapa y discomóvil hasta las 2 am</span>
             </div>
         </a>
 
@@ -979,7 +1010,6 @@
         localStorage.setItem('theme', isDark ? 'light' : 'dark');
         document.getElementById('theme-icon').innerText = isDark ? 'dark_mode' : 'light_mode';
     };
-    // Icono correcto al cargar
     document.addEventListener('DOMContentLoaded', () => {
         const dark = localStorage.getItem('theme') === 'dark';
         document.getElementById('theme-icon').innerText = dark ? 'light_mode' : 'dark_mode';
