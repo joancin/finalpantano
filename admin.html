@@ -82,12 +82,13 @@
       let currentUser = null;
 
       onAuthStateChanged(auth, async (user) => {
-          if (!user) window.location.href = "index.html";
+          if (!user) { window.location.href = "index.html"; return; }
           const docSnap = await getDoc(doc(db, "usuarios", user.uid));
-          if (!docSnap.exists() || docSnap.data().rol !== 'admin') window.location.href = "panel.html";
+          if (!docSnap.exists() || docSnap.data().rol !== 'admin') { window.location.href = "panel.html"; return; }
           currentUser = user;
           escucharTodo();
       });
+
 
       function escucharTodo() {
           // 1. USUARIOS

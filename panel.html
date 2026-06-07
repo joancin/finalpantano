@@ -153,20 +153,25 @@
         /* Saludo + avatar */
         .greet-row {
             position:relative; z-index:1;
-            display:flex; align-items:center; gap:14px;
+            display:flex; align-items:center; gap:16px;
         }
         .avatar {
-            width:56px; height:56px; border-radius:50%; flex-shrink:0;
+            width:64px; height:64px; border-radius:50%; flex-shrink:0;
             background:linear-gradient(135deg,var(--accent),var(--gold));
             display:flex; align-items:center; justify-content:center;
-            font-size:1.2rem; font-weight:800; color:white;
-            box-shadow:0 4px 14px rgba(232,64,12,.4);
-            border:2px solid rgba(255,255,255,.2);
+            font-size:1.35rem; font-weight:800; color:white;
+            box-shadow:0 0 0 3px rgba(255,255,255,.15), 0 0 0 6px rgba(232,64,12,.25), 0 6px 20px rgba(232,64,12,.5);
+            border:2px solid rgba(255,255,255,.25);
+            animation:avatarGlow 3s ease-in-out infinite;
+        }
+        @keyframes avatarGlow{
+            0%,100%{box-shadow:0 0 0 3px rgba(255,255,255,.15),0 0 0 6px rgba(232,64,12,.25),0 6px 20px rgba(232,64,12,.4);}
+            50%{box-shadow:0 0 0 3px rgba(255,255,255,.2),0 0 0 8px rgba(232,64,12,.35),0 8px 28px rgba(232,64,12,.6);}
         }
         .greet-text { flex:1; min-width:0; }
         .greet-hi   { font-size:.8rem; color:rgba(255,255,255,.6); font-weight:600; }
         .greet-name {
-            font-size:1.4rem; font-weight:800; color:white;
+            font-size:1.5rem; font-weight:800; color:white;
             white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
         }
 
@@ -201,6 +206,23 @@
 
         /* ── CUERPO ─────────────────────────────────────────────────── */
         .body-wrap { max-width:640px; margin:0 auto; padding:22px 18px 0; }
+
+        /* Hint de ayuda nav */
+        .nav-hint {
+            background:rgba(245,158,11,.10); border:1px solid rgba(245,158,11,.22);
+            border-radius:14px; padding:12px 16px; margin-bottom:6px;
+            display:flex; align-items:center; gap:10px;
+            font-size:.80rem; color:#92400e; line-height:1.5;
+        }
+        html.dark-mode .nav-hint { color:#fcd34d; background:rgba(245,158,11,.08); border-color:rgba(245,158,11,.18); }
+        .nav-hint .material-symbols-outlined { font-size:20px; flex-shrink:0; color:#f59e0b; }
+
+        /* Sombra de color en las cards del menú */
+        .menu-card:hover {
+            transform:translateY(-5px);
+            box-shadow:0 14px 36px color-mix(in srgb, var(--mc1,#e8400c) 18%, rgba(0,0,0,.08));
+            border-color:color-mix(in srgb, var(--mc1,#e8400c) 30%, transparent);
+        }
 
         /* ── PANEL ADMIN ────────────────────────────────────────────── */
         #admin-panel {
@@ -274,6 +296,7 @@
         .menu-card:active { transform:scale(.97); }
 
         @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+        @keyframes cdPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.04)}}
 
         /* Barra top de color */
         .menu-card-stripe {
@@ -282,49 +305,70 @@
         }
 
         .mc-icon {
-            width:46px; height:46px; border-radius:14px; margin-bottom:12px;
+            width:54px; height:54px; border-radius:16px; margin-bottom:14px;
             display:flex; align-items:center; justify-content:center;
             background:linear-gradient(135deg,var(--mc1,#e8400c),var(--mc2,#f59e0b));
-            color:white; font-size:22px; flex-shrink:0;
+            color:white; font-size:26px; flex-shrink:0;
             position:relative; z-index:1;
-            box-shadow:0 3px 10px rgba(0,0,0,.15);
+            background:linear-gradient(135deg, rgba(232,64,12,.06), rgba(245,158,11,.06));
+            opacity:0; transition:opacity .2s;
         }
+        .quick-btn:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,.1); border-color:var(--accent); }
+        .quick-btn:hover::before { opacity:1; }
+        .quick-btn:active { transform:scale(.94); }
+        .quick-btn .material-symbols-outlined { font-size:28px; }
+        .quick-btn-label { font-size:.72rem; font-weight:800; }
+
         .mc-title {
-            font-size:.92rem; font-weight:800; line-height:1.2;
+            font-size:.95rem; font-weight:800; line-height:1.2;
             position:relative; z-index:1;
         }
         .mc-sub {
-            font-size:.7rem; color:var(--text2); margin-top:3px;
-            position:relative; z-index:1;
+            font-size:.71rem; color:var(--text2); margin-top:4px;
+            position:relative; z-index:1; line-height:1.4;
         }
 
         /* Card destacada — ancho completo */
         .menu-card.full { grid-column:1/-1; flex-direction:row; align-items:center; gap:16px; padding:18px 20px; }
-        .menu-card.full .mc-icon { margin-bottom:0; width:50px; height:50px; }
+        .menu-card.full .mc-icon { margin-bottom:0; width:54px; height:54px; }
         .menu-card.full .mc-body { flex:1; min-width:0; }
         .menu-card.full .material-symbols-outlined.arr { color:var(--text2); opacity:.4; font-size:20px; flex-shrink:0; }
 
-        /* ── ACCESOS RÁPIDOS PÚBLICOS ───────────────────────────────── */
-        .quick-row {
-            display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
-            margin-bottom:22px;
-        }
-        .quick-btn {
-            background:var(--card); border:1px solid var(--border);
-            border-radius:14px; padding:14px 8px;
-            display:flex; flex-direction:column; align-items:center; gap:6px;
-            cursor:pointer; text-decoration:none; color:var(--text);
-            box-shadow:var(--shadow); font-size:.72rem; font-weight:700;
-            transition:transform .15s, border-color .15s;
-        }
-        .quick-btn:hover{transform:translateY(-2px); border-color:var(--accent);}
-        .quick-btn:active{transform:scale(.95);}
-        .quick-btn .material-symbols-outlined{font-size:22px;}
-
-        /* ── BOTTOM NAV ─────────────────────────────────────────────── */
+        /* ── ACCESOS RÁPIDOS PÚBLICOS ─────────────        /* ── BOTTOM NAV ────────────────────────────────────────────── */
         .bottom-nav {
             position:fixed; bottom:0; left:0; width:100%;
-            background:var(--card); border-top:1px solid var(--border);
+            background:rgba(var(--card-rgb, 255,255,255), .92);
+            background:var(--card);
+            border-top:1px solid var(--border);
+            display:flex; justify-content:space-around;
+            padding:8px 0 max(10px,env(safe-area-inset-bottom));
+            z-index:1000; backdrop-filter:blur(20px);
+            box-shadow:0 -4px 24px rgba(0,0,0,.07);
+        }
+        .nav-item {
+            border:none; background:transparent; color:var(--text2);
+            display:flex; flex-direction:column; align-items:center;
+            font-size:.62rem; cursor:pointer; gap:2px; flex:1;
+            text-decoration:none; font-family:inherit; transition:color .2s;
+            padding:4px 0;
+        }
+        .nav-item .material-symbols-outlined { font-size:24px; transition:transform .2s; }
+        .nav-item:active .material-symbols-outlined { transform:scale(.85); }
+        /* Indicador activo tipo pill */
+        .nav-item.active { color:var(--accent); font-weight:800; }
+        .nav-item.active .material-symbols-outlined {
+            background:rgba(232,64,12,.1); border-radius:12px;
+            padding:4px 14px; margin-bottom:0;
+        }
+
+        /* Padding seguro iOS */
+        .body-spacer { height:20px; }
+
+        /* Info footer strip */
+        .footer-hint {
+            text-align:center; color:var(--text2); font-size:.72rem;
+            padding:10px 0 4px; line-height:1.6;
+        } border-top:1px solid var(--border);
             display:flex; justify-content:space-around;
             padding:10px 0 max(10px,env(safe-area-inset-bottom));
             z-index:1000; backdrop-filter:blur(12px);
@@ -340,6 +384,12 @@
 
         /* Padding seguro iOS */
         .body-spacer { height:20px; }
+
+        /* Info footer strip */
+        .footer-hint {
+            text-align:center; color:var(--text2); font-size:.72rem;
+            padding:10px 0 4px; line-height:1.6;
+        }
     </style>
 </head>
 <body>
@@ -419,7 +469,14 @@
 
         <!-- MENÚ PRINCIPAL -->
         <div style="margin-top:22px;">
-            <div class="sec-label">Menú principal</div>
+            <div class="sec-label">¿Qué quieres hacer?</div>
+
+            <!-- Hint para nuevos usuarios -->
+            <div class="nav-hint">
+                <span class="material-symbols-outlined">touch_app</span>
+                <span>Toca cualquier tarjeta para acceder a esa sección. Usa los botones de abajo para navegar rápido.</span>
+            </div>
+
             <div class="menu-grid">
 
                 <a href="actividades.html" class="menu-card"
@@ -429,7 +486,7 @@
                         <span class="material-symbols-outlined">calendar_month</span>
                     </div>
                     <div class="mc-title">Actividades</div>
-                    <div class="mc-sub">Ver el programa</div>
+                    <div class="mc-sub">Ver todos los eventos y apuntarte</div>
                 </a>
 
                 <a href="mis_inscripciones.html" class="menu-card"
@@ -439,7 +496,7 @@
                         <span class="material-symbols-outlined">confirmation_number</span>
                     </div>
                     <div class="mc-title">Mis eventos</div>
-                    <div class="mc-sub">Tus inscripciones</div>
+                    <div class="mc-sub">Eventos en los que estás apuntado</div>
                 </a>
 
                 <a href="rifa.html" class="menu-card"
@@ -449,7 +506,7 @@
                         <span class="material-symbols-outlined">local_activity</span>
                     </div>
                     <div class="mc-title">La Rifa</div>
-                    <div class="mc-sub">Número ganador</div>
+                    <div class="mc-sub">Comprueba si has ganado</div>
                 </a>
 
                 <a href="perfil.html" class="menu-card"
@@ -459,19 +516,19 @@
                         <span class="material-symbols-outlined">account_circle</span>
                     </div>
                     <div class="mc-title">Mi perfil</div>
-                    <div class="mc-sub">Tu cuenta</div>
+                    <div class="mc-sub">Ajustes y datos de tu cuenta</div>
                 </a>
 
-                <!-- Card ancha: Mig Any -->
-                <a href="migany.html" class="menu-card full"
-                   style="--mc1:#b8740a;--mc2:#f59e0b; animation-delay:.2s">
+                <!-- Card ancha: Galería -->
+                <a href="galeria.html" class="menu-card full"
+                   style="--mc1:#059669;--mc2:#0ea5e9; animation-delay:.2s">
                     <div class="menu-card-stripe"></div>
                     <div class="mc-icon">
-                        <span class="material-symbols-outlined">sports_bar</span>
+                        <span class="material-symbols-outlined">photo_library</span>
                     </div>
                     <div class="mc-body">
-                        <div class="mc-title">🤠 Mig Any · Fiesta Vaquera</div>
-                        <div class="mc-sub">Jueves Santo · El Rancho · 5€</div>
+                        <div class="mc-title">📸 Galería de fotos</div>
+                        <div class="mc-sub">Recuerdos de las fiestas</div>
                     </div>
                     <span class="material-symbols-outlined arr">chevron_right</span>
                 </a>
@@ -480,7 +537,7 @@
         </div>
 
         <!-- ACCESOS RÁPIDOS -->
-        <div class="sec-label">Más info</div>
+        <div class="sec-label" style="margin-top:22px;">Más secciones</div>
         <div class="quick-row">
             <a href="festeros.html" class="quick-btn">
                 <span class="material-symbols-outlined" style="color:#e8400c">diversity_3</span>
@@ -490,10 +547,15 @@
                 <span class="material-symbols-outlined" style="color:#0ea5e9">map</span>
                 El Pantano
             </a>
-            <a href="https://eu.zonerama.com/MEDRAN/1490386" target="_blank" rel="noopener" class="quick-btn">
+            <a href="galeria.html" class="quick-btn">
                 <span class="material-symbols-outlined" style="color:#059669">photo_library</span>
-                Fotos
+                Galería
             </a>
+        </div>
+
+        <!-- Pie de página con ayuda -->
+        <div class="footer-hint">
+            💬 ¿Tienes dudas? Pregunta a cualquier festero.
         </div>
 
         <div class="body-spacer"></div>
@@ -521,8 +583,19 @@
         function tick() {
             const d = FIESTA - Date.now();
             if (d <= 0) {
-                ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).innerText = '00');
-                return;
+                // ¡Estamos de fiestas! — reemplaza el countdown por mensaje festivo
+                const strip = document.querySelector('.countdown-strip');
+                strip.innerHTML = `
+                    <div style="width:100%;text-align:center;">
+                        <div style="font-size:1.1rem;font-weight:800;color:white;letter-spacing:.5px;
+                                    animation:cdPulse 1.2s ease-in-out infinite;">
+                            🎉 ¡Estamos de fiestas! 🎉
+                        </div>
+                        <div style="font-size:.68rem;color:rgba(255,255,255,.55);margin-top:4px;font-weight:600;">
+                            Fiestas Pantano 2026 · ¡A celebrar!
+                        </div>
+                    </div>`;
+                return; // para el intervalo
             }
             document.getElementById('cd-d').innerText = String(Math.floor(d/86400000)).padStart(2,'0');
             document.getElementById('cd-h').innerText = String(Math.floor((d%86400000)/3600000)).padStart(2,'0');

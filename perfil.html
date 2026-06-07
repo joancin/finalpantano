@@ -342,25 +342,33 @@
             position:fixed; bottom:0; left:0; width:100%;
             background:var(--card); border-top:1px solid var(--border);
             display:flex; justify-content:space-around;
-            padding:10px 0 max(10px,env(safe-area-inset-bottom));
-            z-index:1000; backdrop-filter:blur(12px);
+            padding:8px 0 max(10px,env(safe-area-inset-bottom));
+            z-index:1000; backdrop-filter:blur(20px);
+            box-shadow:0 -4px 24px rgba(0,0,0,.07);
         }
         .nav-item{
             border:none; background:transparent; color:var(--text2);
             display:flex; flex-direction:column; align-items:center;
-            font-size:.68rem; cursor:pointer; gap:3px; flex:1;
-            text-decoration:none; font-family:inherit; transition:color .15s;
+            font-size:.62rem; cursor:pointer; gap:2px; flex:1; padding:4px 0;
+            text-decoration:none; font-family:inherit; transition:color .2s;
         }
+        .nav-item .material-symbols-outlined{font-size:24px;transition:transform .2s;}
+        .nav-item:active .material-symbols-outlined{transform:scale(.85);}
         .nav-item.active{color:var(--accent); font-weight:800;}
-        .nav-item .material-symbols-outlined{font-size:24px;}
+        .nav-item.active .material-symbols-outlined{
+            background:rgba(232,64,12,.1); border-radius:12px;
+            padding:4px 14px; margin-bottom:0;
+        }
     </style>
 </head>
 <body>
 
     <!-- TOPBAR -->
     <div class="topbar">
-        <a href="panel.html" class="btn-ico" aria-label="Volver al panel">
-            <span class="material-symbols-outlined" style="font-size:20px">home</span>
+        <a href="panel.html" class="btn-ico" aria-label="Volver al panel"
+           style="display:flex;align-items:center;gap:6px;width:auto;padding:0 12px;border-radius:20px;font-size:.8rem;font-weight:700;text-decoration:none;color:var(--text);">
+            <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span>
+            Inicio
         </a>
         <h1>Mi perfil</h1>
     </div>
@@ -439,7 +447,10 @@
                     <div class="ai-ico ic-cyan">
                         <span class="material-symbols-outlined">help</span>
                     </div>
-                    Guía de la app
+                    <div>
+                        <div>Guía de la app</div>
+                        <div style="font-size:.72rem;color:var(--text2);margin-top:2px;">Cómo usar la aplicación paso a paso</div>
+                    </div>
                 </div>
                 <span class="material-symbols-outlined ai-arr">chevron_right</span>
             </a>
@@ -453,7 +464,10 @@
                     <div class="ai-ico ic-blue">
                         <span class="material-symbols-outlined">dark_mode</span>
                     </div>
-                    Modo oscuro
+                    <div>
+                        <div>Modo oscuro</div>
+                        <div style="font-size:.72rem;color:var(--text2);margin-top:2px;">Cambia el color de fondo de la app</div>
+                    </div>
                 </div>
                 <!-- Mismo toggle del original -->
                 <label class="switch">
@@ -503,7 +517,10 @@
                     <div class="ai-ico ic-red">
                         <span class="material-symbols-outlined">logout</span>
                     </div>
-                    Cerrar sesión
+                    <div>
+                        <div>Cerrar sesión</div>
+                        <div style="font-size:.72rem;color:var(--text2);margin-top:2px;">Salir de tu cuenta en este dispositivo</div>
+                    </div>
                 </div>
             </div>
             <div class="action-item danger" onclick="eliminarCuenta()">
@@ -511,7 +528,10 @@
                     <div class="ai-ico ic-red">
                         <span class="material-symbols-outlined">delete_forever</span>
                     </div>
-                    <span style="font-weight:800;">Eliminar cuenta</span>
+                    <div>
+                        <span style="font-weight:800;">Eliminar cuenta</span>
+                        <div style="font-size:.72rem;color:#dc2626;margin-top:2px;">⚠️ Esta acción no se puede deshacer</div>
+                    </div>
                 </div>
             </div>
         </div>

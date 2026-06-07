@@ -5,7 +5,6 @@
 // ============================================================
 
 const CACHE_NAME = 'pantano-v1';
-const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 días
 
 // Páginas y assets que se cachean al instalar
 const PRECACHE_URLS = [

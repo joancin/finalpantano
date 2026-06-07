@@ -685,17 +685,23 @@
         .bottom-nav{
             position:fixed;bottom:0;left:0;width:100%;background:var(--card);
             border-top:1px solid var(--border);display:flex;justify-content:space-around;
-            padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:1000;
-            backdrop-filter:blur(12px);
+            padding:8px 0 max(10px,env(safe-area-inset-bottom));z-index:1000;
+            backdrop-filter:blur(20px);
+            box-shadow:0 -4px 24px rgba(0,0,0,.07);
         }
         .nav-item{
             border:none;background:transparent;color:var(--text2);
-            display:flex;flex-direction:column;align-items:center;font-size:.68rem;
-            cursor:pointer;gap:3px;flex:1;text-decoration:none;
-            font-family:inherit;transition:color .15s;
+            display:flex;flex-direction:column;align-items:center;font-size:.62rem;
+            cursor:pointer;gap:2px;flex:1;padding:4px 0;text-decoration:none;
+            font-family:inherit;transition:color .2s;
         }
+        .nav-item .material-symbols-outlined{font-size:24px;transition:transform .2s;}
+        .nav-item:active .material-symbols-outlined{transform:scale(.85);}
         .nav-item.active{color:var(--accent);font-weight:800;}
-        .nav-item .material-symbols-outlined{font-size:24px;}
+        .nav-item.active .material-symbols-outlined{
+            background:rgba(232,64,12,.1);border-radius:12px;
+            padding:4px 14px;margin-bottom:0;
+        }
     </style>
 </head>
 <body>
