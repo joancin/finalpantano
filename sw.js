@@ -4,7 +4,7 @@
 //             Network-First para Firebase (datos dinámicos)
 // ============================================================
 
-const CACHE_NAME = 'pantano-v1';
+const CACHE_NAME = 'pantano-v3';
 
 // Páginas y assets que se cachean al instalar
 const PRECACHE_URLS = [

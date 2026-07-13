@@ -6,7 +6,11 @@
    </url>
    <url>
       <loc>https://pantano2026.es/index.html</loc>
-      <priority>0.8</priority>
+      <priority>0.9</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/actividades.html</loc>
+      <priority>0.9</priority>
    </url>
    <url>
       <loc>https://pantano2026.es/info.html</loc>
@@ -17,11 +21,32 @@
       <priority>0.7</priority>
    </url>
    <url>
-      <loc>https://pantano2026.es/migany.html</loc>
+      <loc>https://pantano2026.es/rifa.html</loc>
       <priority>0.7</priority>
    </url>
    <url>
-      <loc>https://pantano2026.es/rifa.html</loc>
+      <loc>https://pantano2026.es/migany.html</loc>
       <priority>0.6</priority>
    </url>
+   <url>
+      <loc>https://pantano2026.es/social.html</loc>
+      <priority>0.6</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/feria.html</loc>
+      <priority>0.5</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/terminos.html</loc>
+      <priority>0.3</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/privacidad.html</loc>
+      <priority>0.3</priority>
+   </url>
+   <url>
+      <loc>https://pantano2026.es/cookies.html</loc>
+      <priority>0.3</priority>
+   </url>
 </urlset>
+

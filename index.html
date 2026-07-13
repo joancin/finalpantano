@@ -46,8 +46,8 @@
       "@type": "Event",
       "name": "Fiestas Patronales Pantano 2026",
       "description": "Fiestas Patronales de la Urbanización El Pantano de Torrent, Valencia. Eventos, actividades, torneos, rifa y más.",
-      "startDate": "2026-08-10",
-      "endDate": "2026-08-17",
+      "startDate": "2026-07-24",
+      "endDate": "2026-08-15",
       "eventStatus": "https://schema.org/EventScheduled",
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
       "location": {
@@ -354,22 +354,17 @@
         .ic-fotos    { background: linear-gradient(135deg,#11998e,#38ef7d); }
         .ic-feria    { background: linear-gradient(135deg,#c0392b,#f39c12); }
 
-        /* ── CARD FERIA (destacada con borde especial) ──────────────── */
+        /* ── CARD FERIA ──────────────────────────────────────────────── */
         .pub-card.feria-card {
             border: 2px solid rgba(192,57,43,0.3);
             background: linear-gradient(135deg, rgba(192,57,43,0.04) 0%, rgba(243,156,18,0.04) 100%);
-            position: relative;
-        }
-        .pub-card.feria-card::after {
-            content: '¡NUEVO!';
-            position: absolute;
-            top: 10px; right: 12px;
-            background: linear-gradient(135deg,#c0392b,#f39c12);
-            color: white; font-size: 0.58rem; font-weight: 800;
-            letter-spacing: 0.8px; padding: 3px 8px; border-radius: 20px;
-            z-index: 2;
         }
         .pub-card.feria-card:hover { border-color: transparent; }
+
+        @keyframes fadeInCard {
+            from { opacity: 0; transform: translateY(12px) scale(.97); }
+            to   { opacity: 1; transform: none; }
+        }
 
         /* ── COUNTDOWN ──────────────────────────────────────────────── */
         .countdown-section {
@@ -649,6 +644,18 @@
             </div>
         </a>
 
+        <!-- ╔═ CARD ACTIVIDADES — oculta hasta que empiecen las fiestas ═╗ -->
+        <a id="card-actividades" href="actividades.html" class="pub-card card-full" role="listitem"
+           style="--c1:#e8400c;--c2:#f59e0b; display:none;" aria-label="Ver todas las actividades de las fiestas">
+            <div class="card-ico" style="background:linear-gradient(135deg,#e8400c,#f59e0b)" aria-hidden="true">
+                <span class="material-symbols-outlined" style="color:white">celebration</span>
+            </div>
+            <div class="card-txt">
+                <h3>🎉 Actividades</h3>
+                <span>¡Las fiestas han comenzado! Ver todos los eventos</span>
+            </div>
+        </a>
+
         <a href="migany.html" class="pub-card" role="listitem"
            style="--c1:#f59e0b;--c2:#ef4444;" aria-label="Información sobre el Mig Any">
             <div class="card-ico ic-migany" aria-hidden="true">
@@ -660,15 +667,15 @@
             </div>
         </a>
 
-        <!-- ══ CARD FERIA DE SEVILLA (NUEVO) ══ -->
-        <a href="feria.html" class="pub-card card-full feria-card" role="listitem"
+        <!-- ══ CARD FERIA DE SEVILLA ══ -->
+        <a href="feria.html" class="pub-card feria-card" role="listitem"
            style="--c1:#c0392b;--c2:#f39c12;" aria-label="Ver información de la Feria de Sevilla del barrio">
             <div class="card-ico ic-feria" aria-hidden="true">
                 <span style="font-size:22px">💃</span>
             </div>
             <div class="card-txt">
                 <h3>Feria de Sevilla</h3>
-                <span>Sábado 16 · Quinto, tapa y discomóvil hasta las 2 am</span>
+                <span>Ya celebrada · ¡Gracias a todos!</span>
             </div>
         </a>
 
@@ -709,7 +716,7 @@
         </details>
         <details class="faq-item">
             <summary>¿Cuándo y dónde son las fiestas?</summary>
-            <p>Del <strong>10 al 16 de agosto de 2026</strong> en el recinto habitual de la Urbanización El Pantano, Torrent (Valencia), zona Mas del Jutge.</p>
+            <p>Del <strong>25 de julio al 1 de agosto de 2026</strong> en el recinto habitual de la Urbanización El Pantano, Torrent (Valencia), zona Mas del Jutge.</p>
         </details>
         <details class="faq-item">
             <summary>¿Cómo me apunto a las actividades?</summary>
@@ -907,16 +914,12 @@
             let invitacionId = null;
             let codigoValido = false;
 
-            if (code === "SOYELJEFE") {
-                rolAsignado = "admin"; codigoValido = true;
-            } else {
-                const q = query(collection(db,"invitaciones"), where("codigo","==",code), where("usado","==",false));
-                const snap = await getDocs(q);
-                if (!snap.empty) {
-                    rolAsignado  = snap.docs[0].data().rol || "usuario";
-                    invitacionId = snap.docs[0].id;
-                    codigoValido = true;
-                }
+            const q = query(collection(db,"invitaciones"), where("codigo","==",code), where("usado","==",false));
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+                rolAsignado  = snap.docs[0].data().rol || "usuario";
+                invitacionId = snap.docs[0].id;
+                codigoValido = true;
             }
 
             if (!codigoValido) {
@@ -983,11 +986,20 @@
     }, { passive: true });
 
     // ── COUNTDOWN ────────────────────────────────────────────────────
-    const FIESTA = new Date('2026-08-10T18:00:00');
+    const FIESTA = new Date('2026-07-25T20:00:00+02:00');
     function updateCountdown() {
         const diff = FIESTA - Date.now();
         if (diff <= 0) {
-            document.getElementById('countdown').closest('.countdown-card').querySelector('.countdown-title').innerText = '🎉 ¡Las fiestas han comenzado!';
+            // ¡Fiestas! — actualizar texto countdown y mostrar card de actividades
+            const card = document.getElementById('countdown');
+            if (card) {
+                card.closest('.countdown-card').querySelector('.countdown-title').innerText = '🎉 ¡Las fiestas han comenzado!';
+            }
+            const cardAct = document.getElementById('card-actividades');
+            if (cardAct) {
+                cardAct.style.display = '';
+                cardAct.style.animation = 'fadeInCard .6s ease';
+            }
             return;
         }
         const d = Math.floor(diff / 86400000);

@@ -37,13 +37,27 @@
 
 
 
-      let currentUser = null, myUsername = "";
+      /* ── CACHE modo invitado (10 min, 0 lecturas Firestore en visitas repetidas) ── */
+      const CACHE_KEY = 'act_cache_v1';
+      const CACHE_TTL = 10 * 60 * 1000;
+
+      let currentUser = null, myUsername = "", isGuest = false;
       let allActivities = [], selectedDay = "";
 
       /* ── AUTH ── */
       onAuthStateChanged(auth, async (user) => {
-          if (!user) { window.location.href = "index.html"; return; }
+          if (!user) {
+              // Sin sesión → modo invitado: solo lectura, sin inscripciones
+              isGuest = true;
+              document.getElementById('guest-bar').style.display = 'flex';
+              // Adaptar barra de navegación para guests
+              document.querySelectorAll('.nav-auth').forEach(el => el.style.display = 'none');
+              document.querySelectorAll('.nav-guest').forEach(el => el.style.display = '');
+              cargarActividades();
+              return;
+          }
           currentUser = user;
+          isGuest = false;
           const uDoc = await getDoc(doc(db,"usuarios",user.uid));
           if (uDoc.exists()) myUsername = uDoc.data().username;
           cargarActividades();
@@ -51,10 +65,50 @@
 
       /* ── CARGAR ── */
       async function cargarActividades() {
+          // Guests: leer desde caché local si está vigente → 0 lecturas a Firestore
+          if (isGuest) {
+              try {
+                  const cached = localStorage.getItem(CACHE_KEY);
+                  if (cached) {
+                      const { data, ts } = JSON.parse(cached);
+                      if (Date.now() - ts < CACHE_TTL) {
+                          // Reconstruir objeto fecha compatible con Firestore Timestamp
+                          allActivities = data.map(act => ({
+                              ...act,
+                              fecha: { toDate: () => new Date(act._fechaMs),
+                                       toMillis: () => act._fechaMs }
+                          }));
+                          generarTabsDias();
+                          if (!selectedDay && allActivities.length > 0)
+                              selectedDay = new Date(allActivities[0]._fechaMs).toDateString();
+                          renderActivities();
+                          return; // ← servido desde caché
+                      }
+                  }
+              } catch(e) { /* caché corrupta, continuar con Firestore */ }
+          }
+
           const q = query(collection(db,"actividades"), orderBy("fecha","asc"));
           const snap = await getDocs(q);
           allActivities = [];
-          snap.forEach(d => allActivities.push({ id:d.id, ...d.data() }));
+          snap.forEach(d => {
+              const data = d.data();
+              // _fechaMs permite serializar el Timestamp a JSON para la caché
+              allActivities.push({ id:d.id, ...data, _fechaMs: data.fecha.toMillis() });
+          });
+
+          // Guardar en caché para guests (actividades ya cerradas = datos estáticos)
+          if (isGuest) {
+              try {
+                  const toCache = allActivities.map(({ fecha, ...rest }) => ({
+                      ...rest,
+                      // Quitar Timestamps anidados en inscritos (no serializables)
+                      inscritos: (rest.inscritos || []).map(({ fecha: _f, ...insc }) => insc)
+                  }));
+                  localStorage.setItem(CACHE_KEY, JSON.stringify({ data: toCache, ts: Date.now() }));
+              } catch(e) { /* localStorage lleno, sin caché */ }
+          }
+
           generarTabsDias();
           if (!selectedDay && allActivities.length > 0)
               selectedDay = allActivities[0].fecha.toDate().toDateString();
@@ -204,6 +258,8 @@
                               ? `<span class="cta-tag cta-in">✅ Ya estás apuntado/a</span>`
                               : estaLibre
                               ? `<span class="cta-tag cta-libre">🔓 Sin inscripción</span>`
+                              : isGuest
+                              ? `<span class="cta-tag cta-guest">👁 Ver detalles</span>`
                               : `<span class="cta-tag cta-join">Pulsa para apuntarte →</span>`}
                         </div>
                     </div>
@@ -276,8 +332,8 @@
               pHTML = inscritos.map(e => {
                   const nombre  = e.nombre_equipo||e.capitan||"Usuario";
                   const members = e.miembros?.filter(m=>m.nombre).map(m=>m.nombre).join(", ")||"";
-                  if (e.capitan_uid===currentUser.uid) { estoyDentro=true; miRol='capitan'; }
-                  if (e.miembros?.some(m=>m.uid===currentUser.uid)) { estoyDentro=true; miRol='miembro'; }
+                  if (currentUser && e.capitan_uid===currentUser.uid) { estoyDentro=true; miRol='capitan'; }
+                  if (currentUser && e.miembros?.some(m=>m.uid===currentUser.uid)) { estoyDentro=true; miRol='miembro'; }
                   return `
                     <div class="p-row">
                         <div class="p-ava">${nombre[0]?.toUpperCase()||'?'}</div>
@@ -331,6 +387,19 @@
                     <span class="material-symbols-outlined">person_remove</span>
                     Quiero darme de baja
                 </button>`;
+          } else if (isGuest) {
+              inscArea.innerHTML = `
+                <div class="insc-guest">
+                    <span class="material-symbols-outlined">lock</span>
+                    <div class="insc-guest-txt">
+                        <strong>Solo para vecinos con cuenta</strong>
+                        <span>Necesitas iniciar sesión para apuntarte</span>
+                    </div>
+                </div>
+                <a href="index.html" class="btn-ir-login">
+                    <span class="material-symbols-outlined">key</span>
+                    Iniciar sesión · Crear cuenta
+                </a>`;
           } else {
               inscArea.innerHTML = `
                 <button class="btn-apuntarme" onclick="prepararInscripcion('${act.id}','${act.modalidad}',${act.tamano_equipo||1})">
@@ -906,6 +975,52 @@
         }
         .nav-item.active{color:var(--accent);font-weight:800;}
         .nav-item .material-symbols-outlined{font-size:24px;}
+
+        /* ── GUEST BAR ────────────────────────────────────────────── */
+        .guest-bar {
+            align-items:center; gap:12px;
+            background:linear-gradient(135deg,rgba(14,165,233,.08),rgba(99,102,241,.08));
+            border:1px solid rgba(14,165,233,.2); border-radius:14px;
+            padding:12px 16px; margin-bottom:20px;
+        }
+        .guest-bar .material-symbols-outlined { font-size:20px; color:#0ea5e9; flex-shrink:0; }
+        .guest-bar-txt { flex:1; }
+        .guest-bar-txt strong { display:block; font-size:.85rem; font-weight:800; color:var(--text); }
+        .guest-bar-txt span { font-size:.75rem; color:var(--text2); }
+        .guest-bar-btn {
+            background:#0ea5e9; color:white; border:none;
+            padding:8px 18px; border-radius:20px;
+            font-size:.78rem; font-weight:800; font-family:inherit;
+            cursor:pointer; white-space:nowrap; flex-shrink:0;
+            transition:transform .15s, box-shadow .15s;
+            box-shadow:0 3px 10px rgba(14,165,233,.3);
+        }
+        .guest-bar-btn:hover { transform:translateY(-1px); box-shadow:0 5px 14px rgba(14,165,233,.4); }
+        .guest-bar-btn:active { transform:scale(.95); }
+
+        /* CTA invitado en las cards */
+        .cta-guest { background:rgba(14,165,233,.1); color:#0ea5e9; }
+
+        /* Bloque login en modal de detalles */
+        .insc-guest {
+            display:flex; align-items:center; gap:14px;
+            background:rgba(14,165,233,.07); border:1px solid rgba(14,165,233,.2);
+            border-radius:16px; padding:16px; margin-bottom:10px;
+        }
+        .insc-guest .material-symbols-outlined { font-size:2rem; color:#0ea5e9; flex-shrink:0; }
+        .insc-guest-txt strong { display:block; font-size:.95rem; font-weight:800; color:var(--text); margin-bottom:2px; }
+        .insc-guest-txt span { font-size:.78rem; color:var(--text2); }
+        .btn-ir-login {
+            display:flex; align-items:center; justify-content:center; gap:8px;
+            width:100%; padding:16px; border-radius:16px;
+            background:linear-gradient(135deg,#0ea5e9,#6366f1); color:white;
+            font-weight:800; font-size:.95rem; font-family:inherit;
+            text-decoration:none;
+            box-shadow:0 4px 15px rgba(14,165,233,.3);
+            transition:transform .18s, box-shadow .18s;
+        }
+        .btn-ir-login:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(14,165,233,.4); }
+        .btn-ir-login .material-symbols-outlined { font-size:20px; }
     </style>
 </head>
 <body>
@@ -928,11 +1043,27 @@
     </div>
 
     <!-- ── LISTA ────────────────────────────────────────────── -->
-    <div class="main-wrap" id="activities-container">
-        <div class="empty-state">
-            <span class="es-emoji">⏳</span>
-            <p>Cargando actividades…</p>
-            <span>Un momento, por favor</span>
+    <div class="main-wrap">
+
+        <!-- Banner modo invitado — visible solo cuando no hay sesión -->
+        <div id="guest-bar" class="guest-bar" style="display:none">
+            <span class="material-symbols-outlined">lock_open</span>
+            <div class="guest-bar-txt">
+                <strong>Modo invitado</strong>
+                <span>Inicia sesión para apuntarte a los eventos</span>
+            </div>
+            <button class="guest-bar-btn"
+                    onclick="window.location.href='index.html'">
+                Entrar
+            </button>
+        </div>
+
+        <div id="activities-container">
+            <div class="empty-state">
+                <span class="es-emoji">⏳</span>
+                <p>Cargando actividades…</p>
+                <span>Un momento, por favor</span>
+            </div>
         </div>
     </div>
 
@@ -1021,20 +1152,34 @@
     <div id="toast"></div>
 
     <!-- ── BOTTOM NAV ──────────────────────────────────────────────── -->
-    <nav class="bottom-nav">
-        <a href="panel.html"             class="nav-item">
+    <nav class="bottom-nav" id="bottom-nav">
+        <!-- Para usuarios con cuenta: nav completo -->
+        <a href="panel.html"             class="nav-item nav-auth">
             <span class="material-symbols-outlined">home</span>Inicio
         </a>
         <a href="actividades.html"       class="nav-item active">
             <span class="material-symbols-outlined">event</span>Fiestas
         </a>
-        <a href="mis_inscripciones.html" class="nav-item">
+        <a href="mis_inscripciones.html" class="nav-item nav-auth">
             <span class="material-symbols-outlined">confirmation_number</span>Tickets
         </a>
-        <a href="perfil.html"            class="nav-item">
+        <a href="perfil.html"            class="nav-item nav-auth">
             <span class="material-symbols-outlined">person</span>Perfil
         </a>
+
+        <!-- Para guests: solo inicio y login (ocultos por defecto, JS los muestra) -->
+        <a href="index.html" class="nav-item nav-guest" style="display:none">
+            <span class="material-symbols-outlined">home</span>Inicio
+        </a>
+        <a href="actividades.html" class="nav-item active nav-guest" style="display:none">
+            <span class="material-symbols-outlined">event</span>Fiestas
+        </a>
+        <a href="index.html" class="nav-item nav-guest" style="display:none"
+           onclick="event.preventDefault(); window.location.href='index.html'">
+            <span class="material-symbols-outlined">login</span>Entrar
+        </a>
     </nav>
+
 
 </body>
 </html>

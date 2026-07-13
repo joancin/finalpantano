@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎉 Importar Actividades · Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Bricolage Grotesque', sans-serif; background: #0f0a05; color: #f0e8dc; min-height: 100vh; padding: 30px 20px; }
+    h1 { font-size: 1.6rem; font-weight: 800; color: #f59e0b; margin-bottom: 6px; }
+    p.sub { font-size: .85rem; color: #a89070; margin-bottom: 24px; }
+    .card { background: #1e1610; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 20px; margin-bottom: 16px; max-width: 680px; }
+    .card h2 { font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+    .card p { font-size: .8rem; color: #a89070; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 14px; border: none;
+      background: linear-gradient(135deg, #e8400c, #f59e0b);
+      color: white; font-weight: 800; font-size: 1rem;
+      font-family: inherit; cursor: pointer; margin-bottom: 24px;
+      transition: transform .15s, opacity .15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    #log {
+      max-width: 680px; background: #140e08;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 12px; padding: 16px;
+      font-size: .78rem; line-height: 1.8;
+      font-family: monospace; max-height: 500px; overflow-y: auto;
+    }
+    .ok  { color: #4ade80; }
+    .err { color: #f87171; }
+    .inf { color: #60a5fa; }
+    .warn { color: #fbbf24; }
+    #progress { font-size: .85rem; color: #a89070; margin-bottom: 12px; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: .7rem; font-weight: 800; margin-left: 6px; }
+    .b-fiesta  { background: rgba(168,85,247,.2); color: #c084fc; }
+    .b-comida  { background: rgba(249,115,22,.2); color: #fb923c; }
+    .b-deporte { background: rgba(59,130,246,.2); color: #60a5fa; }
+    .b-concurso{ background: rgba(245,158,11,.2); color: #fbbf24; }
+    .b-carrera { background: rgba(34,197,94,.2);  color: #4ade80; }
+    .b-torneo  { background: rgba(236,72,153,.2); color: #f472b6; }
+  </style>
+</head>
+<body>
+
+  <h1>🎉 Importar Actividades Fiestas Pantano 2026</h1>
+  <p class="sub">Importación masiva desde el llibret oficial · 59 actividades · del 24 Jul al 15 Ago</p>
+
+  <div class="card">
+    <h2>⚠️ Instrucciones</h2>
+    <p>1. Abre esta página desde <strong>pantano2026.es/import_actividades.html</strong> estando logueado como admin.<br>
+       2. Pulsa el botón — se añadirán las 59 actividades a Firestore.<br>
+       3. <strong>No lo ejecutes más de una vez</strong> o se duplicarán las actividades.<br>
+       4. Cuando termine, borra este fichero del servidor por seguridad.</p>
+  </div>
+
+  <button class="btn" id="btn-import" onclick="importar()">
+    🚀 Importar las 59 actividades
+  </button>
+
+  <div id="progress"></div>
+  <div id="log"><span class="inf">Esperando...</span></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, Timestamp }
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCAvWijwO-W4tlXxabVmKVjklWJ3BtQT2E",
+    authDomain: "fiestas-pantano.firebaseapp.com",
+    projectId: "fiestas-pantano",
+    storageBucket: "fiestas-pantano.firebasestorage.app",
+    messagingSenderId: "801380435613",
+    appId: "1:801380435613:web:a842572cf7cee93ac57674"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
+  const auth = getAuth(app);
+
+  // ── Helper: fecha con timezone España (UTC+2 verano) ──────────────
+  function f(iso) {
+    return Timestamp.fromDate(new Date(iso));
+  }
+
+  // ── Las 59 actividades del llibret ────────────────────────────────
+  const ACTIVIDADES = [
+
+    // ── VIERNES 24 JULIO ──────────────────────────────────────────
+    {
+      titulo: "Puesta de Banderas",
+      fecha: f("2026-07-24T22:00:00+02:00"),
+      lugar: "Urbanización El Pantano",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Llega el momento de vestir la urbanización con los colores de las fiestas. ¡Empieza la cuenta atrás!",
+      inscritos: []
+    },
+
+    // ── SÁBADO 25 JULIO ───────────────────────────────────────────
+    {
+      titulo: "Replegar amb Xaranga",
+      fecha: f("2026-07-25T18:00:00+02:00"),
+      lugar: "Calles de la urbanización",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Recorrido por las calles con la charanga «Los Desmontaos» para que os unáis a nosotros al ritmo de la música.",
+      inscritos: []
+    },
+
+    // ── DOMINGO 26 JULIO ──────────────────────────────────────────
+    {
+      titulo: "Paella de Germanor",
+      fecha: f("2026-07-26T14:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "Paella ofrecida por los Festeros 2026 donde disfrutaremos de un domingo de germanor para ir calentando motores.",
+      inscritos: []
+    },
+
+    // ── SÁBADO 1 AGOSTO ───────────────────────────────────────────
+    {
+      titulo: "Torneo de Pádel",
+      fecha: f("2026-08-01T09:00:00+02:00"),
+      lugar: "Pabellón Anabel Medina (Villa Carmen), Torrent",
+      genero: "torneo",
+      modalidad: "parejas",
+      descripcion: "Torneo de pádel. ¡Apúntate con tu compañero/a y a por el trofeo!",
+      inscritos: []
+    },
+    {
+      titulo: "Torneo de Fútbol",
+      fecha: f("2026-08-01T10:00:00+02:00"),
+      lugar: "Pabellón Anabel Medina (Villa Carmen), Torrent",
+      genero: "torneo",
+      modalidad: "equipo",
+      tamano_equipo: 7,
+      descripcion: "Torneo de fútbol. Cada equipo puede tener como máximo 2 personas externas a la urbanización.",
+      inscritos: []
+    },
+    {
+      titulo: "Torneo de Parchís",
+      fecha: f("2026-08-01T17:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "concurso",
+      modalidad: "individual",
+      descripcion: "Empezamos con nuestro tradicional torneo de parchís en el Local de la Asociación. ¡No olvides apuntarte!",
+      inscritos: []
+    },
+    {
+      titulo: "Cena Ibicenca",
+      fecha: f("2026-08-01T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "¡Primera cena! Os esperamos a todos con vuestro mejor look ibicenco.",
+      inscritos: []
+    },
+    {
+      titulo: "Disco Móvil Neón",
+      fecha: f("2026-08-01T23:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Bienvenidos a una de las grandes noches, donde el neón, la música y las ganas de disfrutar serán las protagonistas.",
+      inscritos: []
+    },
+
+    // ── DOMINGO 2 AGOSTO ──────────────────────────────────────────
+    {
+      titulo: "Solemne Misa",
+      fecha: f("2026-08-02T10:00:00+02:00"),
+      lugar: "Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "En memoria de nuestros difuntos.",
+      inscritos: []
+    },
+    {
+      titulo: "Almuerzo Popular",
+      fecha: f("2026-08-02T11:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "Primer almuerzo popular ofrecido por los festeros en la Asociación. ¡Qué buena manera de empezar!",
+      inscritos: []
+    },
+    {
+      titulo: "Concurso de Dominó",
+      fecha: f("2026-08-02T17:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "concurso",
+      modalidad: "individual",
+      descripcion: "Recordad traer vuestro propio Dominó. ¡Mucha suerte a todos y a todas!",
+      inscritos: []
+    },
+    {
+      titulo: "Cena de Sobaquillo",
+      fecha: f("2026-08-02T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "Os esperamos en la calle de la ermita. La bebida y el aperitivo serán a cargo de los festeros.",
+      inscritos: []
+    },
+    {
+      titulo: "Bingo y Música",
+      fecha: f("2026-08-02T23:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Para acabar bien el día, haremos nuestro bingo amenizado con música.",
+      inscritos: []
+    },
+
+    // ── LUNES 3 AGOSTO ────────────────────────────────────────────
+    {
+      titulo: "Talleres Infantiles",
+      fecha: f("2026-08-03T11:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "deporte",
+      modalidad: "sin_inscripcion",
+      descripcion: "Para los más pequeños, los festeros hemos preparado diferentes actividades donde podrán disfrutar de una mañana llena de sorpresas.",
+      inscritos: []
+    },
+    {
+      titulo: "Torneo de Truc",
+      fecha: f("2026-08-03T17:30:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "concurso",
+      modalidad: "parejas",
+      descripcion: "Recordad traer vuestras propias barajas de Truc. ¡Mucha suerte a todos y a todas!",
+      inscritos: []
+    },
+    {
+      titulo: "Masterchef Internacional",
+      fecha: f("2026-08-03T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "concurso",
+      modalidad: "sin_inscripcion",
+      descripcion: "Primera cena con temática internacional por países, acompañada de un concurso de tapas por regiones que después serán valoradas por los Festeros 2026.",
+      inscritos: []
+    },
+
+    // ── MARTES 4 AGOSTO ───────────────────────────────────────────
+    {
+      titulo: "Torneo de Futbolín Infantil",
+      fecha: f("2026-08-04T12:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "concurso",
+      modalidad: "parejas",
+      descripcion: "Esperamos a todos los niños y niñas para ver sus mejores dotes. Mientras tanto, los festeros ofrecen servicio de barra.",
+      inscritos: []
+    },
+    {
+      titulo: "Cena Popular y Concurso de Postres",
+      fecha: f("2026-08-04T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "Seguimos disfrutando de nuestras cenas populares y, en esta ocasión, os animamos a sorprendernos con tu postre más delicioso.",
+      inscritos: []
+    },
+    {
+      titulo: "Bingo y Música",
+      fecha: f("2026-08-04T23:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Para acabar bien el día, disfrutaremos de nuestro bingo tradicional amenizado con música.",
+      inscritos: []
+    },
+
+    // ── MIÉRCOLES 5 AGOSTO ────────────────────────────────────────
+    {
+      titulo: "Taller Infantil",
+      fecha: f("2026-08-05T12:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "deporte",
+      modalidad: "sin_inscripcion",
+      descripcion: "Para los más pequeños, los festeros hemos preparado diferentes actividades donde podrán disfrutar de una mañana llena de sorpresas.",
+      inscritos: []
+    },
+    {
+      titulo: "Concurso de Fútbol Infantil",
+      fecha: f("2026-08-05T18:30:00+02:00"),
+      lugar: "Área recreativa",
+      genero: "deporte",
+      modalidad: "equipo",
+      tamano_equipo: 5,
+      descripcion: "En el área recreativa haremos, como todos los años, el divertido concurso de fútbol infantil. Cada equipo solo podrá tener como máximo 2 personas externas al pantano.",
+      inscritos: []
+    },
+    {
+      titulo: "Concurso de Fútbol Mayor",
+      fecha: f("2026-08-05T19:00:00+02:00"),
+      lugar: "Área recreativa",
+      genero: "deporte",
+      modalidad: "equipo",
+      tamano_equipo: 7,
+      descripcion: "Podrán participar los mayores para disfrutar de una tarde deportiva entre amigos y, sobre todo, recordar viejos tiempos.",
+      inscritos: []
+    },
+
+    // ── JUEVES 6 AGOSTO ───────────────────────────────────────────
+    {
+      titulo: "Taller Infantil",
+      fecha: f("2026-08-06T12:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "deporte",
+      modalidad: "sin_inscripcion",
+      descripcion: "Para los más pequeños, los festeros hemos preparado diferentes actividades donde podrán disfrutar de una mañana llena de sorpresas.",
+      inscritos: []
+    },
+    {
+      titulo: "Semifinales y Finales Campeonatos",
+      fecha: f("2026-08-06T17:30:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "concurso",
+      modalidad: "sin_inscripcion",
+      descripcion: "Llega el momento decisivo de los campeonatos de truc, parchís, dominó y futbolín, donde los mejores participantes competirán por conseguir el trofeo.",
+      inscritos: []
+    },
+    {
+      titulo: "Tortilla Fest",
+      fecha: f("2026-08-06T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "concurso",
+      modalidad: "individual",
+      descripcion: "En este concurso de tortillas, los participantes tendrán que demostrar su talento en la cocina preparando la mejor tortilla. ¡Sabor a competición!",
+      inscritos: []
+    },
+    {
+      titulo: "Remember Night",
+      fecha: f("2026-08-06T23:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "En la discómovil Remember vivirás una noche llena de música que todos conocemos y bailamos. Sonarán grandes temas para disfrutar de buenos momentos.",
+      inscritos: []
+    },
+
+    // ── VIERNES 7 AGOSTO ──────────────────────────────────────────
+    {
+      titulo: "Taller Infantil",
+      fecha: f("2026-08-07T12:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "deporte",
+      modalidad: "sin_inscripcion",
+      descripcion: "Para los más pequeños, los festeros hemos preparado diferentes actividades donde podrán disfrutar de una mañana llena de sorpresas.",
+      inscritos: []
+    },
+    {
+      titulo: "Concurso de Paellas y Camisetas",
+      fecha: f("2026-08-07T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "concurso",
+      modalidad: "equipo",
+      tamano_equipo: 4,
+      descripcion: "Como todos los años, haremos el tradicional concurso de paellas en la calle de la Ermita. También habrá concurso de camisetas por grupos. Se deben depositar 20€ por cada grupo (se devuelve si la zona queda en buenas condiciones).",
+      inscritos: []
+    },
+    {
+      titulo: "Discómovil de Paellas",
+      fecha: f("2026-08-07T23:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Para acabar a lo grande nuestro segundo fin de semana, todos y todas a bailar en la gran discómovil de Paellas.",
+      inscritos: []
+    },
+
+    // ── SÁBADO 8 AGOSTO ───────────────────────────────────────────
+    {
+      titulo: "Horchata y Limón Granizado",
+      fecha: f("2026-08-08T18:30:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "Os esperamos para disfrutar de una refrescante horchata y limón granizado en la calle de la ermita.",
+      inscritos: []
+    },
+    {
+      titulo: "Vespré d'Albaes",
+      fecha: f("2026-08-08T19:30:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Se vivirá un momento muy especial en la calle de la Ermita en el que se le cantará a las clavariesas con emoción y siguiendo la tradición.",
+      inscritos: []
+    },
+    {
+      titulo: "Concurso de Disfraces y Fiesta de la Espuma",
+      fecha: f("2026-08-08T23:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Ven con tu mejor disfraz y disfruta una noche especial llena de creatividad y sorpresas. Después, la fiesta continuará con la mejor música, espuma y muchas ganas de pasarlo en grande.",
+      inscritos: []
+    },
+
+    // ── DOMINGO 9 AGOSTO ──────────────────────────────────────────
+    {
+      titulo: "Solemne Misa",
+      fecha: f("2026-08-09T10:00:00+02:00"),
+      lugar: "Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "En memoria de nuestros difuntos.",
+      inscritos: []
+    },
+    {
+      titulo: "Vuelta en Bici",
+      fecha: f("2026-08-09T18:30:00+02:00"),
+      lugar: "Calle Rosendo Montoro (salida al final)",
+      genero: "carrera",
+      modalidad: "individual",
+      descripcion: "Os esperamos a todos los deportistas pantaneros para la gran vuelta en bici. La salida será al final de la calle Rosendo Montoro.",
+      inscritos: []
+    },
+    {
+      titulo: "Cena en la Calle de la Ermita",
+      fecha: f("2026-08-09T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "La bebida y el aperitivo serán a cargo de los festeros. ¡Os esperamos!",
+      inscritos: []
+    },
+    {
+      titulo: "Mago y Cómico",
+      fecha: f("2026-08-09T23:30:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Después de la cena, no te puedes perder una noche llena de magia y muchas risas. ¡Seguro que nos lo pasamos genial!",
+      inscritos: []
+    },
+
+    // ── LUNES 10 AGOSTO ───────────────────────────────────────────
+    {
+      titulo: "Día Acuático",
+      fecha: f("2026-08-10T12:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "deporte",
+      modalidad: "sin_inscripcion",
+      descripcion: "Disfrutaremos de una mañana acuática en la calle de la ermita, tanto para mayores como para niños, donde viviremos una explosión de diversión llena de agua para pasarlo en grande con amigos.",
+      inscritos: []
+    },
+    {
+      titulo: "Noche Hawaiana",
+      fecha: f("2026-08-10T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Llega otra de nuestras cenas temáticas favoritas. Disfruta de una cena de espíritu tropical. ¡No olvides venir con cualquier detalle hawaiano para meterte de lleno en la fiesta!",
+      inscritos: []
+    },
+
+    // ── MARTES 11 AGOSTO ──────────────────────────────────────────
+    {
+      titulo: "AquaFest: Hinchables Acuáticos",
+      fecha: f("2026-08-11T12:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "deporte",
+      modalidad: "sin_inscripcion",
+      descripcion: "Para los más pequeños, disfruta de una mañana llena de diversión, saltos y chapuzones en grandes hinchables sobre el agua. ¡Perfecto para pasar el calor!",
+      inscritos: []
+    },
+    {
+      titulo: "Maratón Infantil",
+      fecha: f("2026-08-11T18:30:00+02:00"),
+      lugar: "Calle José Victorio Girón (salida)",
+      genero: "carrera",
+      modalidad: "individual",
+      descripcion: "Los atletas pantaneros podrán participar en una divertida carrera y pasar una tarde para disfrutar del deporte. La salida será en la calle José Victorio Girón.",
+      inscritos: []
+    },
+    {
+      titulo: "Maratón Adulta",
+      fecha: f("2026-08-11T20:00:00+02:00"),
+      lugar: "Calle Rosendo Montoro (salida al final)",
+      genero: "carrera",
+      modalidad: "individual",
+      descripcion: "De la misma manera, los mayores podrán participar en la Maratón Adulta. ¡Ánimo atletas! La salida será al final de la calle Rosendo Montoro.",
+      inscritos: []
+    },
+    {
+      titulo: "Cena de Sobaquillo",
+      fecha: f("2026-08-11T22:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "La bebida y el aperitivo serán a cargo de los festeros. ¡Os esperamos!",
+      inscritos: []
+    },
+    {
+      titulo: "Bingo y Música",
+      fecha: f("2026-08-11T23:59:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Para acabar bien el día y después de una buena carrera, haremos bingo amenizado con música.",
+      inscritos: []
+    },
+
+    // ── MIÉRCOLES 12 AGOSTO ───────────────────────────────────────
+    {
+      titulo: "Concurso de Dibujo",
+      fecha: f("2026-08-12T12:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "concurso",
+      modalidad: "individual",
+      descripcion: "Anímate a participar en un concurso donde la imaginación no tiene límites. Pinceles y mucha imaginación serán los protagonistas de este día.",
+      inscritos: []
+    },
+    {
+      titulo: "Cabalgata",
+      fecha: f("2026-08-12T18:30:00+02:00"),
+      lugar: "Camino de la Cañadita (C/ León)",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Tanto a mayores como pequeños, os invitamos a venir disfrazados en un desfile lleno de regalos y música. ¡Habrá muchas sorpresas! Salida: Camino de la Cañadita (C/ León).",
+      inscritos: []
+    },
+    {
+      titulo: "Cowboy Night",
+      fecha: f("2026-08-12T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Disfruta de una cena de deliciosos perritos calientes, ambiente cowboy y complementos vaqueros para meterte de lleno en el Oeste. Además, podrás poner a prueba tu equilibrio en el toro mecánico.",
+      inscritos: []
+    },
+
+    // ── JUEVES 13 AGOSTO ──────────────────────────────────────────
+    {
+      titulo: "Comida de Jubilados",
+      fecha: f("2026-08-13T14:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "Como manda la tradición, disfrutaremos de una agradable comida en torno a una deliciosa paella. Una ocasión perfecta para reunirse, conversar y disfrutar de una jornada especial.",
+      inscritos: []
+    },
+    {
+      titulo: "Bingo de Jubilados",
+      fecha: f("2026-08-13T15:30:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Después de la comida, continuaremos con una divertida sesión de bingo para disfrutar en buena compañía.",
+      inscritos: []
+    },
+    {
+      titulo: "Cena de Sobaquillo",
+      fecha: f("2026-08-13T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "La bebida y el aperitivo serán a cargo de los festeros. ¡Os esperamos!",
+      inscritos: []
+    },
+    {
+      titulo: "PlayBacks: Noche de Artistas",
+      fecha: f("2026-08-13T23:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "concurso",
+      modalidad: "equipo",
+      tamano_equipo: 6,
+      descripcion: "Llega una de las noches más esperadas de las fiestas, con actuaciones cargadas de energía, originalidad y ganas de hacer disfrutar al público. ¡Que empiece el espectáculo!",
+      inscritos: []
+    },
+    {
+      titulo: "Entrega de Premios",
+      fecha: f("2026-08-13T23:59:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Llega el momento de reconocer el esfuerzo y la participación de los ganadores de los diferentes campeonatos. ¡Enhorabuena a todos y todas!",
+      inscritos: []
+    },
+
+    // ── VIERNES 14 AGOSTO ─────────────────────────────────────────
+    {
+      titulo: "Almuerzo Popular",
+      fecha: f("2026-08-14T10:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "Se compartirá un almuerzo ofrecido por los Festeros para recargar energías y seguir disfrutando de las fiestas. Un momento tranquilo para reunirse y charlar con buen sabor de boca.",
+      inscritos: []
+    },
+    {
+      titulo: "Ofrenda a la Virgen de los Desamparados",
+      fecha: f("2026-08-14T19:00:00+02:00"),
+      lugar: "Calle Rosendo Montoro, 61",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "La ofrenda es uno de los momentos más emotivos de las fiestas, donde la tradición y la devoción a la Virgen son las grandes protagonistas. Salida desde Calle Rosendo Montoro, 61 para recoger los ramos.",
+      inscritos: []
+    },
+    {
+      titulo: "Última Cena de las Fiestas 2026",
+      fecha: f("2026-08-14T21:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "Una cena especial para cerrar las fiestas, compartiendo juntos un momento de agradecimiento y despedida. La bebida y el aperitivo serán a cargo de los festeros.",
+      inscritos: []
+    },
+    {
+      titulo: "Gran Discómovil con Animación",
+      fecha: f("2026-08-14T23:00:00+02:00"),
+      lugar: "Calle de la Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Última gran noche para cerrar las fiestas por todo lo alto, con música y baile. Un momento para despedir el año disfrutando y guardando juntos los mejores recuerdos.",
+      inscritos: []
+    },
+
+    // ── SÁBADO 15 AGOSTO ──────────────────────────────────────────
+    {
+      titulo: "Pasacalles",
+      fecha: f("2026-08-15T12:00:00+02:00"),
+      lugar: "Urbanización El Pantano",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Se realizará un recorrido por las calles de la urbanización para acompañar y recoger a las clavariesas en sus casas, en un acto cargado de tradición, respeto y emoción.",
+      inscritos: []
+    },
+    {
+      titulo: "Solemne Misa Final",
+      fecha: f("2026-08-15T13:00:00+02:00"),
+      lugar: "Ermita",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "Última Misa de las fiestas 2026 en memoria a nuestros difuntos.",
+      inscritos: []
+    },
+    {
+      titulo: "Procesión a la Virgen",
+      fecha: f("2026-08-15T19:00:00+02:00"),
+      lugar: "Calles de la urbanización",
+      genero: "fiesta",
+      modalidad: "sin_inscripcion",
+      descripcion: "En honor a la Virgen de los Desamparados, vecinos, festeros y clavariesas acompañarán a la virgen en un recorrido solemne por las calles.",
+      inscritos: []
+    },
+    {
+      titulo: "Vino de Honor",
+      fecha: f("2026-08-15T21:00:00+02:00"),
+      lugar: "Local Asociación de Vecinos",
+      genero: "comida",
+      modalidad: "sin_inscripcion",
+      descripcion: "Tras los actos programados, se ofrecerá un vino de honor para compartir el último momento de convivencia entre vecinos, festeros y asistentes. Una ocasión perfecta para brindar por las Fiestas 2027.",
+      inscritos: []
+    }
+
+  ]; // fin ACTIVIDADES (59 total)
+
+  // ── Auth check ────────────────────────────────────────────────────
+  onAuthStateChanged(auth, (user) => {
+    const log = document.getElementById('log');
+    if (!user) {
+      log.innerHTML = '<span class="err">❌ No has iniciado sesión. Abre esta página desde pantano2026.es estando logueado como admin.</span>';
+      document.getElementById('btn-import').disabled = true;
+    } else {
+      log.innerHTML = `<span class="ok">✅ Logueado como: ${user.email}</span><br><span class="inf">Total a importar: ${ACTIVIDADES.length} actividades. Pulsa el botón para empezar.</span>`;
+    }
+  });
+
+  // ── Importar ──────────────────────────────────────────────────────
+  window.importar = async function() {
+    const btn = document.getElementById('btn-import');
+    const log = document.getElementById('log');
+    const prog = document.getElementById('progress');
+    btn.disabled = true;
+    btn.textContent = '⏳ Importando...';
+    log.innerHTML = '';
+
+    let ok = 0, err = 0;
+    const col = collection(db, 'actividades');
+
+    for (let i = 0; i < ACTIVIDADES.length; i++) {
+      const act = ACTIVIDADES[i];
+      const pct = Math.round((i / ACTIVIDADES.length) * 100);
+      prog.textContent = `Progreso: ${i}/${ACTIVIDADES.length} (${pct}%)`;
+
+      try {
+        const ref = await addDoc(col, act);
+        const fechaStr = act.fecha.toDate().toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        log.innerHTML += `<span class="ok">✅ [${i+1}/${ACTIVIDADES.length}] ${fechaStr} — ${act.titulo}</span><br>`;
+        ok++;
+      } catch (e) {
+        log.innerHTML += `<span class="err">❌ [${i+1}] ${act.titulo}: ${e.message}</span><br>`;
+        err++;
+      }
+
+      log.scrollTop = log.scrollHeight;
+      await new Promise(r => setTimeout(r, 80)); // pequeña pausa entre escrituras
+    }
+
+    prog.textContent = `✅ Completado: ${ok} importadas, ${err} errores.`;
+    btn.textContent = `✅ Hecho (${ok}/${ACTIVIDADES.length})`;
+    log.innerHTML += `<br><span class="warn">⚠️ Recuerda borrar este fichero del servidor cuando termines.</span>`;
+  };
+</script>
+
+</body>
+</html>

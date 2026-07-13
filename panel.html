@@ -307,17 +307,10 @@
         .mc-icon {
             width:54px; height:54px; border-radius:16px; margin-bottom:14px;
             display:flex; align-items:center; justify-content:center;
-            background:linear-gradient(135deg,var(--mc1,#e8400c),var(--mc2,#f59e0b));
-            color:white; font-size:26px; flex-shrink:0;
+            background:linear-gradient(135deg, rgba(232,64,12,.10), rgba(245,158,11,.10));
+            color:var(--accent); font-size:26px; flex-shrink:0;
             position:relative; z-index:1;
-            background:linear-gradient(135deg, rgba(232,64,12,.06), rgba(245,158,11,.06));
-            opacity:0; transition:opacity .2s;
         }
-        .quick-btn:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,.1); border-color:var(--accent); }
-        .quick-btn:hover::before { opacity:1; }
-        .quick-btn:active { transform:scale(.94); }
-        .quick-btn .material-symbols-outlined { font-size:28px; }
-        .quick-btn-label { font-size:.72rem; font-weight:800; }
 
         .mc-title {
             font-size:.95rem; font-weight:800; line-height:1.2;
@@ -334,10 +327,36 @@
         .menu-card.full .mc-body { flex:1; min-width:0; }
         .menu-card.full .material-symbols-outlined.arr { color:var(--text2); opacity:.4; font-size:20px; flex-shrink:0; }
 
-        /* ── ACCESOS RÁPIDOS PÚBLICOS ─────────────        /* ── BOTTOM NAV ────────────────────────────────────────────── */
+        /* ── ACCESOS RÁPIDOS ────────────────────────────────────── */
+        .quick-row {
+            display:flex; gap:10px; flex-wrap:wrap;
+            margin-bottom:6px;
+        }
+        .quick-btn {
+            flex:1; min-width:80px;
+            background:var(--card); border:1px solid var(--border);
+            border-radius:14px; padding:14px 10px;
+            display:flex; flex-direction:column; align-items:center; gap:6px;
+            text-decoration:none; color:var(--text);
+            font-size:.72rem; font-weight:800; font-family:inherit;
+            box-shadow:var(--shadow);
+            transition:transform .2s, box-shadow .2s, border-color .2s;
+            position:relative; overflow:hidden;
+        }
+        .quick-btn::before {
+            content:''; position:absolute; inset:0;
+            background:linear-gradient(135deg,var(--accent),var(--gold));
+            opacity:0; transition:opacity .25s;
+        }
+        .quick-btn:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,.1); border-color:var(--accent); }
+        .quick-btn:hover::before { opacity:.06; }
+        .quick-btn:active { transform:scale(.94); }
+        .quick-btn .material-symbols-outlined { font-size:28px; position:relative; z-index:1; }
+        .quick-btn span:last-child { position:relative; z-index:1; }
+
+        /* ── BOTTOM NAV ────────────────────────────────────────────── */
         .bottom-nav {
             position:fixed; bottom:0; left:0; width:100%;
-            background:rgba(var(--card-rgb, 255,255,255), .92);
             background:var(--card);
             border-top:1px solid var(--border);
             display:flex; justify-content:space-around;
@@ -354,33 +373,11 @@
         }
         .nav-item .material-symbols-outlined { font-size:24px; transition:transform .2s; }
         .nav-item:active .material-symbols-outlined { transform:scale(.85); }
-        /* Indicador activo tipo pill */
         .nav-item.active { color:var(--accent); font-weight:800; }
         .nav-item.active .material-symbols-outlined {
             background:rgba(232,64,12,.1); border-radius:12px;
             padding:4px 14px; margin-bottom:0;
         }
-
-        /* Padding seguro iOS */
-        .body-spacer { height:20px; }
-
-        /* Info footer strip */
-        .footer-hint {
-            text-align:center; color:var(--text2); font-size:.72rem;
-            padding:10px 0 4px; line-height:1.6;
-        } border-top:1px solid var(--border);
-            display:flex; justify-content:space-around;
-            padding:10px 0 max(10px,env(safe-area-inset-bottom));
-            z-index:1000; backdrop-filter:blur(12px);
-        }
-        .nav-item {
-            border:none; background:transparent; color:var(--text2);
-            display:flex; flex-direction:column; align-items:center;
-            font-size:.68rem; cursor:pointer; gap:3px; flex:1;
-            text-decoration:none; font-family:inherit; transition:color .15s;
-        }
-        .nav-item.active { color:var(--accent); font-weight:800; }
-        .nav-item .material-symbols-outlined { font-size:24px; }
 
         /* Padding seguro iOS */
         .body-spacer { height:20px; }
@@ -579,7 +576,7 @@
 
     <script>
         /* ── COUNTDOWN ────────────────────────────────────────────── */
-        const FIESTA = new Date('2026-08-10T18:00:00');
+        const FIESTA = new Date('2026-07-25T20:00:00+02:00');
         function tick() {
             const d = FIESTA - Date.now();
             if (d <= 0) {
