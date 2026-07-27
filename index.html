@@ -366,29 +366,37 @@
             to   { opacity: 1; transform: none; }
         }
 
-        /* ── COUNTDOWN ──────────────────────────────────────────────── */
-        .countdown-section {
-            position: relative; z-index: 1;
-            margin: 0 20px 30px;
-            max-width: 580px; margin-left: auto; margin-right: auto;
-        }
-        .countdown-card {
+        /* Card actividades destacada */
+        .act-hero-card {
             background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
-            border-radius: var(--radius); padding: 28px 24px;
-            color: white; text-align: center;
-            box-shadow: 0 8px 30px rgba(232,64,12,0.35);
+            border-radius: var(--radius);
+            padding: 22px 20px;
+            color: white;
+            display: flex; align-items: center; gap: 16px;
+            box-shadow: 0 8px 28px rgba(232,64,12,0.35);
+            text-decoration: none;
+            transition: transform .2s, box-shadow .2s;
             position: relative; overflow: hidden;
+            margin-bottom: 14px;
+            animation: fadeUp .5s ease backwards;
         }
-        .countdown-card::before {
-            content: ''; position: absolute; inset: 0;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+        .act-hero-card::before {
+            content:''; position:absolute; inset:0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
         }
-        .countdown-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; opacity: 0.85; margin-bottom: 16px; position: relative; }
-        .countdown-nums { display: flex; justify-content: center; gap: 8px; position: relative; }
-        .cd-item { background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 12px; padding: 12px 16px; min-width: 64px; }
-        .cd-num { font-size: 2.2rem; font-weight: 800; line-height: 1; display: block; }
-        .cd-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-top: 2px; display: block; }
-        .cd-sep { font-size: 2rem; font-weight: 800; opacity: 0.5; align-self: center; margin-top: -8px; }
+        .act-hero-card:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(232,64,12,.45); }
+        .act-hero-card:active { transform: scale(.98); }
+        .act-hero-ico {
+            width: 56px; height: 56px; border-radius: 16px;
+            background: rgba(255,255,255,.2); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; flex-shrink: 0; position: relative; z-index: 1;
+        }
+        .act-hero-txt { position: relative; z-index: 1; }
+        .act-hero-txt h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 3px; }
+        .act-hero-txt span { font-size: .8rem; opacity: .85; }
+        .act-hero-arr { margin-left: auto; position: relative; z-index: 1; opacity: .8; }
 
         /* ── LOGIN MODAL ────────────────────────────────────────────── */
         #login-modal {
@@ -452,8 +460,35 @@
         .info-box { padding: 12px 14px; border-radius: 12px; font-size: 0.82rem; line-height: 1.5; margin-bottom: 14px; }
         .info-warning { background: rgba(245,158,11,0.1); color: #92400e; border: 1px solid rgba(245,158,11,0.25); }
         .info-danger { background: rgba(239,68,68,0.08); color: #991b1b; border: 1px solid rgba(239,68,68,0.2); }
+        .info-success { background: rgba(34,197,94,0.08); color: #166534; border: 1px solid rgba(34,197,94,0.25); }
         [data-theme="dark"] .info-warning { color: #fcd34d; }
-        [data-theme="dark"] .info-danger { color: #fca5a5; }
+        [data-theme="dark"] .info-danger  { color: #fca5a5; }
+        [data-theme="dark"] .info-success  { color: #86efac; }
+
+        /* Checkbox de confirmación */
+        .confirm-check {
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer; padding: 12px 14px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; margin-bottom: 14px;
+            transition: border-color .2s;
+        }
+        .confirm-check:hover { border-color: var(--accent); }
+        .confirm-check input { display: none; }
+        .check-box {
+            width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+            border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            transition: background .18s, border-color .18s;
+        }
+        .confirm-check input:checked ~ .check-box,
+        .confirm-check:has(input:checked) .check-box {
+            background: var(--accent); border-color: var(--accent);
+        }
+        .confirm-check:has(input:checked) .check-box::after {
+            content: '✓'; color: white; font-size: .85rem; font-weight: 800;
+        }
+        .check-txt { font-size: .82rem; font-weight: 600; line-height: 1.4; }
 
         .form-hidden { display: none; }
 
@@ -589,25 +624,20 @@
     </div>
 </section>
 
-<!-- ── COUNTDOWN ─────────────────────────────────────────────────── -->
-<section class="countdown-section" aria-label="Cuenta atrás hasta las fiestas">
-    <div class="countdown-card">
-        <div class="countdown-title">⏳ Faltan para las fiestas</div>
-        <div class="countdown-nums" id="countdown">
-            <div class="cd-item"><span class="cd-num" id="cd-d">--</span><span class="cd-label">días</span></div>
-            <span class="cd-sep">:</span>
-            <div class="cd-item"><span class="cd-num" id="cd-h">--</span><span class="cd-label">horas</span></div>
-            <span class="cd-sep">:</span>
-            <div class="cd-item"><span class="cd-num" id="cd-m">--</span><span class="cd-label">min</span></div>
-            <span class="cd-sep">:</span>
-            <div class="cd-item"><span class="cd-num" id="cd-s">--</span><span class="cd-label">seg</span></div>
-        </div>
-    </div>
-</section>
-
 <!-- ── CARDS PÚBLICAS ─────────────────────────────────────────────── -->
 <section class="section-public" aria-label="Accesos rápidos">
-    <div class="section-label">Información pública</div>
+
+    <!-- ★ ACTIVIDADES — siempre visible, elemento principal ★ -->
+    <a href="actividades.html" class="act-hero-card" aria-label="Ver todas las actividades de las fiestas">
+        <div class="act-hero-ico">🎉</div>
+        <div class="act-hero-txt">
+            <h3>Programa de Actividades</h3>
+            <span>¡Las fiestas están en marcha! Ver todos los eventos</span>
+        </div>
+        <span class="material-symbols-outlined act-hero-arr">chevron_right</span>
+    </a>
+
+    <div class="section-label">Más información</div>
 
     <div class="cards-grid" role="list">
 
@@ -622,17 +652,6 @@
             </div>
         </a>
 
-        <a href="info.html" class="pub-card" role="listitem"
-           style="--c1:#667eea;--c2:#764ba2;" aria-label="Información sobre El Pantano">
-            <div class="card-ico ic-info" aria-hidden="true">
-                <span class="material-symbols-outlined">map</span>
-            </div>
-            <div class="card-txt">
-                <h3>El Pantano</h3>
-                <span>Ubicación e historia</span>
-            </div>
-        </a>
-
         <a href="rifa.html" class="pub-card" role="listitem"
            style="--c1:#0ea5e9;--c2:#6366f1;" aria-label="Ver la rifa de las fiestas">
             <div class="card-ico ic-rifa" aria-hidden="true">
@@ -644,15 +663,14 @@
             </div>
         </a>
 
-        <!-- ╔═ CARD ACTIVIDADES — oculta hasta que empiecen las fiestas ═╗ -->
-        <a id="card-actividades" href="actividades.html" class="pub-card card-full" role="listitem"
-           style="--c1:#e8400c;--c2:#f59e0b; display:none;" aria-label="Ver todas las actividades de las fiestas">
-            <div class="card-ico" style="background:linear-gradient(135deg,#e8400c,#f59e0b)" aria-hidden="true">
-                <span class="material-symbols-outlined" style="color:white">celebration</span>
+        <a href="info.html" class="pub-card" role="listitem"
+           style="--c1:#667eea;--c2:#764ba2;" aria-label="Información sobre El Pantano">
+            <div class="card-ico ic-info" aria-hidden="true">
+                <span class="material-symbols-outlined">map</span>
             </div>
             <div class="card-txt">
-                <h3>🎉 Actividades</h3>
-                <span>¡Las fiestas han comenzado! Ver todos los eventos</span>
+                <h3>El Pantano</h3>
+                <span>Ubicación e historia</span>
             </div>
         </a>
 
@@ -664,18 +682,6 @@
             <div class="card-txt">
                 <h3>Mig Any</h3>
                 <span>Fiesta Vaquera</span>
-            </div>
-        </a>
-
-        <!-- ══ CARD FERIA DE SEVILLA ══ -->
-        <a href="feria.html" class="pub-card feria-card" role="listitem"
-           style="--c1:#c0392b;--c2:#f39c12;" aria-label="Ver información de la Feria de Sevilla del barrio">
-            <div class="card-ico ic-feria" aria-hidden="true">
-                <span style="font-size:22px">💃</span>
-            </div>
-            <div class="card-txt">
-                <h3>Feria de Sevilla</h3>
-                <span>Ya celebrada · ¡Gracias a todos!</span>
             </div>
         </a>
 
@@ -712,11 +718,11 @@
     <div class="faq-list">
         <details class="faq-item">
             <summary>¿Quién puede unirse a la app?</summary>
-            <p>Cualquier vecino de la Urb. El Pantano con un <strong>código de invitación</strong> puede crear su cuenta. Pide el tuyo a cualquier Festero.</p>
+            <p>Cualquier vecino de la Urb. El Pantano puede crear su cuenta gratis. Solo tienes que confirmar que eres vecino/a al registrarte.</p>
         </details>
         <details class="faq-item">
             <summary>¿Cuándo y dónde son las fiestas?</summary>
-            <p>Del <strong>25 de julio al 1 de agosto de 2026</strong> en el recinto habitual de la Urbanización El Pantano, Torrent (Valencia), zona Mas del Jutge.</p>
+            <p>Del <strong>24 de julio al 15 de agosto de 2026</strong> en el recinto habitual de la Urbanización El Pantano, Torrent (Valencia), zona Mas del Jutge.</p>
         </details>
         <details class="faq-item">
             <summary>¿Cómo me apunto a las actividades?</summary>
@@ -737,12 +743,12 @@
 <section class="section-public" aria-label="Únete a las fiestas">
     <div class="cta-banner">
         <div class="cta-banner-ico">🎊</div>
-        <h2 class="cta-banner-title">¿Ya tienes tu código?</h2>
-        <p class="cta-banner-sub">Pide tu invitación a un Festero y únete a la app del barrio.</p>
+        <h2 class="cta-banner-title">¿Eres vecino del Pantano?</h2>
+        <p class="cta-banner-sub">Crea tu cuenta gratis y apúntate a las actividades desde el móvil.</p>
         <button class="cta-primary" onclick="abrirLogin(); setTimeout(()=>switchTab('register'),120);"
                 style="margin:0 auto;" aria-label="Crear cuenta nueva">
             <span class="material-symbols-outlined" style="font-size:20px">person_add</span>
-            Crear mi cuenta
+            Crear mi cuenta gratis
         </button>
     </div>
 </section>
@@ -812,8 +818,8 @@
 
         <!-- FORM REGISTRO -->
         <div id="form-register" class="form-hidden" role="tabpanel">
-            <div class="info-box info-warning">
-                ⚠️ Necesitas un <strong>código de invitación</strong> para registrarte. Pídelo a un Festero.
+            <div class="info-box info-success">
+                🎉 ¡Registro abierto para todos los vecinos del Pantano!
             </div>
 
             <div class="input-group">
@@ -834,11 +840,13 @@
                 <input type="password" id="reg-pass-conf" class="pass-input" placeholder="••••••••"
                        autocomplete="new-password">
             </div>
-            <div class="input-group">
-                <label for="reg-code">Código de invitación</label>
-                <input type="text" id="reg-code" class="code-input" placeholder="XXXXXXXX"
-                       maxlength="20" autocomplete="off" spellcheck="false">
-            </div>
+
+            <!-- Checkbox de confirmación -->
+            <label class="confirm-check" for="reg-confirm">
+                <input type="checkbox" id="reg-confirm">
+                <span class="check-box"></span>
+                <span class="check-txt">Confirmo que soy vecino/a de la Urbanización El Pantano</span>
+            </label>
 
             <div class="info-box info-danger">
                 🚨 <strong>Importante:</strong> Si pierdes la contraseña no podrás recuperarla tú mismo. Necesitarás que un admin reinicie tu cuenta.
@@ -898,51 +906,36 @@
         const user     = document.getElementById("reg-user").value.trim();
         const pass     = document.getElementById("reg-pass").value;
         const passConf = document.getElementById("reg-pass-conf").value;
-        const code     = document.getElementById("reg-code").value.trim().toUpperCase();
+        const confirm  = document.getElementById("reg-confirm").checked;
 
-        if (!user || !pass || !passConf || !code) return shake('form-register');
+        if (!user || !pass || !passConf) return shake('form-register');
+        if (!confirm) {
+            // Agitar el checkbox para que se note
+            const lbl = document.querySelector('.confirm-check');
+            lbl.animate([{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'none'}],{duration:200,iterations:2});
+            return showToast("☑️ Confirma que eres vecino/a del Pantano");
+        }
         if (pass !== passConf) return showToast("❌ Las contraseñas no coinciden");
         if (pass.length < 6)   return showToast("❌ Contraseña de mínimo 6 caracteres");
 
         const btn = document.getElementById("btn-register");
-        btn.innerText = "Procesando..."; btn.disabled = true;
+        btn.innerText = "Creando cuenta..."; btn.disabled = true;
         isRegistering = true;
 
         try {
             const email = user.toLowerCase().replace(/\s+/g,'') + "@fiestaspantano.com";
-            let rolAsignado = "usuario";
-            let invitacionId = null;
-            let codigoValido = false;
-
-            const q = query(collection(db,"invitaciones"), where("codigo","==",code), where("usado","==",false));
-            const snap = await getDocs(q);
-            if (!snap.empty) {
-                rolAsignado  = snap.docs[0].data().rol || "usuario";
-                invitacionId = snap.docs[0].id;
-                codigoValido = true;
-            }
-
-            if (!codigoValido) {
-                isRegistering = false;
-                return showError(btn, "Código inválido o ya usado");
-            }
 
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
             await setDoc(doc(db,"usuarios",cred.user.uid), {
-                username: user, email, rol: rolAsignado,
-                codigo_usado: code, fecha_registro: new Date()
+                username: user, email, rol: "usuario",
+                fecha_registro: new Date()
             });
-            if (invitacionId) {
-                await updateDoc(doc(db,"invitaciones",invitacionId), {
-                    usado: true, usado_por: user, fecha_uso: new Date()
-                });
-            }
             showToast("¡Bienvenido/a! 🎉");
             setTimeout(() => window.location.href = "panel.html", 800);
         } catch (e) {
             isRegistering = false;
             if (auth.currentUser) await signOut(auth);
-            const msg = e.code === 'auth/email-already-in-use' ? "Ese usuario ya existe" : "Error al crear cuenta";
+            const msg = e.code === 'auth/email-already-in-use' ? "Ese nombre de usuario ya existe" : "Error al crear cuenta";
             showError(btn, msg);
         }
     };
@@ -984,35 +977,6 @@
     window.addEventListener('scroll', () => {
         document.getElementById('topbar').classList.toggle('scrolled', scrollY > 50);
     }, { passive: true });
-
-    // ── COUNTDOWN ────────────────────────────────────────────────────
-    const FIESTA = new Date('2026-07-25T20:00:00+02:00');
-    function updateCountdown() {
-        const diff = FIESTA - Date.now();
-        if (diff <= 0) {
-            // ¡Fiestas! — actualizar texto countdown y mostrar card de actividades
-            const card = document.getElementById('countdown');
-            if (card) {
-                card.closest('.countdown-card').querySelector('.countdown-title').innerText = '🎉 ¡Las fiestas han comenzado!';
-            }
-            const cardAct = document.getElementById('card-actividades');
-            if (cardAct) {
-                cardAct.style.display = '';
-                cardAct.style.animation = 'fadeInCard .6s ease';
-            }
-            return;
-        }
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        document.getElementById('cd-d').innerText = String(d).padStart(2,'0');
-        document.getElementById('cd-h').innerText = String(h).padStart(2,'0');
-        document.getElementById('cd-m').innerText = String(m).padStart(2,'0');
-        document.getElementById('cd-s').innerText = String(s).padStart(2,'0');
-    }
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
 
     // ── TEMA ─────────────────────────────────────────────────────────
     window.toggleTheme = () => {
